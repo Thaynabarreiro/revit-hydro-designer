@@ -170,7 +170,17 @@ if p_res is None:
 
 peso_total = sum([x["peso"] for x in pecas])
 x_esp = p_res.X
-z_barr_m = H_BARRILETE / 1000.0
+
+# A altura do barrilete vem do roteador, que a deriva do ponto de utilizacao
+# mais alto. Assumir 2900 mm fixo subestimava as descidas - os chuveiros
+# conectam a 3100 mm, acima do valor presumido.
+try:
+    _geo = ler("rede_geometria.json")
+    z_barr_m = _geo["z_barrilete_mm"] / 1000.0
+    origem_z_barr = "publicada pelo roteador"
+except Exception:
+    z_barr_m = H_BARRILETE / 1000.0
+    origem_z_barr = "PADRAO - rede ainda nao gerada"
 
 # A instancia do reservatorio pode estar com deslocamento somado a cota do
 # nivel (NewFamilyInstance interpreta o Z do ponto como offset em familias
@@ -189,8 +199,8 @@ pecas.sort(key=lambda x: abs(x["org"].Y - p_res.Y))
 
 print("=== M9 VERIFICACAO DE PRESSAO ===")
 print("pecas: {0} | peso total: {1:.2f}".format(len(pecas), peso_total))
-print("reservatorio em z = {0:.2f} m | barrilete em z = {1:.2f} m".format(
-    z_res_m, z_barr_m))
+print("reservatorio em z = {0:.2f} m | barrilete em z = {1:.2f} m ({2})".format(
+    z_res_m, z_barr_m, origem_z_barr))
 print("")
 
 # --------------------------------------------- topologia (mesma do m6e)

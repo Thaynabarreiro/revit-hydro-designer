@@ -220,8 +220,56 @@ a('<h2>' + T["h_pressao"] + '</h2>')
 a('<p>' + fmt("p_pressao", kpa=pre["min_exigida_kpa"], mca=pre["altura_min_m"]) + '</p>')
 a('<div class="res">' + fmt("res_pressao", mca=pre["altura_min_m"]) + '</div>')
 
+# -------------------------------------------------- perda de carga (M9)
+VP = None
+try:
+    VP = ler_json(os.path.join(D, "verificacao_pressao.json"))
+except Exception:
+    VP = None
+
+if VP:
+    resumo_vp = VP.get("resumo", {})
+    a('<h2>' + T["h_perda_carga"] + '</h2>')
+    a('<p>' + T["p_perda_carga"] + '</p>')
+    a('<div class="formula">' + VP.get("formula", "J = K x Q^1,75 x D^-4,75") +
+      '\nK = ' + str(VP.get("K", "")) + '</div>')
+
+    a('<h3>' + T["h_perda_trechos"] + '</h3>')
+    a('<table><tr><th>' + T["th_trecho"] + '</th><th>' + T["th_vazao"] +
+      '</th><th>' + T["th_dn"] + '</th><th>v (m/s)</th><th>L (m)</th><th>' +
+      T["th_leq"] + '</th><th>' + T["th_perda"] + '</th></tr>')
+    for tr in VP.get("trechos", []):
+        a('<tr><td>' + tr["nome"] + '</td><td>' + str(tr["Q_ls"]) + '</td><td>' +
+          str(tr["dn_mm"]) + '</td><td>' + str(tr["v_ms"]) + '</td><td>' +
+          str(tr["L_m"]) + '</td><td>' + str(tr["L_eq_m"]) + '</td><td>' +
+          str(tr["dH_mca"]) + '</td></tr>')
+    a('</table>')
+
+    a('<h3>' + T["h_perda_pecas"] + '</h3>')
+    a('<table><tr><th>' + T["th_peca"] + '</th><th>' + T["th_estatica"] +
+      '</th><th>' + T["th_perda"] + '</th><th>' + T["th_disponivel"] +
+      '</th><th>' + T["th_exigida"] + '</th><th>' + T["th_status"] + '</th></tr>')
+    for pc in VP.get("pecas", []):
+        situacao = T["txt_atende"] if pc.get("atende") else T["txt_nao_atende"]
+        a('<tr><td>' + pc.get("familia", "-") + '</td><td>' +
+          str(pc.get("estatica_mca")) + '</td><td>' + str(pc.get("perda_mca")) +
+          '</td><td>' + str(pc.get("disponivel_mca")) + '</td><td>' +
+          str(pc.get("exigida_mca")) + '</td><td>' + situacao + '</td></tr>')
+    a('</table>')
+
+    a('<p>' + fmt("p_iteracoes", n=VP.get("iteracoes", 0)) + '</p>')
+    a('<div class="res">' + fmt("res_perda",
+                                fora=resumo_vp.get("pecas_fora", "-"),
+                                total=resumo_vp.get("total", "-"),
+                                diams=", ".join(
+                                    str(int(d)) for d in
+                                    resumo_vp.get("diametros_usados", []))) + '</div>')
+    a('<div class="res">' + fmt("res_altura_min",
+                                zmin=VP.get("reservatorio_z_min_m", "-"),
+                                zatual=VP.get("reservatorio_z_m", "-")) + '</div>')
+
 # ------------------------------------------------------- ressalvas
-a('<h2>' + T["h_ressalvas"] + '</h2>')
+a("<h2>" + T["h_ressalvas"] + "</h2>")
 a('<div class="aviso">')
 a('<p>' + T["ressalva_escopo"] + '</p>')
 a('<p>' + T["ressalva_altura"] + '</p>')

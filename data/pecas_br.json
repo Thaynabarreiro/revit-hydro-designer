@@ -1,9 +1,19 @@
 {
   "classificacao": [
     {
-      "tipo": "IGNORAR", 
-      "regex": "assento|tampa", 
+      "tipo": "IGNORAR",
+      "regex": "assento|tampa",
       "motivo": "acessorio da bacia"
+    },
+    {
+      "tipo": "IGNORAR",
+      "regex": "reservatorio|cavalete|hidrometro",
+      "motivo": "infraestrutura, nao e ponto de consumo"
+    },
+    {
+      "tipo": "bacia_caixa",
+      "regex": "bacia sanit|vaso sanit",
+      "_nota": "ANTES da regra que ignora caixa acoplada: a louca do template chama-se 'Bacia Sanitaria com Caixa Acoplada' e seria descartada. A caixa avulsa da arquitetura chama-se 'Caixa Acoplada para Bacia', sem 'bacia sanit', entao continua ignorada."
     }, 
     {
       "tipo": "IGNORAR", 

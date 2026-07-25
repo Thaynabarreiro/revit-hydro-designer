@@ -61,13 +61,29 @@ print("=== M2 DIMENSIONAMENTO - " + CFG["projeto"]["nome"] + " ===")
 pontos = list(CONS["pontos_consumo"])
 complementares = []
 
+# Contagem do que o levantamento ja trouxe, por tipo. Quando o reader le o
+# modelo MEP, as pecas complementares ja foram colocadas la pelo M5 e portanto
+# ja estao contadas - somar de novo dobraria a carga delas.
+ja_no_modelo = {}
+for p in pontos:
+    ja_no_modelo[p["tipo_peca"]] = ja_no_modelo.get(p["tipo_peca"], 0) + 1
+
 for pc in CFG.get("pecas_complementares", []):
     tipo = pc["tipo"]
     if tipo not in TIPOS:
         print("!! tipo desconhecido em pecas_complementares: " + tipo)
         continue
+    quantidade = pc.get("quantidade", 1)
+    presentes = ja_no_modelo.get(tipo, 0)
+    if presentes >= quantidade:
+        print("   = {0}: {1} ja no modelo, nao sera somada".format(tipo, presentes))
+        ja_no_modelo[tipo] = presentes - quantidade
+        continue
+    quantidade -= presentes
+    ja_no_modelo[tipo] = 0
+
     dados = TIPOS[tipo]
-    for _ in range(pc.get("quantidade", 1)):
+    for _ in range(quantidade):
         registro = {
             "id": None,
             "familia": "(complementar)",

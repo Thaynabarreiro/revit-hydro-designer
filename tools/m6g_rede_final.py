@@ -192,6 +192,16 @@ z_barr = max(ft(H_BARRILETE), z_top_peca + ft(400.0))
 print("barrilete em z = {0:.0f} mm (ponto mais alto: {1:.0f} mm)".format(
     mm(z_barr), mm(z_top_peca)))
 
+# Publica a geometria adotada para o M9 calcular sobre o que foi realmente
+# modelado. Antes o M9 assumia 2900 mm fixo e subestimava as descidas.
+_geo = codecs.open(os.path.join(D, "rede_geometria.json"), "w", encoding="utf-8")
+_geo.write(json.dumps({
+    "z_barrilete_mm": round(mm(z_barr), 1),
+    "z_ponto_mais_alto_mm": round(mm(z_top_peca), 1),
+    "_sobre": "Escrito pelo roteador. O M9 le daqui a altura real do barrilete.",
+}, indent=2))
+_geo.close()
+
 
 # ================================================= T0: corrigir reservatorio
 t = Transaction(doc, "M6g - corrigir cota do reservatorio")

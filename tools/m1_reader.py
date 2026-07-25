@@ -27,8 +27,13 @@ ARQ_SAIDA = os.path.join(RAIZ, "data", "pontos_consumo.json")
 
 
 def nm(el):
+    # Guarda contra None: Element.Name.__get__(None) devolve o objeto-propriedade
+    # em vez de levantar, e ele nao e serializavel em JSON.
+    if el is None:
+        return "(?)"
     try:
-        return Element.Name.__get__(el)
+        v = Element.Name.__get__(el)
+        return v if isinstance(v, basestring) else "(?)"
     except Exception:
         return "(?)"
 
@@ -96,8 +101,33 @@ def desambiguar_por_ambiente(nome_ambiente):
 
 
 # ------------------------------------------------------------ ambientes
+# Os ambientes vem do VINCULO da arquitetura; as pecas vem do modelo MEP.
+# Essa e a divisao que o projeto adotou: o modelo MEP e dono das pecas, a
+# arquitetura entra so como contexto. Ler ambientes do documento ativo
+# funcionava quando o arquitetonico estava aberto, e passou a devolver zero
+# assim que o fluxo mudou para o modelo hidro.
+from Autodesk.Revit.DB import RevitLinkInstance
+
+doc_ambientes = doc
+TR_LINK = None
+for li in FilteredElementCollector(doc).OfClass(RevitLinkInstance).ToElements():
+    ld = li.GetLinkDocument()
+    if ld is None:
+        continue
+    n_salas = (FilteredElementCollector(ld).OfCategory(BuiltInCategory.OST_Rooms)
+               .WhereElementIsNotElementType().GetElementCount())
+    if n_salas:
+        doc_ambientes = ld
+        TR_LINK = li.GetTotalTransform()
+        break
+
+if doc_ambientes is not doc:
+    print("ambientes lidos do vinculo: " + doc_ambientes.Title)
+else:
+    print("ambientes lidos do proprio documento")
+
 ambientes = []
-for r in (FilteredElementCollector(doc)
+for r in (FilteredElementCollector(doc_ambientes)
           .OfCategory(BuiltInCategory.OST_Rooms)
           .WhereElementIsNotElementType()
           .ToElements()):
@@ -108,7 +138,7 @@ for r in (FilteredElementCollector(doc)
             "id": eid(r.Id),
             "nome": nm(r),
             "area_m2": round(m2(r.Area), 2),
-            "nivel": nm(doc.GetElement(r.LevelId)),
+            "nivel": nm(doc_ambientes.GetElement(r.LevelId)),
             "_el": r,
         })
     except Exception:
@@ -116,10 +146,21 @@ for r in (FilteredElementCollector(doc)
 
 
 def ambiente_do_ponto(ponto):
-    """Descobre em qual ambiente uma coordenada cai."""
+    """Descobre em qual ambiente uma coordenada cai.
+
+    O ponto vem do modelo MEP (coordenadas do host); os ambientes vivem no
+    vinculo. IsPointInRoom espera coordenadas do documento do ambiente, entao
+    o ponto e levado de volta pela transformacao inversa do vinculo.
+    """
+    p = ponto
+    if TR_LINK is not None:
+        try:
+            p = TR_LINK.Inverse.OfPoint(ponto)
+        except Exception:
+            p = ponto
     for amb in ambientes:
         try:
-            if amb["_el"].IsPointInRoom(ponto):
+            if amb["_el"].IsPointInRoom(p):
                 return amb
         except Exception:
             continue
