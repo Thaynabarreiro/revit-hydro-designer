@@ -82,15 +82,49 @@ than no tool.
 
 ## How it works
 
+```mermaid
+flowchart TD
+    ARQ[Architectural model<br/>linked, read-only]
+    CFG[/config_projeto.json<br/>city · code · occupancy · reserve days/]
+    TAB[/pecas_br.json<br/>code table: flow, fixture units, pressure/]
+    MAP[/familias_unmep.json<br/>fixture type → Revit family/]
+
+    ARQ --> M1
+    M1[M1 · Reader<br/>rooms, fixtures, proximity clustering]
+    TAB --> M1
+    M1 --> REV1{Engineer<br/>reviews}
+    REV1 --> M2
+
+    CFG --> M2
+    M2[M2–M4 · Sizing<br/>demand · reservoir · flow · meter · diameters]
+    M2 --> M5
+
+    MAP --> M5
+    M5[M5 · Placement<br/>plumbing families in the MEP model]
+    M5 --> REV2{Engineer<br/>adds / removes / moves}
+    REV2 --> M6
+
+    M6[M6 · Network<br/>service line · riser · main · drops]
+    M6 --> M9
+    M9[M9 · Head loss<br/>pressure verification]
+    M9 --> M8
+
+    TXT[/textos_memorial_br.json<br/>every string — swap file to localise/]
+    TXT --> M8
+    M8[M8 · Report<br/>formulas, tables, declared limitations]
+    M8 --> PDF[Signed calculation report]
+
+    M6 -.-> MODEL[(MEP model<br/>owns the fixtures)]
+
+    style REV1 fill:#fff6e5,stroke:#d08700
+    style REV2 fill:#fff6e5,stroke:#d08700
+    style M9 stroke-dasharray: 5 5
+    style PDF fill:#e8f4ea,stroke:#2e7d4f
 ```
-Architectural model (linked)
-        │
-        ▼
-   reader  ──►  consumption points  ──►  sizing  ──►  placement  ──►  network
-                                            │
-                                            ▼
-                                    calculation report
-```
+
+The amber diamonds are deliberate stops. Automation without a review point is a
+trap: both real bugs found so far — double-counted basins and a bathroom counted
+as a bedroom — would have passed silently without them.
 
 The MEP model owns the fixtures; the architectural model is linked for context
 only. This matches both ISO 19650 practice and reality: architects do not model

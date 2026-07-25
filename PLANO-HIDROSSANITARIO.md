@@ -321,6 +321,86 @@ Peso total lido das famílias: **5,50** — idêntico ao calculado no M2. ✅
    não calcula vazão na rede (é a origem dos warnings de fluxo).
 4. Tubos atravessam paredes em linha reta — sem detecção de obstáculo.
 
+#### M6c/M6d — conexão física (abordagem B)
+
+`Pipe.Create` **a partir de um conector** faz o Revit resolver a conexão na hora;
+quando não consegue, abre diálogo modal e trava o script — foi o que derrubou a
+sessão anterior. A abordagem que funciona:
+
+1. Criar os tubos **por coordenada** (rápido), ancorando o sub-ramal exatamente
+   na origem do conector da peça.
+2. Ligar depois com `ConnectTo`, um par por vez, com `try/except` individual.
+
+Resultado: **11 de 11 peças conectadas**, warnings de 25 → 12.
+
+Os tês entre barrilete e sub-ramal (`m6d_tes.py`) saíram **6 de 12**. As seis
+falhas trazem todas a mesma mensagem: *"Fitting cannot be created between the
+input connectors because the angle..."*.
+
+**Causa raiz identificada:** o traçado é uma cadeia por proximidade, então
+trechos consecutivos se encontram em ângulos arbitrários, e o Revit só cria tê
+em ângulo válido. Um barrilete real corre **ortogonalmente**, junto às paredes —
+e aí todo tê é de 90°.
+
+Ou seja: roteamento ortogonal (Manhattan) resolve três problemas de uma vez —
+os tês passam a ser válidos, a rede fica com aparência de projeto real, e o
+comprimento total cai. É a próxima tarefa do M5.
+
+### M6e — roteamento ortogonal (concluído)
+
+Traçado em cadeia produzia ângulos arbitrários e o Revit recusava criar tê.
+Topologia nova, de barrilete real:
+
+```
+reservatorio -> coluna (Z) -> no0
+no0 -> espinha (corre em Y, no X do reservatorio)
+         |-- ramal (corre em X) -- descida (Z) -- peca
+```
+
+Espinha, ramal e descida são mutuamente perpendiculares, então todo encontro
+é de 90° e o Revit consegue inserir tê e joelho.
+
+| | cadeia | ortogonal |
+|---|---|---|
+| Conexões criadas | 6 | **17** |
+| Comprimento | 89,84 m | **78,58 m** |
+| Warnings | 25 | **5** |
+| Peças ligadas | 11/11 | 11/11 |
+
+Restam **6 tês** que falham com *"failed to insert tee"* — peças muito próximas
+em Y deixam o trecho de espinha curto demais para o corpo do tê caber.
+**Correção especificada:** agrupar peças por faixa de Y (tolerância ~500 mm) e
+servir cada faixa por um único nó, com um sub-ramal em X atendendo o grupo.
+
+### M9 — perda de carga (concluído)
+
+`tools/m9_perda_carga.py` + `data/perda_carga_br.json`.
+Fair-Whipple-Hsiao para tubo liso (`J = K·Q^1,75·D^-4,75`) mais perdas
+localizadas por comprimentos equivalentes. Iteração: a cada passo sobe **um**
+diâmetro — o do trecho de maior perda no caminho da peça mais deficitária.
+Subir o caminho inteiro de uma vez superdimensionava grosseiramente (a coluna
+chegava a DN 110 numa unifamiliar).
+
+**Resultado — acabou o "tudo DN 20":**
+
+| Trecho | DN | v (m/s) |
+|---|---|---|
+| Coluna | 32 | 0,87 |
+| Espinha (tronco) | 32 | 0,54–0,85 |
+| Espinha (pontas) | 20–25 | 0,60–1,43 |
+| Ramais e descidas | 20 | 0,52–0,95 |
+
+11 de 11 peças atendidas, em 13 iterações.
+
+**Dois achados de engenharia:**
+1. A peça crítica é a ducha, com folga de **0,02 mca**. Altura mínima do
+   reservatório: **6,18 m**; o nível "Reserv. Superior" está a **6,20 m**.
+   O projeto passa raspando — decisão consciente a tomar em revisão.
+2. **Bug de colocação:** o reservatório foi modelado a **12,40 m**, o dobro da
+   cota do nível. `NewFamilyInstance` interpretou o Z do ponto como
+   deslocamento somado à cota do nível. O M9 detecta e usa a cota do nível
+   (conservador), mas o M5 precisa passar `Z = 0` ou o offset correto.
+
 #### Armadilhas de API acrescentadas
 
 4. **Nome de parâmetro com acento não pode ser literal no script.** O bridge
@@ -331,6 +411,10 @@ Peso total lido das famílias: **5,50** — idêntico ao calculado no M2. ✅
    peso total 5,30 em vez de 5,50 na primeira rodada.
 6. **`doc.Delete` em lote falha inteiro** se um id já saiu em cascata (apagar um
    tubo remove suas conexões). Apagar um a um, checando `GetElement(id) is None`.
+7. **`ElementId(int)` é ambíguo no Revit 2027** — colide com as sobrecargas
+   `BuiltInParameter` e `BuiltInCategory`. Usar `ElementId(System.Int64(i))`.
+8. **`Pipe.Create` a partir de `Connector` pode abrir diálogo modal** e travar o
+   script indefinidamente. Criar por coordenada e ligar depois com `ConnectTo`.
 
 ### Decisões de arquitetura do produto
 
