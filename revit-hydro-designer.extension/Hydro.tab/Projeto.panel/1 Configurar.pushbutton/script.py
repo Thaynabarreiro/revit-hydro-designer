@@ -42,6 +42,20 @@ oc = cfg["ocupacao"]
 rv = cfg["reservacao"]
 
 # ------------------------------------------------------------ formulário
+# ComboBox recebe LISTA de strings, não dicionário: a variante com dicionário
+# é frágil no engine CPython. O texto escolhido é traduzido de volta abaixo.
+NORMAS = ["BR — NBR 5626", "FR — DTU 60.11"]
+NORMA_PARA_PAIS = {"BR — NBR 5626": "BR", "FR — DTU 60.11": "FR"}
+
+RESERVACOES = ["Superior (por gravidade)", "Inferior + superior (com recalque)"]
+RESERVACAO_PARA_TIPO = {
+    "Superior (por gravidade)": "superior",
+    "Inferior + superior (com recalque)": "inferior_superior",
+}
+
+norma_atual = NORMAS[0] if proj.get("pais", "BR") == "BR" else NORMAS[1]
+reserv_atual = RESERVACOES[0] if rv.get("tipo") == "superior" else RESERVACOES[1]
+
 componentes = [
     forms.Label("PROJETO"),
     forms.TextBox("nome", Text=str(proj.get("nome", ""))),
@@ -49,9 +63,7 @@ componentes = [
     forms.TextBox("cidade", Text=str(proj.get("cidade", ""))),
 
     forms.Label("Norma"),
-    forms.ComboBox("norma", {"BR — NBR 5626": "BR", "FR — DTU 60.11": "FR"},
-                   default="BR — NBR 5626" if proj.get("pais", "BR") == "BR"
-                   else "FR — DTU 60.11"),
+    forms.ComboBox("norma", NORMAS, default=norma_atual),
 
     forms.Separator(),
     forms.Label("OCUPAÇÃO"),
@@ -67,12 +79,7 @@ componentes = [
     forms.Label("Dias de reserva"),
     forms.TextBox("dias", Text=str(rv.get("dias_reserva", 2))),
     forms.Label("Tipo de reservação"),
-    forms.ComboBox("tipo_res",
-                   {"Superior (por gravidade)": "superior",
-                    "Inferior + superior (com recalque)": "inferior_superior"},
-                   default="Superior (por gravidade)"
-                   if rv.get("tipo") == "superior"
-                   else "Inferior + superior (com recalque)"),
+    forms.ComboBox("tipo_res", RESERVACOES, default=reserv_atual),
     forms.Label("Reserva de incêndio (L) — 0 se não houver"),
     forms.TextBox("incendio", Text=str(rv.get("reserva_incendio_l", 0))),
 
@@ -99,7 +106,7 @@ def num(chave, padrao, inteiro=True):
 
 proj["nome"] = str(v.get("nome", "")).strip() or proj.get("nome", "")
 proj["cidade"] = str(v.get("cidade", "")).strip()
-proj["pais"] = v.get("norma", "BR")
+proj["pais"] = NORMA_PARA_PAIS.get(v.get("norma"), "BR")
 proj["norma"] = "NBR" if proj["pais"] == "BR" else "DTU"
 
 oc["pessoas_por_dormitorio"] = num("pessoas_dorm", 2)
@@ -108,7 +115,7 @@ oc["moradores_override"] = num("moradores", None) if mor else None
 oc["consumo_per_capita_l_dia"] = num("percapita", 150)
 
 rv["dias_reserva"] = num("dias", 2)
-rv["tipo"] = v.get("tipo_res", "superior")
+rv["tipo"] = RESERVACAO_PARA_TIPO.get(v.get("tipo_res"), "superior")
 rv["reserva_incendio_l"] = num("incendio", 0)
 
 gravar(cfg)

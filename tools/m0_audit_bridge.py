@@ -84,6 +84,8 @@ def eid(element_id):
 
 
 def coletar(cat):
+    # list() e obrigatorio: ToElements() devolve um IList do .NET, que no
+    # CPython (Python.NET) nao aceita fatiamento nem indexacao negativa.
     return list(
         FilteredElementCollector(doc)
         .OfCategory(cat)

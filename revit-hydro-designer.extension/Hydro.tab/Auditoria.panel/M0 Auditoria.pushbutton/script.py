@@ -103,7 +103,9 @@ def nome(elemento):
 
 
 def coletar(categoria):
-    return (
+    # list() e obrigatorio: ToElements() devolve um IList do .NET, que no
+    # CPython (Python.NET) nao aceita fatiamento nem indexacao negativa.
+    return list(
         FilteredElementCollector(doc)
         .OfCategory(categoria)
         .WhereElementIsNotElementType()
@@ -126,7 +128,7 @@ add("Se um tipo nao tiver regras de conexao configuradas, o gerador automatico")
 add("nao consegue criar a rede com ele. Esta e a checagem do risco 4 do plano.")
 add()
 
-tipos_tubo = FilteredElementCollector(doc).OfClass(PipeType).ToElements()
+tipos_tubo = list(FilteredElementCollector(doc).OfClass(PipeType).ToElements())
 
 if not tipos_tubo:
     add("> **Nenhum tipo de tubulacao encontrado.** O template nao esta preparado")
@@ -160,7 +162,7 @@ else:
 add("## 2. Diametros disponiveis (pipe segments)")
 add()
 
-segmentos = FilteredElementCollector(doc).OfClass(PipeSegment).ToElements()
+segmentos = list(FilteredElementCollector(doc).OfClass(PipeSegment).ToElements())
 
 if not segmentos:
     add("> Nenhum segmento de tubulacao carregado.")
@@ -184,7 +186,7 @@ add("Estes sao os sistemas que o gerador vai reproduzir: agua fria, agua quente,
 add("esgoto, ventilacao, pluvial.")
 add()
 
-sistemas = FilteredElementCollector(doc).OfClass(PipingSystemType).ToElements()
+sistemas = list(FilteredElementCollector(doc).OfClass(PipingSystemType).ToElements())
 uso_sistema = Counter()
 
 for tubo in coletar(BuiltInCategory.OST_PipeCurves):
@@ -301,7 +303,7 @@ for nivel in niveis:
     add("- `{0}` - elevacao {1:.0f} mm".format(nome(nivel), mm(nivel.Elevation)))
 add()
 
-folhas = FilteredElementCollector(doc).OfClass(ViewSheet).ToElements()
+folhas = list(FilteredElementCollector(doc).OfClass(ViewSheet).ToElements())
 add("### Folhas ({0})".format(len(folhas)))
 add()
 if folhas:
@@ -363,7 +365,7 @@ for inst in FilteredElementCollector(doc).OfClass(FamilyInstance).ToElements():
 add("- **Familias in-place:** {0}".format(len(in_place)))
 
 # CAD importado (nao vinculado) e um classico de auditoria.
-importados = FilteredElementCollector(doc).OfClass(ImportInstance).ToElements()
+importados = list(FilteredElementCollector(doc).OfClass(ImportInstance).ToElements())
 nao_vinculados = [i for i in importados if not i.IsLinked]
 add("- **CAD importado (nao vinculado):** {0}".format(len(nao_vinculados)))
 for imp in nao_vinculados[:10]:
