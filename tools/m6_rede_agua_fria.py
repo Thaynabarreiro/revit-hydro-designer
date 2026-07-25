@@ -45,7 +45,7 @@ def ler(n):
 
 NORMA = ler("pecas_br.json")
 CFG = ler("config_projeto.json")
-FAM = ler("familias_unmep.json")
+FAM = ler("familias_pecas.json")
 DIM = ler("dimensionamento.json")
 
 AF = CFG["agua_fria"]
@@ -53,7 +53,7 @@ TIPOS = NORMA["tipos"]
 
 # alturas de referencia (mm, absolutas)
 H_BARRILETE = 2900.0      # distribuicao sob o forro
-H_PONTO_AGUA = 700.0      # altura do ponto de agua nas pecas (padrao UnMEP)
+H_PONTO_AGUA = 700.0      # altura do ponto de agua nas pecas
 
 
 def nm(e):

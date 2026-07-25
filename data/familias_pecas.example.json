@@ -1,0 +1,66 @@
+{
+  "_about": "Maps each fixture type used by the calculation to a family in YOUR Revit template. Copy this file to familias_pecas.json and replace the family names with the ones your template actually contains. Matching is by prefix, so trailing suffixes are tolerated.",
+  "_fallback": "When no specific family exists for a fixture, the generic wall/floor family is used with the type named in tipo_generico (see pecas_br.json).",
+
+  "generica_af_parede": "Generic Cold Water Fixture - Wall",
+  "generica_af_piso": "Generic Cold Water Fixture - Floor",
+
+  "pecas": {
+    "bacia_caixa":       { "familia": "WC - Close-coupled Cistern" },
+    "bacia_valvula":     { "familia": "WC - Flush Valve" },
+    "lavatorio":         { "familia": "Basin - Countertop" },
+    "chuveiro_eletrico": { "familia": "Shower - Electric" },
+    "chuveiro":          { "familia": null, "_note": "No specific family; falls back to the generic with type 'DUC - Ducha'." },
+    "pia":               { "familia": "Kitchen Sink - Single Bowl" },
+    "tanque":            { "familia": "Laundry Tub" },
+    "maquina_lavar":     { "familia": "Washing Machine" },
+    "torneira_jardim":   { "familia": "Garden Tap" },
+    "bide":              { "familia": "Bidet Shower" },
+    "banheira":          { "familia": null, "_note": "Falls back to the generic with type 'BAN - Banheira'." }
+  },
+
+  "infraestrutura": {
+    "reservatorio": {
+      "familia": "Water Tank - Polyethylene",
+      "tipo_por_volume": {
+        "1000": "1000 L", "1500": "1500 L", "2000": "2000 L",
+        "3000": "3000 L", "5000": "5000 L"
+      }
+    },
+    "hidrometro": {
+      "familia": "Water Meter Assembly",
+      "tipo_por_dn": { "20": "20 mm", "25": "25 mm" }
+    },
+    "fossa":            { "familia": "Septic Tank - Circular" },
+    "filtro":           { "familia": "Anaerobic Filter" },
+    "sumidouro":        { "familia": "Soakaway - Circular" },
+    "poco_infiltracao": { "familia": "Infiltration Well - Circular" }
+  },
+
+  "_parametros": "Parameter names carrying the calculation data in your families. IMPORTANT: names with accents must be read from this file, never written as literals in a bridge script — see README.",
+  "parametros": {
+    "peso":                "Relative Weight",
+    "vazao":               "Flow Rate",
+    "pressao_min":         "Minimum Operating Pressure",
+    "trecho":              "Segment",
+    "pressao_calculada":   "Calculated Pressure",
+    "pressao_excedente":   "Excess Pressure",
+    "perda_carga_local":   "Local Head Loss (mH2O)",
+    "comprimento_equiv":   "Equivalent Length",
+    "diametro_af":         "Nominal Diameter Cold Water",
+    "diametro_esg":        "Nominal Diameter Drainage",
+    "altura_ponto_agua":   "Water Outlet Height",
+    "altura_ponto_esgoto": "Drainage Outlet Height",
+    "uhc":                 "Drainage Fixture Units",
+    "sistema":             "System"
+  },
+
+  "_visibilidade": "Optional integer (0/1) instance switches your families may expose, used to declutter views without deleting anything.",
+  "visibilidade_padrao": {
+    "3D Geometry": 1,
+    "Cold and Hot Water Label": 1,
+    "Drainage Label": 1,
+    "Cold and Hot Water Accessories": 1,
+    "Drainage Accessories": 1
+  }
+}

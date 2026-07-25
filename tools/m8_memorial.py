@@ -37,6 +37,9 @@ af = R["agua_fria"]
 hid = R["hidrometro"]
 pre = R["pressao"]
 
+CFGP = ler_json(os.path.join(D, "config_projeto.json"))
+RESP = CFGP.get("responsavel_tecnico", {"nome": "", "titulo": ""})
+
 pais = proj.get("pais", "BR").lower()
 T = ler_json(os.path.join(D, "textos_memorial_" + pais + ".json"))
 
@@ -103,7 +106,7 @@ a('<tr><td>' + T["lbl_projeto"] + '</td><td><b>' + proj["nome"] + '</b></td></tr
 a('<tr><td>' + T["lbl_localidade"] + '</td><td>' + proj.get("cidade", "-") + '</td></tr>')
 a('<tr><td>' + T["lbl_norma"] + '</td><td>' + T["norma_nome"] + '</td></tr>')
 a('<tr><td>' + T["lbl_data"] + '</td><td>' + hoje + '</td></tr>')
-a('<tr><td>' + T["lbl_responsavel"] + '</td><td>' + T["responsavel"] + '</td></tr>')
+a('<tr><td>' + T["lbl_responsavel"] + '</td><td>' + fmt("responsavel", responsavel_nome=RESP["nome"], responsavel_titulo=RESP["titulo"]) + '</td></tr>')
 a('</table></div>')
 
 # ---------------------------------------------------------- objetivo
@@ -223,8 +226,8 @@ a('<p>' + T["ressalva_altura"] + '</p>')
 a('<p>' + T["ressalva_responsabilidade"] + '</p>')
 a('</div>')
 
-a('<div class="assinatura">' + T["assinatura_nome"] + '<br>' +
-  T["assinatura_cargo"] + '</div>')
+a('<div class="assinatura">' + fmt("assinatura_nome", responsavel_nome=RESP["nome"]) + '<br>' +
+  fmt("assinatura_cargo", responsavel_titulo=RESP["titulo"]) + '</div>')
 a('<div class="rodape">' + T["rodape"] + ' &middot; ' + hoje + '</div>')
 a('</body></html>')
 

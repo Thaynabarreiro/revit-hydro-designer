@@ -46,7 +46,7 @@ def ler(n):
 
 
 CFG = ler("config_projeto.json")
-FAM = ler("familias_unmep.json")
+FAM = ler("familias_pecas.json")
 NORMA = ler("pecas_br.json")
 PC = ler("perda_carga_br.json")
 
@@ -152,7 +152,7 @@ for p in (FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_PlumbingF
             if pmin is None:
                 pr2 = portador.LookupParameter(P_PMIN)
                 if pr2 and pr2.StorageType == StorageType.Double:
-                    pmin = pr2.AsDouble()   # em mca, conforme UnMEP
+                    pmin = pr2.AsDouble()   # em mca
         except Exception:
             pass
     pecas.append({"org": con.Origin, "peso": peso or 0.3, "pmin_mca": pmin or 1.0,

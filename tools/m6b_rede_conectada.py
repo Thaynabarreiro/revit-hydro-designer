@@ -48,7 +48,7 @@ def ler(n):
 
 NORMA = ler("pecas_br.json")
 CFG = ler("config_projeto.json")
-FAM = ler("familias_unmep.json")
+FAM = ler("familias_pecas.json")
 DIM = ler("dimensionamento.json")
 
 AF = CFG["agua_fria"]

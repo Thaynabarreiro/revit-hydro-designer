@@ -1,13 +1,28 @@
-# Configuracao local do Claude Code
+# Local Claude Code settings
 .claude/settings.local.json
 
-# Modelos Revit (grandes demais para o repositorio)
+# Revit models — too large for the repository
 *.rvt
 *.rte
 *.rfa
 *.[0-9][0-9][0-9][0-9].rvt
 
-# Temporarios
+# Project-specific configuration and generated output.
+# These describe a real building and a specific office template; the
+# repository ships .example.json files instead.
+data/familias_pecas.json
+data/config_projeto.json
+data/pontos_consumo.json
+data/dimensionamento.json
+data/verificacao_pressao.json
+data/rede_ids.json
+auditoria/
+memoriais/
+
+# Temporary
 *.pyc
 __pycache__/
 *.log
+
+# Local working notes (machine paths, session context)
+HANDOFF.md

@@ -1,43 +1,45 @@
-# revit-hydro-designer
+# revit-hydro-designer.extension
 
-Extensão pyRevit para automação de projeto hidrossanitário no Revit.
-Ver planejamento completo em [`../PLANO-HIDROSSANITARIO.md`](../PLANO-HIDROSSANITARIO.md).
+pyRevit extension for automated plumbing design.
+See the [project plan](../PROJECT-PLAN.md) for the full scope.
 
-## Instalação
+## Installation
 
-1. Abra o Revit 2027.
-2. Aba **pyRevit** → **Settings**.
-3. Em *Custom Extension Directories*, clique em **+** e adicione:
-   ```
-   C:\Users\Shadow\Documents\00 - Claude - Revit
-   ```
-   (a pasta **pai** da `.extension`, não a `.extension` em si)
-4. **Save Settings and Reload**.
-5. Uma aba **Hydro** aparece na faixa de opções.
+1. Open Revit.
+2. **pyRevit** tab -> **Settings**.
+3. Under *Custom Extension Directories*, click **+** and add the folder
+   **containing** this `.extension` directory (not the `.extension` itself).
+4. **Save Settings and Reload.** A **Hydro** tab appears.
 
-## Ferramentas
+These buttons run on pyRevit's CPython 3.12 engine, where accented literals are
+safe. That is not true of the scripts in `../tools/`, which reach Revit through
+the Routes bridge — see the contributor notes in the root README.
 
-### Auditoria M0
+## Buttons
 
-Painel *Auditoria* → botão **Auditoria M0**.
+### 1 Configurar — *Projeto* panel
 
-Roda no modelo aberto e extrai:
+Form for the inputs that change per project: name, city (used for rainfall data),
+national code, occupancy, per-capita demand, days of reserve, reservoir type.
+Writes `data/config_projeto.json`.
 
-| Seção | O que responde |
+### Auditoria M0 — *Auditoria* panel
+
+Audits the open model and writes a Markdown report.
+
+| Section | Question it answers |
 |---|---|
-| Tipos de tubulação + routing preferences | O template consegue gerar rede automaticamente? |
-| Diâmetros disponíveis | Quais bitolas o dimensionamento pode escolher |
-| Sistemas de tubulação | AF / AQ / esgoto / pluvial já definidos? |
-| Famílias por categoria | Quais louças e conexões você usa de verdade |
-| Parâmetros preenchidos | Quais parâmetros o gerador deve preencher |
-| Nomenclatura | Padrão de níveis, folhas e vistas |
-| Health check | Warnings, in-place, CAD importado, vistas órfãs |
+| Pipe types and routing preferences | Can the template generate a network automatically? |
+| Available diameters | Which sizes the calculation may choose from |
+| Piping systems | Are cold water, hot water, drainage and stormwater defined? |
+| Families by category | Which fixtures the template actually carries |
+| Populated parameters | Which parameters the generator should fill |
+| Naming | Level, sheet and view naming patterns |
+| Health check | Warnings, in-place families, imported CAD, orphan views |
 
-Saída: relatório `.md` em `..\auditoria\auditoria_<modelo>.md` + resumo na tela.
+## Planned buttons
 
-## Ordem de uso
-
-1. Rode no **`HID_CT_PROJETO TIOS`** (projeto hidrossanitário real) — extrai as
-   convenções que o gerador deve seguir.
-2. Rode no **`Casa A&R final 2`** (arquitetônico) — verifica o que existe no
-   modelo de entrada antes de gerar a rede.
+`2 Levantar` (survey — the human review step), `3 Dimensionar` (size),
+`4 Colocar peças` (place fixtures), `5 Gerar rede` (generate network),
+`6 Memorial` (report). Their logic already exists in `../tools/`; what is missing
+is the ribbon wrapper and the review dialogs.

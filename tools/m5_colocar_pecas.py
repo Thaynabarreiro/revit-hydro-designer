@@ -2,7 +2,7 @@
 """M5a - Coloca as pecas hidrossanitarias no modelo hidro.
 
 Le a arquitetura ATRAVES DO VINCULO (com transformacao de coordenadas),
-identifica os pontos de consumo e coloca as familias UnMEP correspondentes
+identifica os pontos de consumo e coloca as familias correspondentes
 no modelo hidro, no nivel correto.
 
 Depois disso a engenheira ajusta a vontade - adiciona, remove, move.
@@ -44,7 +44,7 @@ def ler(nome):
 
 NORMA = ler("pecas_br.json")
 CFG = ler("config_projeto.json")
-FAM = ler("familias_unmep.json")
+FAM = ler("familias_pecas.json")
 
 TIPOS = NORMA["tipos"]
 REGRAS = NORMA["classificacao"]
@@ -251,12 +251,12 @@ for pt in pontos:
         simbolo = achar_simbolo(mapa["familia"])
 
     if simbolo is None:
-        # fallback: familia generica com o tipo do UnMEP
-        unmep_tipo = TIPOS[tipo].get("unmep_tipo")
-        if unmep_tipo:
-            simbolo = achar_simbolo(FAM["generica_af_parede"], unmep_tipo)
+        # fallback: familia generica, com o tipo que identifica a peca
+        tipo_gen = TIPOS[tipo].get("tipo_generico")
+        if tipo_gen:
+            simbolo = achar_simbolo(FAM["generica_af_parede"], tipo_gen)
             if simbolo is None:
-                simbolo = achar_simbolo(FAM["generica_af_piso"], unmep_tipo)
+                simbolo = achar_simbolo(FAM["generica_af_piso"], tipo_gen)
             via = "generica"
 
     if simbolo is None:

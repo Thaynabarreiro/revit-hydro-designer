@@ -1,0 +1,111 @@
+{
+  "projeto": {
+    "cidade": "Sao Paulo", 
+    "nome": "Example House", 
+    "norma": "NBR", 
+    "pais": "BR"
+  }, 
+  "_pecas_complementares": "O modelo arquitetonico quase sempre vem sem estas pecas. Sao somadas ao levantamento do reader sem precisar alterar a arquitetura.", 
+  "agua_fria": {
+    "_coef_C": "Q = C * raiz(soma dos pesos). NBR 5626. VALIDAR.", 
+    "_velocidade": "NBR 5626 limita a 3 m/s.", 
+    "material": "PVC Marrom - AF Soldavel", 
+    "_diametro_min": "Smallest diameter the designer accepts. Many offices refuse 20 mm because it is fragile on site. Set to 20 to allow it.", 
+    "coef_C": 0.29999999999999999, 
+    "velocidade_max_ms": 3.0, 
+    "diametro_min_ramal_mm": 25, 
+    "diametros_comerciais_mm": [
+      20, 
+      25, 
+      32, 
+      40, 
+      50, 
+      60, 
+      75, 
+      85, 
+      110
+    ]
+  }, 
+  "reservacao": {
+    "_tipo_opcoes": "superior | inferior_superior (com recalque)", 
+    "tipo": "superior", 
+    "reserva_incendio_l": 0, 
+    "dias_reserva": 2, 
+    "volumes_comerciais_l": [
+      250, 
+      310, 
+      500, 
+      750, 
+      1000, 
+      1500, 
+      2000, 
+      3000, 
+      5000, 
+      10000
+    ]
+  }, 
+  "_sobre": "Configuracao POR PROJETO. Nada aqui e fixo no codigo - cada obra tem a sua.", 
+  "hidrometro": {
+    "_sobre": "Escolhe o menor hidrometro cuja vazao maxima atenda a vazao de projeto.", 
+    "modelos": [
+      {
+        "q_max_m3h": 1.5, 
+        "nome": "1,5 m3/h", 
+        "dn_mm": 20
+      }, 
+      {
+        "q_max_m3h": 3.0, 
+        "nome": "3,0 m3/h", 
+        "dn_mm": 20
+      }, 
+      {
+        "q_max_m3h": 5.0, 
+        "nome": "5,0 m3/h", 
+        "dn_mm": 25
+      }, 
+      {
+        "q_max_m3h": 7.0, 
+        "nome": "7,0 m3/h", 
+        "dn_mm": 32
+      }, 
+      {
+        "q_max_m3h": 10.0, 
+        "nome": "10,0 m3/h", 
+        "dn_mm": 40
+      }, 
+      {
+        "q_max_m3h": 20.0, 
+        "nome": "20,0 m3/h", 
+        "dn_mm": 50
+      }
+    ]
+  }, 
+  "pecas_complementares": [
+    {
+      "ambiente": "laundry", 
+      "quantidade": 1, 
+      "tipo": "maquina_lavar", 
+      "motivo": "not modelled in the architectural file"
+    }, 
+    {
+      "ambiente": "external", 
+      "quantidade": 1, 
+      "tipo": "torneira_jardim", 
+      "motivo": "not modelled in the architectural file"
+    }
+  ], 
+  "responsavel_tecnico": {
+    "nome": "Your Name", 
+    "titulo": "Chartered Engineer"
+  }, 
+  "ocupacao": {
+    "_consumo_ref": "150 L/hab/dia - residencia unifamiliar padrao medio. VALIDAR conforme concessionaria local.", 
+    "_regex_excluir": "'banho suite' casa com 'suite' mas e banheiro, nao dormitorio.", 
+    "pessoas_por_dormitorio": 2, 
+    "consumo_per_capita_l_dia": 150, 
+    "_sobre": "Se moradores_override for null, o sistema conta os dormitorios do modelo e multiplica por pessoas_por_dormitorio.", 
+    "moradores_override": null, 
+    "regex_excluir_dormitorio": "banho|banheiro|lavabo|wc|closet|hall|circula", 
+    "regex_dormitorio": "dormitorio|quarto|suite"
+  }
+}

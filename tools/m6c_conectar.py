@@ -45,7 +45,7 @@ def ler(n):
 
 
 CFG = ler("config_projeto.json")
-FAM = ler("familias_unmep.json")
+FAM = ler("familias_pecas.json")
 AF = CFG["agua_fria"]
 P_PESO = FAM["parametros"]["peso"]
 H_BARRILETE = 2900.0
