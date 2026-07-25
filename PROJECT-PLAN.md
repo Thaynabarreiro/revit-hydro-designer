@@ -155,23 +155,42 @@ Worked example, a single-family house with 11 fixtures:
 | Storage | 1800 L required → 2000 L adopted (2 days' reserve) |
 | Design flow | Σ weights 5.50 → 0.704 L/s (2.53 m³/h) |
 | Water meter | 3.0 m³/h, DN 20 |
-| Network | 34 pipes, 78.58 m, 11/11 fixtures physically connected |
+| Network | 27 pipes, 67.13 m, 11/11 fixtures physically connected |
 | Diameters | DN 25 branches, DN 32 riser and main |
 | Critical fixture | shower, 0.06 m of head to spare |
 
 ### Routing
 
-Distribution follows a real main-and-branch topology: vertical riser, a spine
+Distribution follows a real main-and-branch topology: a vertical riser, a spine
 running along one axis, perpendicular branches, vertical drops. Because the three
 directions are mutually perpendicular, every junction is a right angle and Revit
-can insert tees and elbows. An earlier proximity-chained layout produced
-arbitrary angles that Revit refused to fit.
+can insert tees and elbows.
 
-| | chained | orthogonal |
-|---|---|---|
-| Fittings created | 6 | 17 |
-| Total length | 89.84 m | 78.58 m |
-| Model warnings | 25 | 5 |
+Three iterations were needed to get there, and each failure taught something the
+next version needed.
+
+**Chaining fixtures by proximity** produced arbitrary angles; Revit refused to
+fit most junctions.
+
+**One node per fixture** fixed the angles but left segments between close
+fixtures too short for a tee body. Fixtures are now grouped into *bands* along
+the spine, one node per band, with a branch serving every fixture in it.
+
+**A single spine cannot run both ways.** Sorting bands by distance from the riser
+made the spine double back over itself. It now splits into two runs from the
+riser, each monotonic along the axis — which is what a real distribution main
+does when there is demand on both sides of the stack.
+
+A fourth fix came from the same pass: the main must sit *above* every outlet.
+Showers connect at 3100 mm, so a main fixed at 2900 mm left a 200 mm "drop" with
+no room for a fitting. The height is now derived from the highest outlet.
+
+| | chained | one node each | banded, two runs |
+|---|---|---|---|
+| Fittings created | 6 | 17 | **14 of 16** |
+| Fixtures connected | 11/11 | 11/11 | **11/11** |
+| Total length | 89.84 m | 78.58 m | **67.13 m** |
+| Model warnings | 25 | 5 | **4** |
 
 ### Head loss
 
@@ -235,15 +254,20 @@ and the report must always list what was detected so a person can check it.
 Stated in the generated report as well as here. A tool that overstates its own
 scope is worse than no tool.
 
-1. **Six tee fittings still fail.** Fixtures close together along the spine leave
-   segments too short for a tee body. Fix: group fixtures into bands along the
-   spine axis and serve each band from one node.
-2. **Routing ignores obstacles.** Pipes run in straight orthogonal lines without
+1. **Two tee fittings still fail**, down from six. Fixtures very close together
+   *along a branch* leave the segment between them too short for a tee body —
+   the same problem the banding solved along the spine, one level down. The fix
+   is the same idea applied to branch members.
+2. **The head-loss module assumes a fixed main height** (2900 mm) while the
+   router now derives it from the highest outlet. Drops are therefore slightly
+   longer in the model than in the calculation. The effect is small but real;
+   the router should publish its height for the calculation to read.
+3. **Routing ignores obstacles.** Pipes run in straight orthogonal lines without
    checking walls, beams or other services.
-3. **Clash detection is not part of the pipeline.**
-4. **Paths are hardcoded**, so the project currently runs only on its author's
+4. **Clash detection is not part of the pipeline.**
+5. **Paths are hardcoded**, so the project currently runs only on its author's
    machine. First task for anyone else wanting to use it.
-5. **The formulas and tables require validation** by the responsible engineer
+6. **The formulas and tables require validation** by the responsible engineer
    against the governing code text before use on a real project. The tool
    computes; the signature and the judgement remain human.
 
