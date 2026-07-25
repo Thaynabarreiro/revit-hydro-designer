@@ -1,0 +1,122 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<title>Memorial de Cálculo - Casa A&R</title>
+<style>
+@page { size: A4; margin: 22mm 18mm; }
+* { box-sizing: border-box; }
+body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; font-size: 10.5pt;
+       color: #1a1a1a; line-height: 1.55; margin: 0; padding: 24px; max-width: 900px; }
+h1 { font-size: 19pt; margin: 0 0 4px; color: #0f3d5c; }
+h2 { font-size: 13pt; margin: 26px 0 8px; color: #0f3d5c;
+     border-bottom: 2px solid #0f3d5c; padding-bottom: 3px; }
+h3 { font-size: 11pt; margin: 16px 0 6px; color: #22546f; }
+.sub { color: #55606a; font-size: 10pt; margin-bottom: 18px; }
+.capa { border: 1px solid #c9d3da; border-left: 5px solid #0f3d5c;
+        padding: 18px 20px; margin-bottom: 22px; background: #f7fafc; }
+.capa table { border: 0; margin: 0; }
+.capa td { border: 0; padding: 2px 14px 2px 0; }
+.capa td:first-child { color: #55606a; width: 160px; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 14px; font-size: 9.8pt; }
+th { background: #0f3d5c; color: #fff; text-align: left; padding: 6px 9px; font-weight: 600; }
+td { border-bottom: 1px solid #dde4e9; padding: 5px 9px; }
+tr:nth-child(even) td { background: #f7fafc; }
+.formula { background: #f2f6f8; border-left: 3px solid #6f97ad;
+           padding: 9px 13px; margin: 9px 0; font-family: Consolas, monospace;
+           font-size: 9.8pt; white-space: pre-wrap; }
+.res { background: #e8f4ea; border-left: 3px solid #2e7d4f; padding: 9px 13px;
+       margin: 9px 0; font-weight: 600; }
+.aviso { background: #fff6e5; border-left: 3px solid #d08700; padding: 11px 14px;
+         margin: 14px 0; font-size: 9.8pt; }
+.assinatura { margin-top: 55px; padding-top: 7px; border-top: 1px solid #333;
+              width: 320px; text-align: center; font-size: 9.8pt; }
+.rodape { margin-top: 30px; padding-top: 9px; border-top: 1px solid #dde4e9;
+          color: #77828b; font-size: 8.5pt; }
+.tag { display: inline-block; padding: 1px 7px; border-radius: 9px; font-size: 8.5pt; }
+.tag-m { background: #e3edf5; color: #24506e; }
+.tag-c { background: #fdeede; color: #96590a; }
+@media print { body { padding: 0; } h2 { page-break-after: avoid; }
+               table { page-break-inside: avoid; } }
+</style></head><body>
+<h1>Memorial de Cálculo</h1>
+<div class="sub">Instalações Prediais de Água Fria</div>
+<div class="capa"><table>
+<tr><td>Projeto</td><td><b>Casa A&R</b></td></tr>
+<tr><td>Localidade</td><td>Porto Alegre</td></tr>
+<tr><td>Norma aplicada</td><td>NBR 5626 — Sistemas prediais de água fria</td></tr>
+<tr><td>Data de emissão</td><td>25/07/2026</td></tr>
+<tr><td>Responsável técnico</td><td>Thayna Barreiro — Engenheira Civil</td></tr>
+</table></div>
+<h2>1. Objetivo</h2>
+<p>Este documento apresenta o dimensionamento do sistema predial de água fria da edificação <b>Casa A&R</b>, compreendendo o volume de reservação, a vazão de projeto, a seleção do hidrômetro, o diâmetro do ramal de entrada e o dimensionamento dos sub-ramais por ambiente.</p>
+<h2>2. Metodologia</h2>
+<p>O levantamento dos pontos de consumo foi obtido a partir do modelo BIM, por leitura automatizada das peças de utilização. Peças coincidentes em posição — modeladas em famílias distintas representando uma mesma louça — foram agrupadas em um único ponto de consumo, evitando contagem dupla.</p>
+<p>A vazão de projeto foi determinada pelo <b>método dos pesos relativos</b>, conforme NBR 5626, e os diâmetros foram verificados pelo critério de velocidade máxima admissível.</p>
+<h2>3. Dados do Projeto</h2>
+<table><tr><th>Parâmetro</th><th>Valor</th><th>Origem</th></tr>
+<tr><td>Dormitórios</td><td>3</td><td>dormitório 02 105, dormitório 01 106, suíte 121</td></tr>
+<tr><td>População de projeto</td><td>6 pessoas</td><td>3 dormitorio(s) x 2 pessoa(s)</td></tr>
+<tr><td>Consumo per capita</td><td>150 L/hab.dia</td><td>Residência unifamiliar, padrão médio</td></tr>
+<tr><td>Período de reserva</td><td>2 dia(s)</td><td>Definido em projeto</td></tr>
+</table>
+<h2>4. Levantamento dos Pontos de Consumo</h2>
+<table><tr><th>Ambiente</th><th>Peça</th><th>Vazão (L/s)</th><th>Peso</th><th>Pressão mín. (kPa)</th><th>Origem</th></tr>
+<tr><td>banho social 115</td><td>Bacia sanitaria com caixa de descarga</td><td>0.15</td><td>0.3</td><td>5</td><td><span class="tag tag-m">modelo</span></td></tr>
+<tr><td>banho social 115</td><td>Chuveiro ou ducha</td><td>0.2</td><td>0.4</td><td>10</td><td><span class="tag tag-m">modelo</span></td></tr>
+<tr><td>banho social 115</td><td>Lavatorio</td><td>0.15</td><td>0.3</td><td>5</td><td><span class="tag tag-m">modelo</span></td></tr>
+<tr><td>banho suíte 108</td><td>Bacia sanitaria com caixa de descarga</td><td>0.15</td><td>0.3</td><td>5</td><td><span class="tag tag-m">modelo</span></td></tr>
+<tr><td>banho suíte 108</td><td>Chuveiro ou ducha</td><td>0.2</td><td>0.4</td><td>10</td><td><span class="tag tag-m">modelo</span></td></tr>
+<tr><td>banho suíte 108</td><td>Lavatorio</td><td>0.15</td><td>0.3</td><td>5</td><td><span class="tag tag-m">modelo</span></td></tr>
+<tr><td>cozinha 113</td><td>Pia de cozinha</td><td>0.25</td><td>0.7</td><td>5</td><td><span class="tag tag-m">modelo</span></td></tr>
+<tr><td>externo</td><td>Torneira de jardim ou lavagem</td><td>0.2</td><td>0.4</td><td>5</td><td><span class="tag tag-c">complementar</span></td></tr>
+<tr><td>lavanderia 109</td><td>Maquina de lavar roupa ou louca</td><td>0.3</td><td>1.0</td><td>5</td><td><span class="tag tag-c">complementar</span></td></tr>
+<tr><td>lavanderia 109</td><td>Tanque de lavar roupa</td><td>0.25</td><td>0.7</td><td>5</td><td><span class="tag tag-m">modelo</span></td></tr>
+<tr><td>varanda 119</td><td>Pia de cozinha</td><td>0.25</td><td>0.7</td><td>5</td><td><span class="tag tag-m">modelo</span></td></tr>
+<tr><td colspan="3"><b>Total</b></td><td><b>5.5</b></td><td colspan="2"><b>11 pontos</b></td></tr>
+</table>
+<div class="aviso"><b>Peças complementares.</b> As peças abaixo não constam do modelo arquitetônico e foram incluídas no dimensionamento por decisão de projeto:<ul>
+<li>Torneira de jardim ou lavagem &mdash; externo (nao modelada no arquitetonico)</li>
+<li>Maquina de lavar roupa ou louca &mdash; lavanderia 109 (nao modelada no arquitetonico)</li>
+</ul></div>
+<h2>5. Consumo Diário e Volume de Reservação</h2>
+<h3>5.1 Consumo diário</h3>
+<div class="formula">CD = P x q
+CD = 6 hab x 150 L/hab.dia</div>
+<div class="res">CD = 900 L/dia</div>
+<h3>5.2 Volume de reservação</h3>
+<div class="formula">V = CD x n
+V = 900 L/dia x 2</div>
+<div class="res">V necessário = 1800 L &nbsp;&nbsp;→&nbsp;&nbsp; Volume adotado = 2000 L (capacidade comercial)</div>
+<p>Sistema com reservatório superior único, alimentação por gravidade.</p>
+<h2>6. Vazão de Projeto</h2>
+<p>Método dos pesos relativos, conforme NBR 5626:</p>
+<div class="formula">Q = C x raiz(soma dos pesos)
+Q = 0.3 x raiz(5.5)</div>
+<div class="res">Q = 0.704 L/s = 2.533 m3/h</div>
+<h2>7. Hidrômetro e Ramal de Entrada</h2>
+<h3>7.1 Hidrômetro</h3>
+<p>Selecionado o menor modelo cuja vazão máxima atende à vazão de projeto:</p>
+<div class="res">Hidrômetro 3,0 m3/h — DN 20 mm</div>
+<h3>7.2 Ramal de entrada (alimentador predial)</h3>
+<div class="formula">D = raiz(4Q / pi.v)
+Q = 0.704 L/s   |   v_max = 3,0 m/s</div>
+<div class="res">D teórico = 17.28 mm &nbsp;&nbsp;→&nbsp;&nbsp; DN adotado = 20 mm &nbsp;(v real = 2.24 m/s)</div>
+<h2>8. Dimensionamento dos Sub-ramais</h2>
+<table><tr><th>Ambiente</th><th>Peças</th><th>Σ Pesos</th><th>Vazão (L/s)</th><th>DN adotado (mm)</th></tr>
+<tr><td>banho social 115</td><td>3</td><td>1.0</td><td>0.3</td><td>20</td></tr>
+<tr><td>banho suíte 108</td><td>3</td><td>1.0</td><td>0.3</td><td>20</td></tr>
+<tr><td>cozinha 113</td><td>1</td><td>0.7</td><td>0.251</td><td>20</td></tr>
+<tr><td>externo</td><td>1</td><td>0.4</td><td>0.19</td><td>20</td></tr>
+<tr><td>lavanderia 109</td><td>2</td><td>1.7</td><td>0.391</td><td>20</td></tr>
+<tr><td>varanda 119</td><td>1</td><td>0.7</td><td>0.251</td><td>20</td></tr>
+</table>
+<h2>9. Verificação de Pressão</h2>
+<p>A peça de utilização mais exigente do sistema requer pressão dinâmica mínima de <b>10 kPa</b>, equivalente a <b>1.02 m.c.a.</b></p>
+<div class="res">O fundo do reservatório deve situar-se, no mínimo, 1.02 m acima do ponto de utilização mais desfavorável.</div>
+<h2>10. Ressalvas e Limitações</h2>
+<div class="aviso">
+<p><b>Escopo desta revisão.</b> O dimensionamento apresentado aplica o critério de velocidade máxima admissível. A verificação por <b>perda de carga</b> (distribuída e localizada) não está incluída nesta emissão; sua incorporação poderá elevar o diâmetro de trechos com maior extensão ou maior número de conexões.</p>
+<p><b>Altura do reservatório.</b> O valor indicado no item 9 considera apenas a pressão estática necessária, sem acréscimo da perda de carga até o ponto crítico. O valor final deve ser majorado após essa verificação.</p>
+<p><b>Responsabilidade técnica.</b> Os cálculos foram produzidos com apoio de rotina computacional desenvolvida para leitura do modelo BIM e aplicação da norma. Os resultados foram conferidos e são assumidos pelo responsável técnico signatário, a quem cabe a validação final.</p>
+</div>
+<div class="assinatura">Thayna Barreiro<br>Engenheira Civil</div>
+<div class="rodape">Memorial gerado automaticamente a partir do modelo BIM — revit-hydro-designer &middot; 25/07/2026</div>
+</body></html>

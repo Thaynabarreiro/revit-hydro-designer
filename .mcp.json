@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "revit": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "C:\\Users\\Shadow\\AppData\\Roaming\\pyRevit\\Extensions\\mcp-server-for-revit-python.extension",
+        "main.py"
+      ]
+    }
+  }
+}

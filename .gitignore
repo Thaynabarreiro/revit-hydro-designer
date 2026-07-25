@@ -1,0 +1,13 @@
+# Configuracao local do Claude Code
+.claude/settings.local.json
+
+# Modelos Revit (grandes demais para o repositorio)
+*.rvt
+*.rte
+*.rfa
+*.[0-9][0-9][0-9][0-9].rvt
+
+# Temporarios
+*.pyc
+__pycache__/
+*.log

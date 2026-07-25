@@ -1,0 +1,96 @@
+{
+  "_sobre": "Mapeia cada tipo de peca do nosso calculo para a familia UnMEP que sera colocada no modelo hidro. 'familia' e casado por 'comeca com' para tolerar sufixos (ex.: '...Bancada1').",
+  "_fallback": "Quando nao existe familia especifica para a peca, usa-se a familia generica com o tipo indicado em 'unmep_tipo' de pecas_br.json.",
+
+  "generica_af_parede": "UnMEP_PH_AF_Peça Genérica de Parede",
+  "generica_af_piso": "UnMEP_PH_AF_Peça Genérica de Piso",
+
+  "pecas": {
+    "bacia_caixa": {
+      "familia": "UnMEP_PH_AF-ESG_Bacia Sanitária com Caixa Acoplada"
+    },
+    "bacia_valvula": {
+      "familia": "UnMEP_PH_AF-ESG_Bacia Sanitária com Descarga Embutida"
+    },
+    "lavatorio": {
+      "familia": "UnMEP_PH_AF-ESG_Lavatório Quadrado em Bancada"
+    },
+    "chuveiro_eletrico": {
+      "familia": "UnMEP_PH_AF_Chuveiro Elétrico"
+    },
+    "chuveiro": {
+      "familia": null,
+      "_nota": "Nao existe familia especifica de ducha comum no acervo. Usa a generica com o tipo 'DUC - Ducha'."
+    },
+    "pia": {
+      "familia": "UnMEP_PH_AF-ESG_Pia de Cozinha Com Torneira de Mesa - 01 Cuba"
+    },
+    "tanque": {
+      "familia": "UnMEP_PH_AF-ESG_Tanquinho de Mármore"
+    },
+    "maquina_lavar": {
+      "familia": "UnMEP_PH_AF-ESG_Máquina de Lavar Comum"
+    },
+    "torneira_jardim": {
+      "familia": "UnMEP_PH_AF_Torneira de Jardim"
+    },
+    "bide": {
+      "familia": "UnMEP_PH_AF_Ducha Higienica"
+    },
+    "banheira": {
+      "familia": null,
+      "_nota": "Usa generica com tipo 'BAN - Banheira'."
+    }
+  },
+
+  "infraestrutura": {
+    "reservatorio": {
+      "familia": "UnMEP_RES_Reservatorio de Polietileno",
+      "tipo_por_volume": {
+        "1000": "UnMEP - 1000 L",
+        "1500": "UnMEP - 1500 L",
+        "2000": "UnMEP - 2000 L",
+        "3000": "UnMEP - 3000 L",
+        "5000": "UnMEP - 5000 L"
+      }
+    },
+    "hidrometro": {
+      "familia": "UnMEP_RES_AF_Cavalete de Hidrômetro",
+      "tipo_por_dn": {
+        "20": "UnMEP - 20 mm",
+        "25": "UnMEP - 25 mm"
+      }
+    },
+    "fossa": { "familia": "UnMEP_PH_ESG_Fossa Circular Com Anel de Concreto" },
+    "filtro": { "familia": "UnMEP_PH_ESG_Filtro Anaeróbio" },
+    "sumidouro": { "familia": "UnMEP_PH_ESG_Sumidouro Circular com Anel de Concreto" },
+    "poco_infiltracao": { "familia": "UnMEP_PH_PLUV_Poço de Infiltraçao Circular com Anel de Concreto" }
+  },
+
+  "_parametros": "Nomes de parametro com acento PRECISAM vir daqui. Literais acentuados dentro do script sao corrompidos pelo bridge do pyRevit Routes e o LookupParameter nunca casa.",
+  "parametros": {
+    "peso": "UnMEP: Peso Relativo",
+    "vazao": "UnMEP: Vazão",
+    "pressao_min": "UnMEP: Pressão Mínima de Funcionamento da Peça Hidrossanitária",
+    "trecho": "UnMEP: Trecho",
+    "pressao_calculada": "UnMEP: Pressão Calculada",
+    "pressao_excedente": "UnMEP: Pressão Excedente",
+    "perda_carga_local": "UnMEP: Perda de Carga Localizada(mca)",
+    "comprimento_equiv": "UnMEP: Comprimento Equivalente",
+    "diametro_af": "UnMEP: Diâmetro Nominal Água Fria",
+    "diametro_esg": "UnMEP: Diâmetro Nominal Esgoto",
+    "altura_ponto_agua": "UnMEP: Altura do Ponto de Água",
+    "altura_ponto_esgoto": "UnMEP: Altura do Ponto de Esgoto",
+    "uhc": "UnMEP: Número UHC",
+    "sistema": "UnMEP: Sistema"
+  },
+
+  "_visibilidade": "Interruptores de instancia (Integer 0/1) para limpar a vista sem apagar nada.",
+  "visibilidade_padrao": {
+    "UnMEP: Geometria 3D": 1,
+    "UnMEP: Sigla 3D Água Fria e Quente": 1,
+    "UnMEP: Sigla 3D Esgoto": 1,
+    "UnMEP: Acessórios de Água Fria e Quente": 1,
+    "UnMEP: Acessórios de Esgoto": 1
+  }
+}

@@ -1,0 +1,209 @@
+{
+  "_unidades": "vazao_ls = L/s | pressao_min_kpa = kPa | unmep_tipo = nome do tipo na familia generica UnMEP", 
+  "ambiente_para_tipo": [
+    {
+      "tipo": "pia", 
+      "regex": "cozinha|gourmet|copa|churrasq|varanda"
+    }, 
+    {
+      "tipo": "tanque", 
+      "regex": "lavanderia|servico|area de"
+    }, 
+    {
+      "tipo": "lavatorio", 
+      "regex": "banho|banheiro|lavabo|wc|suite|toalete"
+    }
+  ], 
+  "raio_cluster_mm": 700, 
+  "_criterio_pressao": "norma = usa pressao_min_kpa (minimo normativo) | unmep = usa pressao_min_kpa_unmep (2 mca, mais conservador)", 
+  "classificacao": [
+    {
+      "tipo": "IGNORAR", 
+      "regex": "assento|tampa", 
+      "motivo": "acessorio da bacia"
+    }, 
+    {
+      "tipo": "IGNORAR", 
+      "regex": "caixa acoplada", 
+      "motivo": "faz parte da bacia"
+    }, 
+    {
+      "tipo": "IGNORAR", 
+      "regex": "^box|box ", 
+      "motivo": "vidro do box, nao e ponto de consumo"
+    }, 
+    {
+      "tipo": "IGNORAR", 
+      "regex": "coluna", 
+      "motivo": "pedestal, nao e ponto de consumo"
+    }, 
+    {
+      "tipo": "bacia_caixa", 
+      "regex": "bacia|vaso sanit"
+    }, 
+    {
+      "tipo": "chuveiro_eletrico", 
+      "regex": "chuveiro eletrico|ducha eletrica"
+    }, 
+    {
+      "tipo": "chuveiro", 
+      "regex": "chuveiro|ducha"
+    }, 
+    {
+      "tipo": "tanque", 
+      "regex": "tanque"
+    }, 
+    {
+      "tipo": "maquina_lavar", 
+      "regex": "maquina de lavar|lava roupa|lava louca"
+    }, 
+    {
+      "tipo": "banheira", 
+      "regex": "banheira"
+    }, 
+    {
+      "tipo": "bide", 
+      "regex": "bide"
+    }, 
+    {
+      "tipo": "torneira_jardim", 
+      "regex": "torneira de jardim|jardim"
+    }, 
+    {
+      "tipo": "pia", 
+      "regex": "pia de cozinha|pia "
+    }, 
+    {
+      "tipo": "lavatorio", 
+      "regex": "lavatorio"
+    }, 
+    {
+      "tipo": "REVISAR", 
+      "regex": "torneira|misturador", 
+      "motivo": "torneira solta - depende do ambiente (pia x lavatorio)"
+    }, 
+    {
+      "tipo": "REVISAR", 
+      "regex": "cuba", 
+      "motivo": "cuba pode ser lavatorio ou pia, e pode duplicar com a torneira"
+    }
+  ], 
+  "_classificacao": "Regras aplicadas em ordem, primeira que casar vence. Regex sem acento e minusculo - o reader normaliza o nome antes de comparar.", 
+  "tipos": {
+    "bide": {
+      "pressao_min_kpa_unmep": 19.600000000000001, 
+      "diam_esgoto_mm": 40, 
+      "desc": "Bide", 
+      "esgoto_uhc": 1, 
+      "pressao_min_kpa": 5, 
+      "vazao_ls": 0.10000000000000001, 
+      "peso": 0.10000000000000001, 
+      "unmep_tipo": "BIDE - Bide"
+    }, 
+    "bacia_caixa": {
+      "pressao_min_kpa_unmep": 19.600000000000001, 
+      "diam_esgoto_mm": 100, 
+      "desc": "Bacia sanitaria com caixa de descarga", 
+      "esgoto_uhc": 6, 
+      "pressao_min_kpa": 5, 
+      "vazao_ls": 0.14999999999999999, 
+      "peso": 0.29999999999999999, 
+      "unmep_tipo": "BSCA - Bacia Sanitaria de Caixa Acoplada"
+    }, 
+    "banheira": {
+      "pressao_min_kpa_unmep": 19.600000000000001, 
+      "diam_esgoto_mm": 40, 
+      "desc": "Banheira", 
+      "esgoto_uhc": 2, 
+      "pressao_min_kpa": 10, 
+      "vazao_ls": 0.29999999999999999, 
+      "peso": 1.0, 
+      "unmep_tipo": "BAN - Banheira"
+    }, 
+    "chuveiro_eletrico": {
+      "pressao_min_kpa_unmep": 19.600000000000001, 
+      "diam_esgoto_mm": 40, 
+      "desc": "Chuveiro eletrico", 
+      "esgoto_uhc": 2, 
+      "pressao_min_kpa": 10, 
+      "vazao_ls": 0.10000000000000001, 
+      "peso": 0.10000000000000001, 
+      "unmep_tipo": "CHE - Chuveiro Eletrico"
+    }, 
+    "pia": {
+      "pressao_min_kpa_unmep": 19.600000000000001, 
+      "diam_esgoto_mm": 50, 
+      "desc": "Pia de cozinha", 
+      "esgoto_uhc": 3, 
+      "pressao_min_kpa": 5, 
+      "vazao_ls": 0.25, 
+      "peso": 0.69999999999999996, 
+      "unmep_tipo": "PC - Pia de Cozinha"
+    }, 
+    "bacia_valvula": {
+      "pressao_min_kpa_unmep": 19.600000000000001, 
+      "diam_esgoto_mm": 100, 
+      "desc": "Bacia sanitaria com valvula de descarga", 
+      "esgoto_uhc": 6, 
+      "pressao_min_kpa": 15, 
+      "vazao_ls": 1.7000000000000000, 
+      "peso": 32.0, 
+      "unmep_tipo": "BSVD - Bacia Sanitaria com Valvula de Descarga"
+    }, 
+    "torneira_jardim": {
+      "pressao_min_kpa_unmep": 19.600000000000001, 
+      "diam_esgoto_mm": 0, 
+      "desc": "Torneira de jardim ou lavagem", 
+      "esgoto_uhc": 0, 
+      "pressao_min_kpa": 5, 
+      "vazao_ls": 0.20000000000000001, 
+      "peso": 0.40000000000000002, 
+      "unmep_tipo": "TJ - Torneira de Jardim"
+    }, 
+    "maquina_lavar": {
+      "pressao_min_kpa_unmep": 19.600000000000001, 
+      "diam_esgoto_mm": 50, 
+      "desc": "Maquina de lavar roupa ou louca", 
+      "esgoto_uhc": 3, 
+      "pressao_min_kpa": 5, 
+      "vazao_ls": 0.29999999999999999, 
+      "peso": 1.0, 
+      "unmep_tipo": "MLR - Maquina Lavadora de Roupas"
+    }, 
+    "tanque": {
+      "pressao_min_kpa_unmep": 19.600000000000001, 
+      "diam_esgoto_mm": 50, 
+      "desc": "Tanque de lavar roupa", 
+      "esgoto_uhc": 3, 
+      "pressao_min_kpa": 5, 
+      "vazao_ls": 0.25, 
+      "peso": 0.69999999999999996, 
+      "unmep_tipo": "TQ - Tanquinho"
+    }, 
+    "lavatorio": {
+      "pressao_min_kpa_unmep": 19.600000000000001, 
+      "diam_esgoto_mm": 40, 
+      "desc": "Lavatorio", 
+      "esgoto_uhc": 1, 
+      "pressao_min_kpa": 5, 
+      "vazao_ls": 0.14999999999999999, 
+      "peso": 0.29999999999999999, 
+      "unmep_tipo": "LAV - Lavatorio"
+    }, 
+    "chuveiro": {
+      "pressao_min_kpa_unmep": 19.600000000000001, 
+      "diam_esgoto_mm": 40, 
+      "desc": "Chuveiro ou ducha", 
+      "esgoto_uhc": 2, 
+      "pressao_min_kpa": 10, 
+      "vazao_ls": 0.20000000000000001, 
+      "peso": 0.40000000000000002, 
+      "unmep_tipo": "DUC - Ducha"
+    }
+  }, 
+  "_cluster": "Familias diferentes a menos de raio_cluster_mm no mesmo nivel sao tratadas como UM unico ponto de consumo (ex.: cuba + torneira + cuba shared = 1 pia). Evita contagem dupla, que superdimensiona a rede.", 
+  "_validacao": "Vazoes e pesos CONFERIDOS contra os tipos da familia UnMEP_PH_AF_Peca Generica (25/07/2026). Todos os valores batem. Divergencia encontrada: o UnMEP adota pressao minima de 2 mca (19,6 kPa) para praticamente todas as pecas, contra os 5-10 kPa minimos da norma. Ver campo pressao_min_kpa_unmep e a chave criterio_pressao.", 
+  "norma": "NBR 5626 - metodo dos pesos relativos", 
+  "criterio_pressao": "unmep", 
+  "_ambiente": "Usado para desambiguar itens REVISAR pelo nome do ambiente."
+}
