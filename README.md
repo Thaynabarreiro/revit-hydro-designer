@@ -220,8 +220,8 @@ Revit API traps found the hard way and worth knowing:
 - Fittings need right angles. A layout that chains fixtures by proximity produces
   arbitrary angles that Revit refuses to fit.
 
-**Known limitation:** paths are hardcoded to the author's machine. Parameterising
-them is the first task for anyone wanting to run this elsewhere.
+**Known limitation:** the buttons inject the project root, but running a tool
+directly through the bridge still falls back to a literal path.
 
 ---
 
