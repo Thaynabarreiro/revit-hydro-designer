@@ -1,3 +1,4 @@
+#! python3
 # -*- coding: utf-8 -*-
 """Verificação de acervo — o template tem o que este projeto vai precisar?
 

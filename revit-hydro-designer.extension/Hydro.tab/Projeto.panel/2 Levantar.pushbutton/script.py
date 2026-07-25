@@ -1,3 +1,4 @@
+#! python3
 # -*- coding: utf-8 -*-
 """Levantamento dos pontos de consumo — e a etapa de revisão humana.
 

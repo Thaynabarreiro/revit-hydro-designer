@@ -1,3 +1,4 @@
+#! python3
 # -*- coding: utf-8 -*-
 """Coloca as peças hidrossanitárias no modelo MEP.
 

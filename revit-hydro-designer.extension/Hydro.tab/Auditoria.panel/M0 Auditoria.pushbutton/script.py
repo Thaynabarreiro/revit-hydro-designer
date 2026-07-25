@@ -1,3 +1,4 @@
+#! python3
 # -*- coding: utf-8 -*-
 """M0 - Auditoria de modelo hidrossanitario.
 
@@ -10,7 +11,6 @@ Serve para dois fins:
 
 Autora: Thayna Barreiro
 """
-from __future__ import unicode_literals
 
 import codecs
 import os
@@ -18,6 +18,8 @@ import re
 from collections import Counter, defaultdict
 
 from pyrevit import revit, script
+
+import hydro
 
 from Autodesk.Revit.DB import (
     BuiltInCategory,
@@ -42,7 +44,7 @@ doc = revit.doc
 output = script.get_output()
 
 # Onde o relatorio .md e gravado. Ajuste se mover o projeto.
-PASTA_SAIDA = r"C:\Users\Shadow\Documents\00 - Claude - Revit\auditoria"
+PASTA_SAIDA = os.path.join(hydro.RAIZ, "auditoria")
 
 # Categorias que interessam a um projeto hidrossanitario.
 CATEGORIAS_HIDRO = [

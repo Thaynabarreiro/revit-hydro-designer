@@ -1,3 +1,4 @@
+#! python3
 # -*- coding: utf-8 -*-
 """Formulario de configuracao do projeto hidrossanitario.
 
@@ -13,8 +14,10 @@ import os
 
 from pyrevit import forms, script
 
-RAIZ = r"C:\Users\Shadow\Documents\00 - Claude - Revit"
-ARQ = os.path.join(RAIZ, "data", "config_projeto.json")
+import hydro
+
+RAIZ = hydro.RAIZ
+ARQ = hydro.caminho_dado("config_projeto.json")
 
 output = script.get_output()
 

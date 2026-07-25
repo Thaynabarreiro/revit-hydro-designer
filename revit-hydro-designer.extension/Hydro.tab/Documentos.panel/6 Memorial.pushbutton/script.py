@@ -1,3 +1,4 @@
+#! python3
 # -*- coding: utf-8 -*-
 """Gera o memorial de cálculo e abre no navegador.
 
