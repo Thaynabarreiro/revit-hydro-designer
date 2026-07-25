@@ -1,3 +1,3 @@
-title: "1 Configurar"
-tooltip: "Formulario com os dados do projeto: cidade, norma BR/FR, ocupacao, dias de reserva. Grava em config_projeto.json."
+title: "1\nConfigurar"
+tooltip: "Dados deste projeto: nome, cidade, norma (BR/FR), ocupacao, consumo per capita, dias de reserva e tipo de reservacao. Grava data/config_projeto.json."
 author: "Thayna Barreiro"
