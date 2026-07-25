@@ -16,6 +16,7 @@ data/pontos_consumo.json
 data/dimensionamento.json
 data/verificacao_pressao.json
 data/rede_ids.json
+data/acervo.json
 auditoria/
 memoriais/
 

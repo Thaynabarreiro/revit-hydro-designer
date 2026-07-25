@@ -21,7 +21,7 @@ from Autodesk.Revit.DB import (
     UnitUtils,
 )
 
-RAIZ = r"C:\Users\Shadow\Documents\00 - Claude - Revit"
+RAIZ = globals().get("RAIZ", "C:/Users/Shadow/Documents/00 - Claude - Revit")
 ARQ_NORMA = os.path.join(RAIZ, "data", "pecas_br.json")
 ARQ_SAIDA = os.path.join(RAIZ, "data", "pontos_consumo.json")
 

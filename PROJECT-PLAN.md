@@ -265,7 +265,8 @@ scope is worse than no tool.
 3. **Routing ignores obstacles.** Pipes run in straight orthogonal lines without
    checking walls, beams or other services.
 4. **Clash detection is not part of the pipeline.**
-5. **Paths are hardcoded**, so the project currently runs only on its author's
+5. **Paths still have a hardcoded fallback.** The buttons inject the real root,
+   but running a tool directly through the bridge falls back to a literal path.
    machine. First task for anyone else wanting to use it.
 6. **The formulas and tables require validation** by the responsible engineer
    against the governing code text before use on a real project. The tool
@@ -280,9 +281,27 @@ Group spine nodes to fix the remaining tees · correct the reservoir placement
 offset · write results back into family parameters so existing tags and schedules
 read them · fold the head-loss results into the report.
 
-**Phase B — make it a product**
-Ribbon buttons for every stage · a template-inventory check that names missing
-families before generating instead of failing midway · parameterised paths.
+**Phase B — make it a product** *(done)*
+Every stage now has a ribbon button, in the order they are meant to be used:
+*1 Configurar*, *2 Levantar*, *3 Dimensionar*, *4 Colocar peças*, *5 Gerar rede*,
+*6 Memorial*, plus *Auditoria M0* and *Verificar acervo*.
+
+*2 Levantar* is the review stop, and it reports the three things worth
+questioning: which fixtures were **grouped** into one point, which had their type
+**inferred from the room name**, and which could not be classified at all. Those
+are exactly the shapes the two real bugs took.
+
+*Verificar acervo* answers "does this template have what this project needs?"
+before anything is generated — mapped fixture families, infrastructure families,
+the specific reservoir volume and meter size the sizing asked for, the cold-water
+system, pipe types with usable routing preferences, and the calculation
+parameters. A missing family becomes a list instead of a mid-run failure.
+
+The buttons run on pyRevit's CPython 3.12 while the calculation modules were
+written for the IronPython 2.7 bridge. Rather than maintain two copies, a small
+shared module executes the same files in a prepared namespace. Tool scripts now
+accept an injected project root, so the buttons derive it from their own location
+instead of relying on a fixed path.
 
 **Phase C — remaining disciplines**
 Hot water, then sanitary drainage and venting, then stormwater, then on-site

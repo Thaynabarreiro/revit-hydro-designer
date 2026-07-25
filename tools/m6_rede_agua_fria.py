@@ -32,7 +32,9 @@ from Autodesk.Revit.DB.Plumbing import Pipe, PipeType, PipingSystemType
 from Autodesk.Revit.DB.Structure import StructuralType
 import System
 
-RAIZ = "C:/Users/Shadow/Documents/00 - Claude - Revit"
+# Aceita RAIZ injetada pelo chamador (os botoes pyRevit descobrem a raiz a
+# partir da propria localizacao). O literal e apenas o fallback do bridge.
+RAIZ = globals().get("RAIZ", "C:/Users/Shadow/Documents/00 - Claude - Revit")
 D = os.path.join(RAIZ, "data")
 
 

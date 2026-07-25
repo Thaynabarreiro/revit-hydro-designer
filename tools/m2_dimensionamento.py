@@ -16,7 +16,7 @@ import os
 import re
 import unicodedata
 
-RAIZ = r"C:\Users\Shadow\Documents\00 - Claude - Revit"
+RAIZ = globals().get("RAIZ", "C:/Users/Shadow/Documents/00 - Claude - Revit")
 D = os.path.join(RAIZ, "data")
 
 

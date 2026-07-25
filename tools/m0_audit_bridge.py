@@ -30,7 +30,7 @@ from Autodesk.Revit.DB import (
 )
 from Autodesk.Revit.DB.Plumbing import PipeSegment, PipeType, PipingSystemType
 
-PASTA_SAIDA = r"C:\Users\Shadow\Documents\00 - Claude - Revit\auditoria"
+PASTA_SAIDA = os.path.join(globals().get("RAIZ", "C:/Users/Shadow/Documents/00 - Claude - Revit"), "auditoria")
 
 CATEGORIAS_HIDRO = [
     ("Pecas hidrossanitarias", BuiltInCategory.OST_PlumbingFixtures),
