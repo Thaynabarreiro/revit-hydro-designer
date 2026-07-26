@@ -1,5 +1,6 @@
-# Local Claude Code settings
+# Local Claude Code and MCP settings
 .claude/settings.local.json
+.mcp.json
 
 # Revit models — too large for the repository
 *.rvt

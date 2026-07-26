@@ -21,7 +21,10 @@ from Autodesk.Revit.DB import (
     XYZ,
 )
 
-D = "C:/Users/Shadow/Documents/00 - Claude - Revit/data"
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+_auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+RAIZ = globals().get("RAIZ", os.environ.get("HYDRO_PROJECT_ROOT", _auto_root))
+D = os.path.join(RAIZ, "data")
 
 f = codecs.open(os.path.join(D, "rede_ids.json"), "r", encoding="utf-8")
 R = json.loads(f.read())

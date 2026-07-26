@@ -1,0 +1,29 @@
+{
+  "projeto": {
+    "norma": "NBR", 
+    "cidade": "Porto Alegre", 
+    "nome": "Casa A&R", 
+    "pais": "BR"
+  }, 
+  "tratamento": {
+    "filtro_anaerobio": {
+      "volume_adotado_l": 1000.0, 
+      "volume_calculado_l": 960.0, 
+      "dn_adotado_mm": 1500
+    }, 
+    "normas": "NBR 7229 (Fossa Séptica e Sumidouro) / NBR 13969 (Filtro Anaeróbio)", 
+    "fossa_septica": {
+      "volume_adotado_l": 2000.0, 
+      "volume_calculado_l": 1828.0, 
+      "dn_adotado_mm": 2000
+    }, 
+    "sumidouro": {
+      "area_infiltracao_necessaria_m2": 12.0, 
+      "taxa_percolacao_solo_l_m2_dia": 50.0, 
+      "dn_adotado_mm": 2000, 
+      "profundidade_util_m": 1.9099999999999999
+    }, 
+    "moradores": 4, 
+    "consumo_per_capita_l_dia": 150
+  }
+}

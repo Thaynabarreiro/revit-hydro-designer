@@ -47,7 +47,9 @@ from Autodesk.Revit.DB.Plumbing import Pipe, PipeType, PipingSystemType
 
 # Aceita RAIZ injetada pelo chamador (os botoes pyRevit descobrem a raiz a
 # partir da propria localizacao). O literal e apenas o fallback do bridge.
-RAIZ = globals().get("RAIZ", "C:/Users/Shadow/Documents/00 - Claude - Revit")
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+_auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+RAIZ = globals().get("RAIZ", os.environ.get("HYDRO_PROJECT_ROOT", _auto_root))
 D = os.path.join(RAIZ, "data")
 
 
@@ -138,22 +140,35 @@ niveis = sorted(FilteredElementCollector(doc).OfClass(Level).ToElements(),
                 key=lambda x: x.Elevation)
 nivel_base, nivel_topo = niveis[0], niveis[-1]
 
+pts = [t for t in FilteredElementCollector(doc).OfClass(PipeType).ToElements()]
 tipo_tubo = None
-for t in FilteredElementCollector(doc).OfClass(PipeType).ToElements():
-    if "Marrom" in nm(t):
+for t in pts:
+    if "Marrom" in nm(t) or "Soldavel" in nm(t) or "Soldável" in nm(t):
         tipo_tubo = t
-if tipo_tubo is None:
-    tipo_tubo = list(FilteredElementCollector(doc).OfClass(PipeType).ToElements())[0]
+        break
+if tipo_tubo is None and pts:
+    tipo_tubo = pts[0]
 
 sistema = None
 for s in FilteredElementCollector(doc).OfClass(PipingSystemType).ToElements():
     try:
-        if "AAF" in (s.Abbreviation or ""):
+        if "AAF" in (s.Abbreviation or "") or "Fria" in nm(s) or "AF" in (s.Abbreviation or ""):
             sistema = s
+            break
     except Exception:
         pass
 if sistema is None:
-    raise Exception("sistema AF nao encontrado")
+    for s in FilteredElementCollector(doc).OfClass(PipingSystemType).ToElements():
+        try:
+            if str(s.SystemClassification) == "DomesticColdWater":
+                sistema = s
+                break
+        except Exception:
+            pass
+if sistema is None:
+    ps_list = [s for s in FilteredElementCollector(doc).OfClass(PipingSystemType).ToElements()]
+    if ps_list:
+        sistema = ps_list[0]
 
 pecas, res_inst = [], None
 for p in (FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_PlumbingFixtures)
@@ -278,9 +293,44 @@ def tubo(p1, p2, d, rot):
         return None
 
 
+# Obter conector de saida lateral do reservatorio que aponta para FORA da caixa
+c_res = None
+if res_inst is not None:
+    try:
+        cm = res_inst.MEPModel.ConnectorManager
+        p_center = res_inst.Location.Point
+        for c in cm.Connectors:
+            if str(c.PipeSystemType) == "DomesticColdWater" and abs(c.Radius * 304.8 * 2 - 50.0) < 10.0:
+                dir_v = c.CoordinateSystem.BasisZ
+                vec_c = c.Origin - p_center
+                if dir_v.DotProduct(vec_c) > 0:
+                    c_res = c
+                    break
+    except Exception:
+        pass
+
+p_con = c_res.Origin if c_res is not None else XYZ(p_res.X, p_res.Y, nivel_topo.Elevation)
+dir_out = c_res.CoordinateSystem.BasisZ if c_res is not None else XYZ(0, 1, 0)
 no0 = XYZ(x_esp, p_res.Y, z_barr)
-coluna = tubo(XYZ(p_res.X, p_res.Y, nivel_topo.Elevation), no0,
-              diametro(C * math.sqrt(peso_total)), "coluna")
+
+# 1. Stub horizontal saindo 500 mm para FORA do contorno da caixa d'agua
+p_stub_out = p_con + dir_out * ft(500.0)
+stub_reservatorio = tubo(p_con, p_stub_out, diametro(C * math.sqrt(peso_total)), "stub_reservatorio")
+
+# 2. Descida 100% vertical por FORA da caixa d'agua ate a cota do barrilete (Z_barr)
+p_desloc_barr = XYZ(p_stub_out.X, p_stub_out.Y, z_barr)
+prumada_res = tubo(p_stub_out, p_desloc_barr, diametro(C * math.sqrt(peso_total)), "prumada_externa_reservatorio")
+
+# 3. Trecho horizontal no barrilete ate a espinha principal
+coluna = tubo(p_desloc_barr, no0, diametro(C * math.sqrt(peso_total)), "ramal_barrilete_reservatorio")
+
+if c_res is not None and stub_reservatorio is not None:
+    try:
+        ct_col = conector_perto(stub_reservatorio, p_con)
+        if ct_col is not None and not c_res.IsConnected:
+            c_res.ConnectTo(ct_col)
+    except Exception:
+        pass
 
 for k, ramo in enumerate(ramos):
     peso_rest = sum([f["peso"] for f in ramo])
@@ -301,7 +351,16 @@ for k, ramo in enumerate(ramos):
                                diametro(C * math.sqrt(max(peso_ramal, 0.01))),
                                "ramal {0}.{1}.{2}".format(k + 1, i + 1, j + 1))
             pc["p_ramal"] = p_alvo
-            pc["desc"] = tubo(p_alvo, pc["org"],
+            
+            # Trecho ortogonal horizontal de alinhamento com a parede (em Y)
+            p_topo_descida = XYZ(pc["org"].X, pc["org"].Y, z_barr)
+            pc["p_topo_descida"] = p_topo_descida
+            pc["ramal_parede"] = tubo(p_alvo, p_topo_descida,
+                                      diametro(C * math.sqrt(pc["peso"])),
+                                      "ramal_parede {0}.{1}.{2}".format(k + 1, i + 1, j + 1))
+            
+            # Descida 100% vertical em Z na posicao exata X,Y da peca
+            pc["desc"] = tubo(p_topo_descida, pc["org"],
                               diametro(C * math.sqrt(pc["peso"])),
                               "descida {0}.{1}.{2}".format(k + 1, i + 1, j + 1))
             p_cursor = p_alvo
@@ -366,14 +425,22 @@ def liga(a, b, ponto, rot, terceiro=None):
         fit_falha.append((rot, str(e)[:50]))
 
 
+# Joelhos no percurso externo da caixa d'agua
+if stub_reservatorio is not None and prumada_res is not None:
+    liga(stub_reservatorio, prumada_res, p_stub_out, "joelho_topo_externo_reservatorio")
+if prumada_res is not None and coluna is not None:
+    liga(prumada_res, coluna, p_desloc_barr, "joelho_base_externa_reservatorio")
+
 # pe da coluna: coluna mais o inicio de cada ramo
 if coluna is not None and ramos:
-    e1 = ramos[0][0].get("esp")
-    e2 = ramos[1][0].get("esp") if len(ramos) > 1 else None
-    if e2 is not None:
+    e1 = ramos[0][0].get("esp") if (len(ramos[0]) > 0) else None
+    e2 = ramos[1][0].get("esp") if (len(ramos) > 1 and len(ramos[1]) > 0) else None
+    if e1 is not None and e2 is not None:
         liga(e1, e2, no0, "te no pe da coluna", terceiro=coluna)
-    else:
+    elif e1 is not None:
         liga(coluna, e1, no0, "joelho no pe da coluna")
+    elif e2 is not None:
+        liga(coluna, e2, no0, "joelho no pe da coluna")
 
 for k, ramo in enumerate(ramos):
     for i, fx in enumerate(ramo):
@@ -381,7 +448,7 @@ for k, ramo in enumerate(ramos):
         prox = ramo[i + 1].get("esp") if i + 1 < len(ramo) else None
         saida = None
         if membros:
-            saida = membros[0].get("ramal") or membros[0].get("desc")
+            saida = membros[0].get("ramal") or membros[0].get("ramal_parede")
         if prox is not None:
             liga(fx.get("esp"), prox, fx["p_no"],
                  "te faixa {0}.{1}".format(k + 1, i + 1), terceiro=saida)
@@ -391,13 +458,19 @@ for k, ramo in enumerate(ramos):
             if pc.get("ramal") is None:
                 continue
             prox_r = membros[j + 1].get("ramal") if j + 1 < len(membros) else None
+            saida_p = pc.get("ramal_parede") or pc.get("desc")
             if prox_r is not None:
                 liga(pc["ramal"], prox_r, pc["p_ramal"],
                      "te {0}.{1}.{2}".format(k + 1, i + 1, j + 1),
-                     terceiro=pc.get("desc"))
+                     terceiro=saida_p)
             else:
-                liga(pc["ramal"], pc.get("desc"), pc["p_ramal"],
+                liga(pc["ramal"], saida_p, pc["p_ramal"],
                      "joelho {0}.{1}.{2}".format(k + 1, i + 1, j + 1))
+            
+            # Joelho no topo da descida vertical na parede
+            if pc.get("ramal_parede") and pc.get("desc"):
+                liga(pc["ramal_parede"], pc["desc"], pc["p_topo_descida"],
+                     "joelho_topo_descida {0}.{1}.{2}".format(k + 1, i + 1, j + 1))
 t.Commit()
 
 print("")

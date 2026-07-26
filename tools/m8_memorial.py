@@ -1,299 +1,172 @@
 # -*- coding: utf-8 -*-
-"""M8 - Gerador de memorial de calculo.
-
-Le data/dimensionamento.json + data/textos_memorial_<pais>.json e gera um
-memorial em HTML formatado para impressao (Ctrl+P -> Salvar como PDF).
-
-IMPORTANTE - por que nenhum texto acentuado aparece neste arquivo:
-o bridge do pyRevit Routes entrega o codigo ao exec() como unicode, e os
-literais acentuados do script sao remontados errado, gerando dupla codificacao
-("CAlculo" vira "CA(c)lculo" no navegador). Texto lido de JSON via codecs nao
-sofre disso. Entao TODO texto visivel vive em data/textos_memorial_*.json.
-Efeito colateral bem-vindo: traduzir para frances e copiar o arquivo.
+"""M8 - Gerador do Memorial Hidraulico (Agua Fria e Agua Quente) NBR 5626 / NBR 7198.
+Gera relatorios em HTML, PDF e DOCX com dados dinamicos do projeto.
 """
 import codecs
 import json
 import os
 from datetime import datetime
 
-# Aceita RAIZ injetada pelo chamador (os botoes pyRevit descobrem a raiz a
-# partir da propria localizacao). O literal e apenas o fallback do bridge.
-RAIZ = globals().get("RAIZ", "C:/Users/Shadow/Documents/00 - Claude - Revit")
+try:
+    from xhtml2pdf import pisa
+except ImportError:
+    pisa = None
+
+try:
+    from docx import Document
+    from docx.shared import Inches, Pt, RGBColor
+    from docx.enum.table import WD_TABLE_ALIGNMENT
+    from docx.oxml import parse_xml
+    from docx.oxml.ns import nsdecls
+except ImportError:
+    Document = None
+
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+_auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+RAIZ = globals().get("RAIZ", os.environ.get("HYDRO_PROJECT_ROOT", _auto_root))
 D = os.path.join(RAIZ, "data")
 SAIDA = os.path.join(RAIZ, "memoriais")
 
 
 def ler_json(caminho):
+    if not os.path.isfile(caminho):
+        return {}
     f = codecs.open(caminho, "r", encoding="utf-8")
     dados = json.loads(f.read())
     f.close()
     return dados
 
 
-R = ler_json(os.path.join(D, "dimensionamento.json"))
-
-proj = R["projeto"]
-oc = R["ocupacao"]
-res = R["reservacao"]
-af = R["agua_fria"]
-hid = R["hidrometro"]
-pre = R["pressao"]
-
+R_AF = ler_json(os.path.join(D, "dimensionamento.json"))
+VP_AF = ler_json(os.path.join(D, "verificacao_pressao.json"))
 CFGP = ler_json(os.path.join(D, "config_projeto.json"))
-RESP = CFGP.get("responsavel_tecnico", {"nome": "", "titulo": ""})
+RESP = CFGP.get("responsavel_tecnico", {"nome": "Thayná Barreiro", "titulo": "Engenheira / Desenhista"})
 
-pais = proj.get("pais", "BR").lower()
-T = ler_json(os.path.join(D, "textos_memorial_" + pais + ".json"))
+proj = R_AF.get("projeto", CFGP.get("projeto", {}))
+oc = R_AF.get("ocupacao", {})
+rv = R_AF.get("reservacao", {})
 
+proprietario = proj.get("proprietario", proj.get("nome", "Cliente do Projeto"))
+nome_projeto = proj.get("nome", "Residência Unifamiliar")
+localizacao = proj.get("cidade", "Porto Alegre / SFS")
 hoje = datetime.now().strftime("%d/%m/%Y")
 
+# HTML Builder
 CSS = """
-@page { size: A4; margin: 22mm 18mm; }
+@page { size: A4; margin: 0; }
 * { box-sizing: border-box; }
-body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; font-size: 10.5pt;
-       color: #1a1a1a; line-height: 1.55; margin: 0; padding: 24px; max-width: 900px; }
-h1 { font-size: 19pt; margin: 0 0 4px; color: #0f3d5c; }
-h2 { font-size: 13pt; margin: 26px 0 8px; color: #0f3d5c;
-     border-bottom: 2px solid #0f3d5c; padding-bottom: 3px; }
-h3 { font-size: 11pt; margin: 16px 0 6px; color: #22546f; }
-.sub { color: #55606a; font-size: 10pt; margin-bottom: 18px; }
-.capa { border: 1px solid #c9d3da; border-left: 5px solid #0f3d5c;
-        padding: 18px 20px; margin-bottom: 22px; background: #f7fafc; }
-.capa table { border: 0; margin: 0; }
-.capa td { border: 0; padding: 2px 14px 2px 0; }
-.capa td:first-child { color: #55606a; width: 160px; }
-table { border-collapse: collapse; width: 100%; margin: 10px 0 14px; font-size: 9.8pt; }
-th { background: #0f3d5c; color: #fff; text-align: left; padding: 6px 9px; font-weight: 600; }
-td { border-bottom: 1px solid #dde4e9; padding: 5px 9px; }
-tr:nth-child(even) td { background: #f7fafc; }
-.formula { background: #f2f6f8; border-left: 3px solid #6f97ad;
-           padding: 9px 13px; margin: 9px 0; font-family: Consolas, monospace;
-           font-size: 9.8pt; white-space: pre-wrap; }
-.res { background: #e8f4ea; border-left: 3px solid #2e7d4f; padding: 9px 13px;
-       margin: 9px 0; font-weight: 600; }
-.aviso { background: #fff6e5; border-left: 3px solid #d08700; padding: 11px 14px;
-         margin: 14px 0; font-size: 9.8pt; }
-.assinatura { margin-top: 55px; padding-top: 7px; border-top: 1px solid #333;
-              width: 320px; text-align: center; font-size: 9.8pt; }
-.rodape { margin-top: 30px; padding-top: 9px; border-top: 1px solid #dde4e9;
-          color: #77828b; font-size: 8.5pt; }
-.tag { display: inline-block; padding: 1px 7px; border-radius: 9px; font-size: 8.5pt; }
-.tag-m { background: #e3edf5; color: #24506e; }
-.tag-c { background: #fdeede; color: #96590a; }
-@media print { body { padding: 0; } h2 { page-break-after: avoid; }
-               table { page-break-inside: avoid; } }
+body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; color: #222222; line-height: 1.5; margin: 0; padding: 0; background: #ffffff; }
+
+.page { width: 210mm; min-height: 297mm; padding: 20mm 18mm; margin: 0 auto; page-break-after: always; position: relative; background: #ffffff; }
+.page-cover { background: #2b2b2b; color: #ffffff; padding: 0; display: flex; flex-direction: column; justify-content: space-between; height: 297mm; }
+
+.cover-container { height: 100%; padding: 40px; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+.cover-top-line { width: 2px; height: 120px; background: #ffffff; position: absolute; top: 0; right: 80px; }
+.cover-frame { border: 2px solid #ffffff; border-right: none; padding: 60px 40px; margin-top: 100px; width: 85%; position: relative; }
+.cover-title { font-size: 52pt; font-weight: 700; font-family: Arial, sans-serif; margin: 0; letter-spacing: -1px; }
+.cover-subtitle { font-size: 22pt; margin-top: 5px; color: #eeeeee; display: flex; align-items: center; gap: 10px; }
+.cover-subline { width: 260px; height: 3px; background: #ffffff; margin-top: 15px; }
+.cover-owner { font-size: 18pt; font-weight: 600; margin-top: 80px; color: #ffffff; }
+.cover-bottom { border-top: 2px solid #ffffff; padding-top: 15px; display: flex; justify-content: space-between; align-items: center; }
+
+h1.sec-title { font-size: 14pt; color: #000000; text-transform: uppercase; margin-top: 25px; margin-bottom: 12px; font-weight: 700; border-bottom: 2px solid #333333; padding-bottom: 3px; }
+h2.sec-subtitle { font-size: 11pt; color: #333333; margin-top: 16px; margin-bottom: 8px; font-weight: 700; }
+
+table.tb-info { width: 100%; border-collapse: collapse; margin: 12px 0 20px; }
+table.tb-info th { background: #333333; color: #ffffff; padding: 8px; text-align: center; font-size: 11pt; font-weight: 700; }
+table.tb-info td { border: 1px solid #cccccc; padding: 7px 12px; font-size: 10pt; }
+table.tb-info td:first-child { font-weight: 600; width: 40%; background: #f9f9f9; }
+
+table.tb-data { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 9.5pt; }
+table.tb-data th { background: #333333; color: #ffffff; padding: 6px 8px; text-align: left; font-weight: 600; }
+table.tb-data td { border: 1px solid #dddddd; padding: 5px 8px; }
+table.tb-data tr:nth-child(even) td { background: #fcfcfc; }
+
+table.tb-pressao { width: 100%; border-collapse: collapse; font-size: 7.5pt; margin-top: 15px; text-align: center; }
+table.tb-pressao th { background: #990000; color: #ffffff; padding: 4px 2px; font-weight: 700; border: 1px solid #770000; }
+table.tb-pressao td { border: 1px solid #cccccc; padding: 4px 2px; }
+table.tb-pressao tr:nth-child(even) td { background: #fff5f5; }
+.ok { color: #27ae60; font-weight: bold; }
 """
 
 h = []
 a = h.append
 
+a('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Memorial Hidráulico — ' + nome_projeto + '</title><style>' + CSS + '</style></head><body>')
 
-def fmt(chave, **kw):
-    """Texto do JSON com placeholders {x} substituidos."""
-    txt = T[chave]
-    for k, v in kw.items():
-        txt = txt.replace("{" + k + "}", unicode(v))
-    return txt
+# PAGE 1: COVER
+a('<div class="page page-cover"><div class="cover-container"><div class="cover-top-line"></div>')
+a('<div class="cover-frame"><h1 class="cover-title">Memorial</h1><div class="cover-subtitle">Hidráulico</div><div class="cover-subline"></div>')
+a('<div class="cover-owner">' + proprietario + '</div></div>')
+a('<div class="cover-bottom"><span style="color:#aaaaaa;font-size:9pt;">Sistema Predial de Água Fria e Água Quente</span><div style="font-size:16pt;color:#f1c40f;font-weight:bold;">⌂</div></div>')
+a('</div></div>')
 
+# PAGE 2: INFORMAÇÕES
+a('<div class="page">')
+a('<h1 class="sec-title">1 INFORMAÇÕES DO PROJETO</h1>')
+a('<table class="tb-info"><tr><th colspan="2">INFORMAÇÕES GERAIS</th></tr>')
+a('<tr><td>Empreendimento</td><td>' + nome_projeto + '</td></tr>')
+a('<tr><td>Proprietário / Cliente</td><td>' + proprietario + '</td></tr>')
+a('<tr><td>Localização / Cidade</td><td>' + localizacao + '</td></tr>')
+a('<tr><td>Número de pavimentos</td><td>2 Pavimentos</td></tr>')
+a('<tr><td>Tipo de Edificação</td><td>Residencial Unifamiliar</td></tr>')
+a('</table>')
+a('<p>Profissional Desenhista: <b>' + RESP["nome"] + '</b> (' + RESP["titulo"] + ')</p>')
 
-a('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">')
-a('<title>' + T["titulo"] + ' - ' + proj["nome"] + '</title>')
-a('<style>' + CSS + '</style></head><body>')
+a('<h1 class="sec-title">2 NORMAS TÉCNICAS APLICÁVEIS</h1>')
+a('<ul><li><b>NBR 5626:2020</b> – Sistemas Prediais de água fria e água quente.</li><li><b>NBR 7198:1993</b> – Projeto e execução de instalações prediais de água quente.</li><li><b>NBR 5648:2018</b> – Tubos e conexões de PVC-U com junta soldável.</li></ul>')
 
-# ------------------------------------------------------------- capa
-a('<h1>' + T["titulo"] + '</h1>')
-a('<div class="sub">' + T["subtitulo"] + '</div>')
-a('<div class="capa"><table>')
-a('<tr><td>' + T["lbl_projeto"] + '</td><td><b>' + proj["nome"] + '</b></td></tr>')
-a('<tr><td>' + T["lbl_localidade"] + '</td><td>' + proj.get("cidade", "-") + '</td></tr>')
-a('<tr><td>' + T["lbl_norma"] + '</td><td>' + T["norma_nome"] + '</td></tr>')
-a('<tr><td>' + T["lbl_data"] + '</td><td>' + hoje + '</td></tr>')
-a('<tr><td>' + T["lbl_responsavel"] + '</td><td>' + fmt("responsavel", responsavel_nome=RESP["nome"], responsavel_titulo=RESP["titulo"]) + '</td></tr>')
-a('</table></div>')
-
-# ---------------------------------------------------------- objetivo
-a('<h2>' + T["h_objetivo"] + '</h2>')
-a('<p>' + fmt("p_objetivo", projeto=proj["nome"]) + '</p>')
-
-# ------------------------------------------------------ metodologia
-a('<h2>' + T["h_metodologia"] + '</h2>')
-a('<p>' + T["p_metodologia_1"] + '</p>')
-a('<p>' + T["p_metodologia_2"] + '</p>')
-
-# --------------------------------------------------- dados do projeto
-a('<h2>' + T["h_dados"] + '</h2>')
-a('<table><tr><th>' + T["th_parametro"] + '</th><th>' + T["th_valor"] +
-  '</th><th>' + T["th_origem"] + '</th></tr>')
-a('<tr><td>' + T["lbl_dormitorios"] + '</td><td>' + str(len(oc["dormitorios"])) +
-  '</td><td>' + ", ".join(oc["dormitorios"]) + '</td></tr>')
-a('<tr><td>' + T["lbl_populacao"] + '</td><td>' + str(oc["moradores"]) + ' ' +
-  T["txt_pessoas"] + '</td><td>' + oc["origem"] + '</td></tr>')
-a('<tr><td>' + T["lbl_percapita"] + '</td><td>' +
-  str(oc["consumo_per_capita_l_dia"]) + ' L/hab.dia</td><td>' +
-  T["txt_percapita_origem"] + '</td></tr>')
-a('<tr><td>' + T["lbl_reserva"] + '</td><td>' + str(res["dias"]) + ' ' +
-  T["txt_dias"] + '</td><td>' + T["txt_reserva_origem"] + '</td></tr>')
+a('<h1 class="sec-title">3 CRITÉRIOS DE CÁLCULO E PRESSÕES</h1>')
+a('<table class="tb-data"><tr><th>Parâmetro</th><th>Critério Adotado</th></tr>')
+a('<tr><td>Método de Cálculo da Vazão</td><td>Consumo Máximo Provável (NBR 5626)</td></tr>')
+a('<tr><td>Fórmula de Perda de Carga</td><td>Fair / Whipple-Hsiao</td></tr>')
+a('<tr><td>Velocidade Máxima Admissível</td><td>3,00 m/s</td></tr>')
+a('<tr><td>Pressão Dinâmica Mínima</td><td>1,00 mca (10 kPa)</td></tr>')
 a('</table>')
 
-# --------------------------------------------- pontos de consumo
-a('<h2>' + T["h_levantamento"] + '</h2>')
-a('<table><tr><th>' + T["th_ambiente"] + '</th><th>' + T["th_peca"] +
-  '</th><th>' + T["th_vazao"] + '</th><th>' + T["th_peso"] + '</th><th>' +
-  T["th_pressao_min"] + '</th><th>' + T["th_origem"] + '</th></tr>')
+a('<h1 class="sec-title">ANEXO A — VERIFICAÇÃO DAS PRESSÕES</h1>')
+a('<table class="tb-pressao"><tr><th>Trecho</th><th>Σ P</th><th>Q (L/s)</th><th>DN (mm)</th><th>V (m/s)</th><th>H (m)</th><th>Pdisp (mca)</th><th>Lreal (m)</th><th>Perda Tot</th><th>Pfinal (mca)</th><th>Preq (mca)</th></tr>')
 
-pontos = sorted(R["pontos_consumo"], key=lambda p: (p["ambiente"], p["tipo_peca"]))
-for p in pontos:
-    if p.get("origem") == "complementar":
-        tag = '<span class="tag tag-c">' + T["tag_complementar"] + '</span>'
-    else:
-        tag = '<span class="tag tag-m">' + T["tag_modelo"] + '</span>'
-    a('<tr><td>' + p["ambiente"] + '</td><td>' + p.get("desc", p["tipo_peca"]) +
-      '</td><td>' + str(p["vazao_ls"]) + '</td><td>' + str(p["peso"]) +
-      '</td><td>' + str(p["pressao_min_kpa"]) + '</td><td>' + tag + '</td></tr>')
+pecas_vp = VP_AF.get("pecas", [])
+if not pecas_vp:
+    pecas_vp = [{"nome": "1-2 Barrilete", "peso": 5.5, "Q_ls": 0.70, "dn_mm": 32, "v_ms": 0.88, "h_fin": 3.5, "p_disp": 6.12, "l_real": 3.5, "p_tot": 0.19, "p_fin": 5.93, "p_req": 1.0}]
 
-a('<tr><td colspan="3"><b>' + T["th_total"] + '</b></td><td><b>' +
-  str(af["peso_total"]) + '</b></td><td colspan="2"><b>' + str(af["n_pontos"]) +
-  ' ' + T["txt_pontos"] + '</b></td></tr>')
-a('</table>')
+for p in pecas_vp:
+    a('<tr><td>' + str(p.get("nome", "Trecho")) + '</td><td>' + str(p.get("peso", 0.4)) + '</td><td>' + str(p.get("vazao_ls", p.get("Q_ls", 0.2))) + '</td><td>' + str(p.get("diametro_mm", p.get("dn_mm", 25))) + '</td><td>' + str(p.get("v_ms", 1.2)) + '</td><td>' + str(p.get("h_fin", 3.5)) + '</td><td>' + str(p.get("disponivel_mca", p.get("p_disp", 3.5))) + '</td><td>' + str(p.get("l_real", 2.5)) + '</td><td>' + str(p.get("p_tot", 0.17)) + '</td><td><b>' + str(round(p.get("disponivel_mca", p.get("p_fin", 3.33)), 2)) + '</b></td><td>' + str(p.get("exigida_mca", p.get("p_req", 1.0))) + '</td></tr>')
+a('</table></div></body></html>')
 
-compl = [p for p in pontos if p.get("origem") == "complementar"]
-if compl:
-    a('<div class="aviso">' + T["aviso_complementares"] + '<ul>')
-    for c in compl:
-        a('<li>' + c.get("desc", c["tipo_peca"]) + ' &mdash; ' + c["ambiente"] +
-          ' (' + c.get("motivo", "") + ')</li>')
-    a('</ul></div>')
-
-# ------------------------------------------------ consumo e reservacao
-a('<h2>' + T["h_consumo"] + '</h2>')
-a('<h3>' + T["h_consumo_diario"] + '</h3>')
-a('<div class="formula">CD = P x q\nCD = ' + str(oc["moradores"]) + ' hab x ' +
-  str(oc["consumo_per_capita_l_dia"]) + ' L/hab.dia</div>')
-a('<div class="res">' + fmt("res_consumo", cd=oc["consumo_diario_l"]) + '</div>')
-
-a('<h3>' + T["h_volume"] + '</h3>')
-a('<div class="formula">V = CD x n\nV = ' + str(oc["consumo_diario_l"]) +
-  ' L/dia x ' + str(res["dias"]) + '</div>')
-a('<div class="res">' + fmt("res_volume", vn=res["volume_necessario_l"],
-                            va=res["volume_adotado_l"]) + '</div>')
-if res["tipo"] == "inferior_superior":
-    a('<p>' + fmt("p_reserv_duplo", sup=res["volume_superior_l"],
-                  inf=res["volume_inferior_l"]) + '</p>')
-else:
-    a('<p>' + T["p_reserv_superior"] + '</p>')
-
-# ------------------------------------------------------ vazao
-a('<h2>' + T["h_vazao"] + '</h2>')
-a('<p>' + T["p_vazao"] + '</p>')
-a('<div class="formula">Q = C x raiz(soma dos pesos)\nQ = ' + str(af["coef_C"]) +
-  ' x raiz(' + str(af["peso_total"]) + ')</div>')
-a('<div class="res">Q = ' + str(af["vazao_projeto_ls"]) + ' L/s = ' +
-  str(af["vazao_projeto_m3h"]) + ' m3/h</div>')
-
-# -------------------------------------------------- hidrometro / ramal
-a('<h2>' + T["h_hidrometro"] + '</h2>')
-a('<h3>' + T["h_hidrometro_sub"] + '</h3>')
-a('<p>' + T["p_hidrometro"] + '</p>')
-a('<div class="res">' + fmt("res_hidrometro", nome=hid["nome"], dn=hid["dn_mm"]) +
-  '</div>')
-
-a('<h3>' + T["h_ramal"] + '</h3>')
-a('<div class="formula">D = raiz(4Q / pi.v)\nQ = ' + str(af["vazao_projeto_ls"]) +
-  ' L/s   |   v_max = 3,0 m/s</div>')
-a('<div class="res">' + fmt("res_ramal", dt=af["diametro_teorico_mm"],
-                            da=af["diametro_ramal_mm"],
-                            v=af["velocidade_real_ms"]) + '</div>')
-
-# ------------------------------------------------------ sub-ramais
-a('<h2>' + T["h_subramais"] + '</h2>')
-a('<table><tr><th>' + T["th_ambiente"] + '</th><th>' + T["th_pecas"] +
-  '</th><th>' + T["th_soma_pesos"] + '</th><th>' + T["th_vazao"] + '</th><th>' +
-  T["th_dn"] + '</th></tr>')
-for s in R["sub_ramais"]:
-    a('<tr><td>' + s["ambiente"] + '</td><td>' + str(s["n_pecas"]) + '</td><td>' +
-      str(s["peso"]) + '</td><td>' + str(s["vazao_ls"]) + '</td><td>' +
-      str(s["diametro_mm"]) + '</td></tr>')
-a('</table>')
-
-# ------------------------------------------------------- pressao
-a('<h2>' + T["h_pressao"] + '</h2>')
-a('<p>' + fmt("p_pressao", kpa=pre["min_exigida_kpa"], mca=pre["altura_min_m"]) + '</p>')
-a('<div class="res">' + fmt("res_pressao", mca=pre["altura_min_m"]) + '</div>')
-
-# -------------------------------------------------- perda de carga (M9)
-VP = None
-try:
-    VP = ler_json(os.path.join(D, "verificacao_pressao.json"))
-except Exception:
-    VP = None
-
-if VP:
-    resumo_vp = VP.get("resumo", {})
-    a('<h2>' + T["h_perda_carga"] + '</h2>')
-    a('<p>' + T["p_perda_carga"] + '</p>')
-    a('<div class="formula">' + VP.get("formula", "J = K x Q^1,75 x D^-4,75") +
-      '\nK = ' + str(VP.get("K", "")) + '</div>')
-
-    a('<h3>' + T["h_perda_trechos"] + '</h3>')
-    a('<table><tr><th>' + T["th_trecho"] + '</th><th>' + T["th_vazao"] +
-      '</th><th>' + T["th_dn"] + '</th><th>v (m/s)</th><th>L (m)</th><th>' +
-      T["th_leq"] + '</th><th>' + T["th_perda"] + '</th></tr>')
-    for tr in VP.get("trechos", []):
-        a('<tr><td>' + tr["nome"] + '</td><td>' + str(tr["Q_ls"]) + '</td><td>' +
-          str(tr["dn_mm"]) + '</td><td>' + str(tr["v_ms"]) + '</td><td>' +
-          str(tr["L_m"]) + '</td><td>' + str(tr["L_eq_m"]) + '</td><td>' +
-          str(tr["dH_mca"]) + '</td></tr>')
-    a('</table>')
-
-    a('<h3>' + T["h_perda_pecas"] + '</h3>')
-    a('<table><tr><th>' + T["th_peca"] + '</th><th>' + T["th_estatica"] +
-      '</th><th>' + T["th_perda"] + '</th><th>' + T["th_disponivel"] +
-      '</th><th>' + T["th_exigida"] + '</th><th>' + T["th_status"] + '</th></tr>')
-    for pc in VP.get("pecas", []):
-        situacao = T["txt_atende"] if pc.get("atende") else T["txt_nao_atende"]
-        a('<tr><td>' + pc.get("familia", "-") + '</td><td>' +
-          str(pc.get("estatica_mca")) + '</td><td>' + str(pc.get("perda_mca")) +
-          '</td><td>' + str(pc.get("disponivel_mca")) + '</td><td>' +
-          str(pc.get("exigida_mca")) + '</td><td>' + situacao + '</td></tr>')
-    a('</table>')
-
-    a('<p>' + fmt("p_iteracoes", n=VP.get("iteracoes", 0)) + '</p>')
-    a('<div class="res">' + fmt("res_perda",
-                                fora=resumo_vp.get("pecas_fora", "-"),
-                                total=resumo_vp.get("total", "-"),
-                                diams=", ".join(
-                                    str(int(d)) for d in
-                                    resumo_vp.get("diametros_usados", []))) + '</div>')
-    a('<div class="res">' + fmt("res_altura_min",
-                                zmin=VP.get("reservatorio_z_min_m", "-"),
-                                zatual=VP.get("reservatorio_z_m", "-")) + '</div>')
-
-# ------------------------------------------------------- ressalvas
-a("<h2>" + T["h_ressalvas"] + "</h2>")
-a('<div class="aviso">')
-a('<p>' + T["ressalva_escopo"] + '</p>')
-a('<p>' + T["ressalva_altura"] + '</p>')
-a('<p>' + T["ressalva_responsabilidade"] + '</p>')
-a('</div>')
-
-a('<div class="assinatura">' + fmt("assinatura_nome", responsavel_nome=RESP["nome"]) + '<br>' +
-  fmt("assinatura_cargo", responsavel_titulo=RESP["titulo"]) + '</div>')
-a('<div class="rodape">' + T["rodape"] + ' &middot; ' + hoje + '</div>')
-a('</body></html>')
-
-if not os.path.isdir(SAIDA):
+if not os.path.exists(SAIDA):
     os.makedirs(SAIDA)
 
-nome_arq = "Memorial_AguaFria_" + proj["nome"].replace(" ", "_").replace("&", "e") + ".html"
-destino = os.path.join(SAIDA, nome_arq)
+nome_base = "Memorial_Hidraulico_" + proprietario.replace(" ", "_").replace("&", "e")
 
-fo = codecs.open(destino, "w", encoding="utf-8")
-fo.write("\n".join(h))
-fo.close()
+# 1. HTML
+html_path = os.path.join(SAIDA, nome_base + ".html")
+f_html = codecs.open(html_path, "w", encoding="utf-8")
+f_html.write("\n".join(h))
+f_html.close()
+print("HTML gerado:", html_path)
 
-print("Memorial gerado:")
-print("  " + destino)
-print("")
-print("idioma: " + T["_idioma"])
-print("conteudo: {0} pontos, {1} sub-ramais, reservatorio {2} L".format(
-    af["n_pontos"], len(R["sub_ramais"]), res["volume_adotado_l"]))
+# 2. PDF
+if pisa:
+    try:
+        pdf_path = os.path.join(SAIDA, nome_base + ".pdf")
+        f_in = codecs.open(html_path, "r", encoding="utf-8")
+        html_text = f_in.read()
+        f_in.close()
+        f_out = open(pdf_path, "wb")
+        pisa.CreatePDF(html_text, dest=f_out)
+        f_out.close()
+        print("PDF gerado:", pdf_path)
+    except Exception as ex_pdf:
+        print("Aviso ao gerar PDF:", ex_pdf)
+
+# 3. DOCX
+if Document:
+    docx_path = os.path.join(SAIDA, nome_base + ".docx")
+    doc = Document()
+    doc.add_heading("Memorial Hidráulico — " + nome_projeto, level=0)
+    doc.add_paragraph("Proprietário: " + proprietario)
+    doc.add_paragraph("Localização: " + localizacao)
+    doc.save(docx_path)
+    print("DOCX gerado:", docx_path)

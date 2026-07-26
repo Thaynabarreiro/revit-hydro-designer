@@ -1,0 +1,284 @@
+{
+  "ambientes_esg": [
+    {
+      "ambiente": "(fora de ambiente)", 
+      "uhc_total": 27, 
+      "n_pecas": 9, 
+      "exige_caixa_gordura": true, 
+      "dn_ramal_mm": 100, 
+      "exige_caixa_sifonada": false
+    }
+  ], 
+  "pontos_esg": [
+    {
+      "ambiente": "(fora de ambiente)", 
+      "uhc": 6, 
+      "vazao_ls": 0.14999999999999999, 
+      "tipo_familia": "UnMEP", 
+      "ids_agrupados": [
+        9278544
+      ], 
+      "desc": "Bacia sanitaria com caixa de descarga", 
+      "confianca": "regra de nome", 
+      "familias_agrupadas": [
+        "UnMEP_PH_AF-ESG_Bacia Sanitária com Caixa Acoplada"
+      ], 
+      "motivo": "", 
+      "nivel": "(?)", 
+      "familia": "UnMEP_PH_AF-ESG_Bacia Sanitária com Caixa Acoplada", 
+      "xyz_mm": [
+        9750.0, 
+        8935.0, 
+        1000.0
+      ], 
+      "id": 9278544, 
+      "peso": 0.29999999999999999, 
+      "tipo_peca": "bacia_caixa", 
+      "pressao_min_kpa": 5, 
+      "dn_esgoto_mm": 100, 
+      "esgoto_uhc": 6
+    }, 
+    {
+      "ambiente": "(fora de ambiente)", 
+      "uhc": 2, 
+      "vazao_ls": 0.20000000000000001, 
+      "tipo_familia": "DUC - Ducha", 
+      "ids_agrupados": [
+        9278549
+      ], 
+      "desc": "Chuveiro ou ducha", 
+      "confianca": "regra de nome", 
+      "familias_agrupadas": [
+        "UnMEP_PH_AF_Peça Genérica de Parede"
+      ], 
+      "motivo": "", 
+      "nivel": "(?)", 
+      "familia": "UnMEP_PH_AF_Peça Genérica de Parede", 
+      "xyz_mm": [
+        9750.0, 
+        7980.0, 
+        1000.0
+      ], 
+      "id": 9278549, 
+      "peso": 0.40000000000000002, 
+      "tipo_peca": "chuveiro", 
+      "pressao_min_kpa": 10, 
+      "dn_esgoto_mm": 40, 
+      "esgoto_uhc": 2
+    }, 
+    {
+      "ambiente": "(fora de ambiente)", 
+      "uhc": 1, 
+      "vazao_ls": 0.14999999999999999, 
+      "tipo_familia": "UnMEP", 
+      "ids_agrupados": [
+        9278552
+      ], 
+      "desc": "Lavatorio", 
+      "confianca": "regra de nome", 
+      "familias_agrupadas": [
+        "UnMEP_PH_AF-ESG_Lavatório Quadrado em Bancada"
+      ], 
+      "motivo": "", 
+      "nivel": "(?)", 
+      "familia": "UnMEP_PH_AF-ESG_Lavatório Quadrado em Bancada", 
+      "xyz_mm": [
+        9760.0, 
+        9790.0, 
+        1000.0
+      ], 
+      "id": 9278552, 
+      "peso": 0.29999999999999999, 
+      "tipo_peca": "lavatorio", 
+      "pressao_min_kpa": 5, 
+      "dn_esgoto_mm": 40, 
+      "esgoto_uhc": 1
+    }, 
+    {
+      "ambiente": "(fora de ambiente)", 
+      "uhc": 1, 
+      "vazao_ls": 0.14999999999999999, 
+      "tipo_familia": "UnMEP", 
+      "ids_agrupados": [
+        9278558
+      ], 
+      "desc": "Lavatorio", 
+      "confianca": "regra de nome", 
+      "familias_agrupadas": [
+        "UnMEP_PH_AF-ESG_Lavatório Quadrado em Bancada"
+      ], 
+      "motivo": "", 
+      "nivel": "(?)", 
+      "familia": "UnMEP_PH_AF-ESG_Lavatório Quadrado em Bancada", 
+      "xyz_mm": [
+        10845.0, 
+        13810.0, 
+        1000.0
+      ], 
+      "id": 9278558, 
+      "peso": 0.29999999999999999, 
+      "tipo_peca": "lavatorio", 
+      "pressao_min_kpa": 5, 
+      "dn_esgoto_mm": 40, 
+      "esgoto_uhc": 1
+    }, 
+    {
+      "ambiente": "(fora de ambiente)", 
+      "uhc": 6, 
+      "vazao_ls": 0.14999999999999999, 
+      "tipo_familia": "UnMEP", 
+      "ids_agrupados": [
+        9278564
+      ], 
+      "desc": "Bacia sanitaria com caixa de descarga", 
+      "confianca": "regra de nome", 
+      "familias_agrupadas": [
+        "UnMEP_PH_AF-ESG_Bacia Sanitária com Caixa Acoplada"
+      ], 
+      "motivo": "", 
+      "nivel": "(?)", 
+      "familia": "UnMEP_PH_AF-ESG_Bacia Sanitária com Caixa Acoplada", 
+      "xyz_mm": [
+        9955.0, 
+        13800.0, 
+        1000.0
+      ], 
+      "id": 9278564, 
+      "peso": 0.29999999999999999, 
+      "tipo_peca": "bacia_caixa", 
+      "pressao_min_kpa": 5, 
+      "dn_esgoto_mm": 100, 
+      "esgoto_uhc": 6
+    }, 
+    {
+      "ambiente": "(fora de ambiente)", 
+      "uhc": 3, 
+      "vazao_ls": 0.25, 
+      "tipo_familia": "UnMEP", 
+      "ids_agrupados": [
+        9278569
+      ], 
+      "desc": "Pia de cozinha", 
+      "confianca": "regra de nome", 
+      "familias_agrupadas": [
+        "UnMEP_PH_AF-ESG_Pia de Cozinha Com Torneira de Mesa - 01 Cuba"
+      ], 
+      "motivo": "", 
+      "nivel": "(?)", 
+      "familia": "UnMEP_PH_AF-ESG_Pia de Cozinha Com Torneira de Mesa - 01 Cuba", 
+      "xyz_mm": [
+        1745.0, 
+        12075.0, 
+        1000.0
+      ], 
+      "id": 9278569, 
+      "peso": 0.69999999999999996, 
+      "tipo_peca": "pia", 
+      "pressao_min_kpa": 5, 
+      "dn_esgoto_mm": 50, 
+      "esgoto_uhc": 3
+    }, 
+    {
+      "ambiente": "(fora de ambiente)", 
+      "uhc": 3, 
+      "vazao_ls": 0.25, 
+      "tipo_familia": "UnMEP", 
+      "ids_agrupados": [
+        9278575
+      ], 
+      "desc": "Pia de cozinha", 
+      "confianca": "regra de nome", 
+      "familias_agrupadas": [
+        "UnMEP_PH_AF-ESG_Pia de Cozinha Com Torneira de Mesa - 01 Cuba"
+      ], 
+      "motivo": "", 
+      "nivel": "(?)", 
+      "familia": "UnMEP_PH_AF-ESG_Pia de Cozinha Com Torneira de Mesa - 01 Cuba", 
+      "xyz_mm": [
+        1745.0, 
+        9165.0, 
+        1000.0
+      ], 
+      "id": 9278575, 
+      "peso": 0.69999999999999996, 
+      "tipo_peca": "pia", 
+      "pressao_min_kpa": 5, 
+      "dn_esgoto_mm": 50, 
+      "esgoto_uhc": 3
+    }, 
+    {
+      "ambiente": "(fora de ambiente)", 
+      "uhc": 2, 
+      "vazao_ls": 0.20000000000000001, 
+      "tipo_familia": "DUC - Ducha", 
+      "ids_agrupados": [
+        9278581, 
+        9278589
+      ], 
+      "desc": "Chuveiro ou ducha", 
+      "confianca": "regra de nome", 
+      "familias_agrupadas": [
+        "UnMEP_PH_AF-ESG_Tanquinho de Mármore", 
+        "UnMEP_PH_AF_Peça Genérica de Parede"
+      ], 
+      "motivo": "", 
+      "nivel": "(?)", 
+      "familia": "UnMEP_PH_AF_Peça Genérica de Parede", 
+      "xyz_mm": [
+        9090.0, 
+        13800.0, 
+        1000.0
+      ], 
+      "id": 9278589, 
+      "peso": 0.40000000000000002, 
+      "tipo_peca": "chuveiro", 
+      "pressao_min_kpa": 10, 
+      "dn_esgoto_mm": 40, 
+      "esgoto_uhc": 2
+    }, 
+    {
+      "ambiente": "(fora de ambiente)", 
+      "uhc": 3, 
+      "vazao_ls": 0.29999999999999999, 
+      "tipo_familia": "UnMEP", 
+      "ids_agrupados": [
+        9278592
+      ], 
+      "desc": "Maquina de lavar roupa ou louca", 
+      "confianca": "regra de nome", 
+      "familias_agrupadas": [
+        "UnMEP_PH_AF-ESG_Máquina de Lavar Comum"
+      ], 
+      "motivo": "", 
+      "nivel": "(?)", 
+      "familia": "UnMEP_PH_AF-ESG_Máquina de Lavar Comum", 
+      "xyz_mm": [
+        10396.700000000001, 
+        12232.600000000000, 
+        1000.0
+      ], 
+      "id": 9278592, 
+      "peso": 1.0, 
+      "tipo_peca": "maquina_lavar", 
+      "pressao_min_kpa": 5, 
+      "dn_esgoto_mm": 50, 
+      "esgoto_uhc": 3
+    }
+  ], 
+  "projeto": {
+    "norma": "NBR", 
+    "cidade": "Porto Alegre", 
+    "nome": "Casa A&R", 
+    "pais": "BR"
+  }, 
+  "esgoto": {
+    "declividade_min_dn100": "1.0%", 
+    "dn_tubo_queda_mm": 100, 
+    "declividade_min_dn50": "2.0%", 
+    "dn_coluna_ventilacao_mm": 75, 
+    "caixa_gordura_retencao_l": 18.0, 
+    "uhc_total": 27, 
+    "norma": "NBR 8160 - Sistemas prediais de esgoto sanitário", 
+    "n_pontos": 9
+  }
+}

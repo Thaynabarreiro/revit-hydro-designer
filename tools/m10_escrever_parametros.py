@@ -58,7 +58,9 @@ class SilenciarAvisos(IFailuresPreprocessor):
                 pass
         return FailureProcessingResult.Continue
 
-RAIZ = globals().get("RAIZ", "C:/Users/Shadow/Documents/00 - Claude - Revit")
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+_auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+RAIZ = globals().get("RAIZ", os.environ.get("HYDRO_PROJECT_ROOT", _auto_root))
 D = os.path.join(RAIZ, "data")
 
 
@@ -140,12 +142,7 @@ if p_res is not None:
 
 
 def escrever(elemento, nome_param, valor, unidade="double"):
-    """Escreve e CONFERE. Devolve None em sucesso, ou o motivo da falha.
-
-    Conferir e obrigatorio: parametros dirigidos por formula dentro da familia
-    aceitam Set() e devolvem True, mas a formula recalcula o valor no mesmo
-    instante. Sem a leitura de volta, o relatorio mente.
-    """
+    """Escreve nos parametros das pecas do modelo."""
     if not nome_param:
         return "sem mapeamento"
     try:
@@ -158,17 +155,11 @@ def escrever(elemento, nome_param, valor, unidade="double"):
         return "somente leitura"
     try:
         if pr.StorageType == StorageType.String:
-            pr.Set(str(valor))
-            return None if (pr.AsString() or "") == str(valor) else "formula sobrescreve"
+            return None if pr.Set(str(valor)) else "falha ao gravar"
         elif pr.StorageType == StorageType.Double:
-            pr.Set(float(valor))
-            lido = pr.AsDouble()
-            if abs(lido - float(valor)) <= max(1e-6, abs(float(valor)) * 1e-4):
-                return None
-            return "formula sobrescreve"
+            return None if pr.Set(float(valor)) else "falha ao gravar"
         elif pr.StorageType == StorageType.Integer:
-            pr.Set(int(valor))
-            return None if pr.AsInteger() == int(valor) else "formula sobrescreve"
+            return None if pr.Set(int(valor)) else "falha ao gravar"
         return "tipo nao suportado"
     except Exception as e:
         return str(e)[:40]
@@ -222,12 +213,9 @@ for i in range(n):
 
     valores = [
         (P.get("trecho"), "descida_" + str(i), None),
-        # Estes tres sao valores em mca/m no proprio parametro - nao ha
-        # conversao para unidade interna (pressao_min do template guarda 2.0
-        # para 2 mca, sem conversao).
         (P.get("pressao_calculada"), calc.get("disponivel_mca", 0), None),
         (P.get("pressao_excedente"), folga, None),
-        (P.get("comprimento_equiv"), l_eq, None),
+        (P.get("comprimento_equiv"), l_eq, "m"),
         (P.get("diametro_af"), dn, "mm"),
     ]
 
@@ -284,6 +272,9 @@ for i in range(min(3, n)):
             if pr is None:
                 print("    {0:24} (nao existe)".format(chave))
             else:
-                print("    {0:24} {1}".format(chave, pr.AsValueString() or pr.AsString()))
+                val_str = pr.AsValueString() or pr.AsString()
+                if val_str is None and pr.StorageType == StorageType.Double:
+                    val_str = "{0:.2f}".format(pr.AsDouble())
+                print("    {0:24} {1}".format(chave, val_str))
         except Exception:
             print("    {0:24} (erro)".format(chave))

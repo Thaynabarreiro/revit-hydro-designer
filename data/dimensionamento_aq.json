@@ -1,0 +1,180 @@
+{
+  "projeto": {
+    "pais": "BR", 
+    "norma": "NBR", 
+    "cidade": "Porto Alegre", 
+    "nome": "Casa A&R"
+  }, 
+  "agua_quente": {
+    "vazao_projeto_m3h": 1.8069999999999999, 
+    "consumo_diario_aq_l": 0.0, 
+    "diametro_min_mm": 22, 
+    "vazao_projeto_ls": 0.502, 
+    "coef_C": 0.29999999999999999, 
+    "potencia_estimada_kw": 42.0, 
+    "fonte_aquecimento": "aquecedor_passagem", 
+    "delta_t_c": 20, 
+    "n_pontos": 6, 
+    "peso_total": 2.7999999999999998
+  }, 
+  "pontos_consumo_aq": [
+    {
+      "esgoto_uhc": 2, 
+      "familias_agrupadas": [
+        "UnMEP_PH_AF_Peça Genérica de Parede"
+      ], 
+      "tipo_peca": "chuveiro", 
+      "peso": 0.40000000000000002, 
+      "ambiente": "(fora de ambiente)", 
+      "pressao_min_kpa": 10, 
+      "id": 9278549, 
+      "vazao_ls": 0.20000000000000001, 
+      "tipo_familia": "DUC - Ducha", 
+      "desc": "Chuveiro ou ducha", 
+      "nivel": "(?)", 
+      "motivo": "", 
+      "xyz_mm": [
+        9750.0, 
+        7980.0, 
+        1000.0
+      ], 
+      "confianca": "regra de nome", 
+      "familia": "UnMEP_PH_AF_Peça Genérica de Parede", 
+      "ids_agrupados": [
+        9278549
+      ]
+    }, 
+    {
+      "esgoto_uhc": 1, 
+      "familias_agrupadas": [
+        "UnMEP_PH_AF-ESG_Lavatório Quadrado em Bancada"
+      ], 
+      "tipo_peca": "lavatorio", 
+      "peso": 0.29999999999999999, 
+      "ambiente": "(fora de ambiente)", 
+      "pressao_min_kpa": 5, 
+      "id": 9278552, 
+      "vazao_ls": 0.14999999999999999, 
+      "tipo_familia": "UnMEP", 
+      "desc": "Lavatorio", 
+      "nivel": "(?)", 
+      "motivo": "", 
+      "xyz_mm": [
+        9760.0, 
+        9790.0, 
+        1000.0
+      ], 
+      "confianca": "regra de nome", 
+      "familia": "UnMEP_PH_AF-ESG_Lavatório Quadrado em Bancada", 
+      "ids_agrupados": [
+        9278552
+      ]
+    }, 
+    {
+      "esgoto_uhc": 1, 
+      "familias_agrupadas": [
+        "UnMEP_PH_AF-ESG_Lavatório Quadrado em Bancada"
+      ], 
+      "tipo_peca": "lavatorio", 
+      "peso": 0.29999999999999999, 
+      "ambiente": "(fora de ambiente)", 
+      "pressao_min_kpa": 5, 
+      "id": 9278558, 
+      "vazao_ls": 0.14999999999999999, 
+      "tipo_familia": "UnMEP", 
+      "desc": "Lavatorio", 
+      "nivel": "(?)", 
+      "motivo": "", 
+      "xyz_mm": [
+        10845.0, 
+        13810.0, 
+        1000.0
+      ], 
+      "confianca": "regra de nome", 
+      "familia": "UnMEP_PH_AF-ESG_Lavatório Quadrado em Bancada", 
+      "ids_agrupados": [
+        9278558
+      ]
+    }, 
+    {
+      "esgoto_uhc": 3, 
+      "familias_agrupadas": [
+        "UnMEP_PH_AF-ESG_Pia de Cozinha Com Torneira de Mesa - 01 Cuba"
+      ], 
+      "tipo_peca": "pia", 
+      "peso": 0.69999999999999996, 
+      "ambiente": "(fora de ambiente)", 
+      "pressao_min_kpa": 5, 
+      "id": 9278569, 
+      "vazao_ls": 0.25, 
+      "tipo_familia": "UnMEP", 
+      "desc": "Pia de cozinha", 
+      "nivel": "(?)", 
+      "motivo": "", 
+      "xyz_mm": [
+        1745.0, 
+        12075.0, 
+        1000.0
+      ], 
+      "confianca": "regra de nome", 
+      "familia": "UnMEP_PH_AF-ESG_Pia de Cozinha Com Torneira de Mesa - 01 Cuba", 
+      "ids_agrupados": [
+        9278569
+      ]
+    }, 
+    {
+      "esgoto_uhc": 3, 
+      "familias_agrupadas": [
+        "UnMEP_PH_AF-ESG_Pia de Cozinha Com Torneira de Mesa - 01 Cuba"
+      ], 
+      "tipo_peca": "pia", 
+      "peso": 0.69999999999999996, 
+      "ambiente": "(fora de ambiente)", 
+      "pressao_min_kpa": 5, 
+      "id": 9278575, 
+      "vazao_ls": 0.25, 
+      "tipo_familia": "UnMEP", 
+      "desc": "Pia de cozinha", 
+      "nivel": "(?)", 
+      "motivo": "", 
+      "xyz_mm": [
+        1745.0, 
+        9165.0, 
+        1000.0
+      ], 
+      "confianca": "regra de nome", 
+      "familia": "UnMEP_PH_AF-ESG_Pia de Cozinha Com Torneira de Mesa - 01 Cuba", 
+      "ids_agrupados": [
+        9278575
+      ]
+    }, 
+    {
+      "esgoto_uhc": 2, 
+      "familias_agrupadas": [
+        "UnMEP_PH_AF-ESG_Tanquinho de Mármore", 
+        "UnMEP_PH_AF_Peça Genérica de Parede"
+      ], 
+      "tipo_peca": "chuveiro", 
+      "peso": 0.40000000000000002, 
+      "ambiente": "(fora de ambiente)", 
+      "pressao_min_kpa": 10, 
+      "id": 9278589, 
+      "vazao_ls": 0.20000000000000001, 
+      "tipo_familia": "DUC - Ducha", 
+      "desc": "Chuveiro ou ducha", 
+      "nivel": "(?)", 
+      "motivo": "", 
+      "xyz_mm": [
+        9090.0, 
+        13800.0, 
+        1000.0
+      ], 
+      "confianca": "regra de nome", 
+      "familia": "UnMEP_PH_AF_Peça Genérica de Parede", 
+      "ids_agrupados": [
+        9278581, 
+        9278589
+      ]
+    }
+  ]
+}

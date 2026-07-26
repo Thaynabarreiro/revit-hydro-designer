@@ -5,7 +5,7 @@ sizes the cold-water system to code, models the pipe network, verifies pressure,
 and issues a calculation report ready for an engineer's signature.
 
 Built with [pyRevit](https://github.com/pyrevitlabs/pyRevit) and driven through
-the pyRevit Routes REST API, so any MCP-capable AI assistant can develop against
+the pyRevit Routes REST API, so any MCP-capable AI assistant (such as Claude Code) can develop against
 a live Revit session.
 
 > **Status: work in progress.** Cold water is implemented end to end, including
@@ -13,6 +13,12 @@ a live Revit session.
 > and on-site sewage treatment are planned, as is a second national code module.
 > See [the project plan](PROJECT-PLAN.md) for the full scope and for every
 > engineering decision taken so far.
+
+---
+
+> [!WARNING]
+> **Engineering Disclaimer**
+> This tool is an automated calculation and modeling assistant for qualified civil and building-services engineers. It automates repetitive NBR 5626, NBR 8160, and NBR 10844 calculations and geometry generation. All sizing outputs, pressure verification, and generated reports MUST be reviewed, validated, and approved by a licensed engineer prior to construction or municipal submission.
 
 ---
 
@@ -78,9 +84,7 @@ data/config_projeto.json      per-project inputs
 data/textos_memorial_br.json  every string in the report
 ```
 
-Files ending in `.example.json` are the templates to copy; the real ones are
-git-ignored because they describe a specific building and a specific office
-template.
+Files ending in `.example.json` are templates to copy. Real `.json` files are git-ignored because they describe specific building data and office templates.
 
 **The calculation engine is separable from the modelling engine.** Reading the
 model, routing and reporting are country-agnostic; the code rules are a pluggable
@@ -147,50 +151,77 @@ flowchart TD
     style PDF fill:#e8f4ea,stroke:#2e7d4f
 ```
 
-The amber diamonds are deliberate stops. Automation without a review point is a
-trap: both real bugs found so far would have passed silently without them.
-
-The MEP model owns the fixtures; the architectural model is linked for context
-only. This matches both ISO 19650 practice and reality: architects do not model
-plumbing reliably, so the engineer places what the project actually needs.
-Fixtures missing from the architectural file are declared in project
-configuration rather than requiring that file to be corrected.
-
 ---
 
 ## Requirements
 
-- Autodesk Revit (developed against 2027; the API calls used are version-tolerant)
-- [pyRevit](https://github.com/pyrevitlabs/pyRevit)
-- A Revit template containing plumbing families with configured routing preferences
+- **Autodesk Revit 2027** (currently verified version; API calls used are designed for cross-version compatibility).
+- [pyRevit v4.8+](https://github.com/pyrevitlabs/pyRevit)
+- A Revit template containing plumbing families with configured routing preferences.
 
-## Installation
+---
 
-1. Clone this repository.
-2. Copy `data/config_projeto.example.json` to `data/config_projeto.json` and
-   `data/familias_pecas.example.json` to `data/familias_pecas.json`, then edit
-   them for your project and your template.
-3. In Revit: **pyRevit → Settings → Custom Extension Directories** → add the
-   folder *containing* `revit-hydro-designer.extension`.
-4. **Save Settings and Reload.** A **Hydro** tab appears.
+## Installation & First-Run Setup
 
-## Development against a live Revit session
+1. **Clone this repository**:
+   ```bash
+   git clone https://github.com/Thaynabarreiro/revit-hydro-designer.git
+   ```
 
-`tools/run_in_revit.sh` posts a Python file to the pyRevit Routes API
-(`http://localhost:48884`), which executes it inside the running Revit process
-and returns stdout. This makes the write → run → read-the-real-error → fix loop
-possible without leaving the editor.
+2. **Configure Project Settings**:
+   Copy the example JSON configuration files in `data/`:
+   ```bash
+   cp data/config_projeto.example.json data/config_projeto.json
+   cp data/familias_pecas.example.json data/familias_pecas.json
+   ```
+   Edit `data/config_projeto.json` and `data/familias_pecas.json` to match your local project requirements and template family names.
 
+3. **Configure pyRevit Extension**:
+   - Open Revit 2027.
+   - Go to **pyRevit → Settings → Custom Extension Directories**.
+   - Add the folder path *containing* `revit-hydro-designer.extension`.
+   - Click **Save Settings and Reload**.
+   - The **Hydro** tab will appear in the Revit ribbon with discipline-based panels.
+
+---
+
+## Development against a live Revit session (Claude Code & MCP)
+
+The development workflow leverages pyRevit's Routes REST server (`http://localhost:48884`), which executes Python tools directly inside the active Revit process and returns stdout.
+
+### 1. Enable pyRevit Routes Server
+- In Revit: **pyRevit → Settings → Routes Server**.
+- Enable the Routes server and bind it strictly to `127.0.0.1`.
+
+### 2. Configure MCP Server for AI Assistant (e.g. Claude Code)
+- Copy `.mcp.example.json` to `.mcp.json`:
+  ```bash
+  cp .mcp.example.json .mcp.json
+  ```
+- Edit `.mcp.json` to specify your local pyRevit extension directory path.
+
+### 3. Run Validation Script via Bridge
 ```bash
-./tools/run_in_revit.sh tools/m1_reader.py "read fixtures"
+python tools/run_in_revit.py tools/m1_reader.py "read fixtures"
 ```
 
-Enable **Routes Server** in pyRevit settings first, and bind it to `127.0.0.1`.
-The Routes API is a draft feature with no authentication — do not expose it.
+---
+
+## Troubleshooting & First-Run Validation
+
+- **Issue: `ConnectionRefusedError: [WinError 10061]` when running bridge**
+  - **Cause**: pyRevit Routes Server is not running or not bound to `127.0.0.1:48884`.
+  - **Fix**: Open Revit 2027, verify pyRevit is loaded, and enable the Routes server in pyRevit settings.
+
+- **Issue: `KeyError: 'familias'` when running M5 placement**
+  - **Cause**: `data/familias_pecas.json` does not exist or missing family mapping.
+  - **Fix**: Ensure `data/familias_pecas.example.json` was copied to `data/familias_pecas.json`.
 
 ---
 
 ## Notes for contributors
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full development guidelines.
 
 Two environments, two sets of rules:
 
@@ -220,11 +251,8 @@ Revit API traps found the hard way and worth knowing:
 - Fittings need right angles. A layout that chains fixtures by proximity produces
   arbitrary angles that Revit refuses to fit.
 
-**Known limitation:** the buttons inject the project root, but running a tool
-directly through the bridge still falls back to a literal path.
-
 ---
 
-## Licence
+## License
 
 MIT — see [LICENSE](LICENSE).

@@ -21,7 +21,9 @@ from Autodesk.Revit.DB import (
     UnitUtils,
 )
 
-RAIZ = globals().get("RAIZ", "C:/Users/Shadow/Documents/00 - Claude - Revit")
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+_auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+RAIZ = globals().get("RAIZ", os.environ.get("HYDRO_PROJECT_ROOT", _auto_root))
 ARQ_NORMA = os.path.join(RAIZ, "data", "pecas_br.json")
 ARQ_SAIDA = os.path.join(RAIZ, "data", "pontos_consumo.json")
 

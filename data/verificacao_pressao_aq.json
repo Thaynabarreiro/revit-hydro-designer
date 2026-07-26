@@ -1,0 +1,93 @@
+{
+  "pecas_fora_criterio": 0, 
+  "norma": "NBR 7198", 
+  "trechos_aq": [
+    {
+      "dn_mm": 22, 
+      "ambiente": "(fora de ambiente)", 
+      "v_ms": 0.53000000000000003, 
+      "peca": "chuveiro", 
+      "dH_mca": 0.0, 
+      "Q_ls": 0.20000000000000001, 
+      "L_m": 3.5, 
+      "nome": "ramal_aq_0", 
+      "pressao_disponivel_mca": 3.5, 
+      "pressao_exigida_mca": 1.0, 
+      "L_eq_m": 1.2000000000000000, 
+      "atende": true
+    }, 
+    {
+      "dn_mm": 22, 
+      "ambiente": "(fora de ambiente)", 
+      "v_ms": 0.39000000000000001, 
+      "peca": "lavatorio", 
+      "dH_mca": 0.0, 
+      "Q_ls": 0.14999999999999999, 
+      "L_m": 3.5, 
+      "nome": "ramal_aq_1", 
+      "pressao_disponivel_mca": 3.5, 
+      "pressao_exigida_mca": 1.0, 
+      "L_eq_m": 1.2000000000000000, 
+      "atende": true
+    }, 
+    {
+      "dn_mm": 22, 
+      "ambiente": "(fora de ambiente)", 
+      "v_ms": 0.39000000000000001, 
+      "peca": "lavatorio", 
+      "dH_mca": 0.0, 
+      "Q_ls": 0.14999999999999999, 
+      "L_m": 3.5, 
+      "nome": "ramal_aq_2", 
+      "pressao_disponivel_mca": 3.5, 
+      "pressao_exigida_mca": 1.0, 
+      "L_eq_m": 1.2000000000000000, 
+      "atende": true
+    }, 
+    {
+      "dn_mm": 22, 
+      "ambiente": "(fora de ambiente)", 
+      "v_ms": 0.66000000000000003, 
+      "peca": "pia", 
+      "dH_mca": 0.0, 
+      "Q_ls": 0.25, 
+      "L_m": 3.5, 
+      "nome": "ramal_aq_3", 
+      "pressao_disponivel_mca": 3.5, 
+      "pressao_exigida_mca": 1.0, 
+      "L_eq_m": 1.2000000000000000, 
+      "atende": true
+    }, 
+    {
+      "dn_mm": 22, 
+      "ambiente": "(fora de ambiente)", 
+      "v_ms": 0.66000000000000003, 
+      "peca": "pia", 
+      "dH_mca": 0.0, 
+      "Q_ls": 0.25, 
+      "L_m": 3.5, 
+      "nome": "ramal_aq_4", 
+      "pressao_disponivel_mca": 3.5, 
+      "pressao_exigida_mca": 1.0, 
+      "L_eq_m": 1.2000000000000000, 
+      "atende": true
+    }, 
+    {
+      "dn_mm": 22, 
+      "ambiente": "(fora de ambiente)", 
+      "v_ms": 0.53000000000000003, 
+      "peca": "chuveiro", 
+      "dH_mca": 0.0, 
+      "Q_ls": 0.20000000000000001, 
+      "L_m": 3.5, 
+      "nome": "ramal_aq_5", 
+      "pressao_disponivel_mca": 3.5, 
+      "pressao_exigida_mca": 1.0, 
+      "L_eq_m": 1.2000000000000000, 
+      "atende": true
+    }
+  ], 
+  "n_pecas": 6, 
+  "temperatura_c": 60, 
+  "formula": "J = 0,00075 x Q^1.75 x D^-4.75 (Fair-Whipple-Hsiao para Água Quente)"
+}

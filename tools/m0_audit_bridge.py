@@ -30,7 +30,10 @@ from Autodesk.Revit.DB import (
 )
 from Autodesk.Revit.DB.Plumbing import PipeSegment, PipeType, PipingSystemType
 
-PASTA_SAIDA = os.path.join(globals().get("RAIZ", "C:/Users/Shadow/Documents/00 - Claude - Revit"), "auditoria")
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+_auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+RAIZ = globals().get("RAIZ", os.environ.get("HYDRO_PROJECT_ROOT", _auto_root))
+PASTA_SAIDA = os.path.join(RAIZ, "auditoria")
 
 CATEGORIAS_HIDRO = [
     ("Pecas hidrossanitarias", BuiltInCategory.OST_PlumbingFixtures),
