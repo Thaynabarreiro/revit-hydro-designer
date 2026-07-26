@@ -1,0 +1,107 @@
+{
+  "resumo": {
+    "ambientes_colocados": 14, 
+    "pontos_a_revisar": 0, 
+    "vazao_projeto_ls": 0.60699999999999998, 
+    "peso_total": 4.0999999999999996, 
+    "coef_C": 0.29999999999999999, 
+    "pontos_identificados": 9, 
+    "vazao_soma_simples_ls": 1.75
+  }, 
+  "revisar": [], 
+  "modelo": "Casa A&R final 2", 
+  "ignorados": {
+    "box_growarq (vidro do box, nao e ponto de consumo)": 2, 
+    "Deca_Shared_Caixa Acoplada para Bacia_P.280 (faz parte da bacia)": 2, 
+    "Deca_Shared_Assento_P.280 (acessorio da bacia)": 2, 
+    "coluna tanque_growarq (pedestal, nao e ponto de consumo)": 1
+  }, 
+  "pontos_consumo": [], 
+  "norma": "NBR 5626 - metodo dos pesos relativos", 
+  "ambientes": [
+    {
+      "nome": "garagem 104", 
+      "id": 3893019, 
+      "area_m2": 24.690000000000001, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "dormitório 02 105", 
+      "id": 3893022, 
+      "area_m2": 10.740000000000000, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "dormitório 01 106", 
+      "id": 3893025, 
+      "area_m2": 8.9100000000000001, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "closet 107", 
+      "id": 3893028, 
+      "area_m2": 6.8300000000000001, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "banho suíte 108", 
+      "id": 3893031, 
+      "area_m2": 3.8999999999999999, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "lavanderia 109", 
+      "id": 3893034, 
+      "area_m2": 5.5899999999999999, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "circulação 111", 
+      "id": 3893040, 
+      "area_m2": 6.4500000000000002, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "jantar 112", 
+      "id": 3893043, 
+      "area_m2": 14.380000000000001, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "cozinha 113", 
+      "id": 3893046, 
+      "area_m2": 11.260000000000000, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "banho social 115", 
+      "id": 3893382, 
+      "area_m2": 4.0499999999999998, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "hall 116", 
+      "id": 3893395, 
+      "area_m2": 2.6400000000000001, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "estar 118", 
+      "id": 3972134, 
+      "area_m2": 16.640000000000001, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "varanda 119", 
+      "id": 3972227, 
+      "area_m2": 14.800000000000001, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "suíte 121", 
+      "id": 3985687, 
+      "area_m2": 14.410000000000000, 
+      "nivel": "Térreo"
+    }
+  ]
+}

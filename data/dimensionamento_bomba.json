@@ -1,25 +1,25 @@
 {
-  "bomba_recalque": {
-    "potencia_calculada_cv": 0.0, 
-    "tempo_operacao_h": 1.5, 
-    "altura_manometrica_total_mca": 9.5, 
-    "vazao_bomba_ls": 0.0, 
-    "norma": "NBR 5626 - Sistemas de Recalque e Elevação de Água", 
-    "vazao_bomba_m3h": 0.0, 
-    "potencia_calculada_kw": 0.0, 
-    "bomba_recomendada": {
-      "modelo": "Schneider BC-92S 0.25 CV", 
-      "potencia_cv": 0.25, 
-      "dn_succao_mm": 25, 
-      "dn_recalque_mm": 25
-    }, 
-    "altura_geometria_m": 8.0, 
-    "consumo_diario_l": 0
-  }, 
   "projeto": {
+    "pais": "BR", 
     "norma": "NBR", 
     "cidade": "Porto Alegre", 
-    "nome": "Casa A&R", 
-    "pais": "BR"
+    "nome": "Casa A&R"
+  }, 
+  "bomba_recalque": {
+    "vazao_bomba_ls": 0.16700000000000001, 
+    "norma": "NBR 5626 - Sistemas de Recalque e Elevação de Água", 
+    "consumo_diario_l": 900, 
+    "bomba_recomendada": {
+      "dn_recalque_mm": 25, 
+      "potencia_cv": 0.25, 
+      "modelo": "Schneider BC-92S 0.25 CV", 
+      "dn_succao_mm": 25
+    }, 
+    "altura_geometria_m": 8.0, 
+    "tempo_operacao_h": 1.5, 
+    "potencia_calculada_cv": 0.040000000000000001, 
+    "potencia_calculada_kw": 0.029999999999999999, 
+    "vazao_bomba_m3h": 0.59999999999999998, 
+    "altura_manometrica_total_mca": 9.5
   }
 }

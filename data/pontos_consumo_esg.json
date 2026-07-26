@@ -1,0 +1,354 @@
+{
+  "resumo": {
+    "ambientes_colocados": 14, 
+    "pontos_a_revisar": 0, 
+    "vazao_projeto_ls": 0.60699999999999998, 
+    "peso_total": 4.0999999999999996, 
+    "coef_C": 0.29999999999999999, 
+    "pontos_identificados": 9, 
+    "vazao_soma_simples_ls": 1.75
+  }, 
+  "revisar": [], 
+  "modelo": "Casa A&R final 2", 
+  "ignorados": {
+    "box_growarq (vidro do box, nao e ponto de consumo)": 2, 
+    "Deca_Shared_Caixa Acoplada para Bacia_P.280 (faz parte da bacia)": 2, 
+    "Deca_Shared_Assento_P.280 (acessorio da bacia)": 2, 
+    "coluna tanque_growarq (pedestal, nao e ponto de consumo)": 1
+  }, 
+  "pontos_consumo": [
+    {
+      "nivel": "Térreo", 
+      "xyz_mm": [
+        9750.0, 
+        8935.0, 
+        500.0
+      ], 
+      "ambiente": "banho social 115", 
+      "desc": "Bacia sanitaria com caixa de descarga", 
+      "pressao_min_kpa": 5, 
+      "peso": 0.29999999999999999, 
+      "vazao_ls": 0.14999999999999999, 
+      "familia": "Bacia Sanitária 06", 
+      "familias_agrupadas": [
+        "Bacia Sanitária 06"
+      ], 
+      "ids_agrupados": [
+        3804795
+      ], 
+      "motivo": "", 
+      "tipo_peca": "bacia_caixa", 
+      "confianca": "regra de nome", 
+      "esgoto_uhc": 6, 
+      "id": 3804795, 
+      "tipo_familia": "P.280.17_Branco Gelo GE17"
+    }, 
+    {
+      "nivel": "Térreo", 
+      "xyz_mm": [
+        9750.0, 
+        7980.0, 
+        2500.0
+      ], 
+      "ambiente": "banho social 115", 
+      "desc": "Chuveiro ou ducha", 
+      "pressao_min_kpa": 10, 
+      "peso": 0.40000000000000002, 
+      "vazao_ls": 0.20000000000000001, 
+      "familia": "chuveiro quadrado_growarq", 
+      "familias_agrupadas": [
+        "chuveiro quadrado_growarq"
+      ], 
+      "ids_agrupados": [
+        3805162
+      ], 
+      "motivo": "", 
+      "tipo_peca": "chuveiro", 
+      "confianca": "regra de nome", 
+      "esgoto_uhc": 2, 
+      "id": 3805162, 
+      "tipo_familia": "chuveiro quadrado_growarq"
+    }, 
+    {
+      "nivel": "Térreo", 
+      "xyz_mm": [
+        9760.0, 
+        9790.0, 
+        500.0
+      ], 
+      "ambiente": "banho social 115", 
+      "desc": "Lavatorio", 
+      "pressao_min_kpa": 5, 
+      "peso": 0.29999999999999999, 
+      "vazao_ls": 0.14999999999999999, 
+      "familia": "Blocks_Lavatório Manzanita_F01227PT", 
+      "familias_agrupadas": [
+        "Blocks_Lavatório Manzanita_F01227PT", 
+        "Blks_Bnh_Pottery-Barn_Lavatorio-Manzanita_Cuba_Shared"
+      ], 
+      "ids_agrupados": [
+        3809815, 
+        3809816
+      ], 
+      "motivo": "", 
+      "tipo_peca": "lavatorio", 
+      "confianca": "regra de nome", 
+      "esgoto_uhc": 1, 
+      "id": 3809815, 
+      "tipo_familia": "Único"
+    }, 
+    {
+      "nivel": "Térreo", 
+      "xyz_mm": [
+        10845.0, 
+        13810.0, 
+        500.0
+      ], 
+      "ambiente": "banho suíte 108", 
+      "desc": "Lavatorio", 
+      "pressao_min_kpa": 5, 
+      "peso": 0.29999999999999999, 
+      "vazao_ls": 0.14999999999999999, 
+      "familia": "Blocks_Lavatório Manzanita_F01227PT", 
+      "familias_agrupadas": [
+        "Blocks_Lavatório Manzanita_F01227PT", 
+        "Blks_Bnh_Pottery-Barn_Lavatorio-Manzanita_Cuba_Shared"
+      ], 
+      "ids_agrupados": [
+        3860625, 
+        3860626
+      ], 
+      "motivo": "", 
+      "tipo_peca": "lavatorio", 
+      "confianca": "regra de nome", 
+      "esgoto_uhc": 1, 
+      "id": 3860625, 
+      "tipo_familia": "Único"
+    }, 
+    {
+      "nivel": "Térreo", 
+      "xyz_mm": [
+        9955.0, 
+        13800.0, 
+        500.0
+      ], 
+      "ambiente": "banho suíte 108", 
+      "desc": "Bacia sanitaria com caixa de descarga", 
+      "pressao_min_kpa": 5, 
+      "peso": 0.29999999999999999, 
+      "vazao_ls": 0.14999999999999999, 
+      "familia": "Bacia Sanitária 06", 
+      "familias_agrupadas": [
+        "Bacia Sanitária 06"
+      ], 
+      "ids_agrupados": [
+        3860940
+      ], 
+      "motivo": "", 
+      "tipo_peca": "bacia_caixa", 
+      "confianca": "regra de nome", 
+      "esgoto_uhc": 6, 
+      "id": 3860940, 
+      "tipo_familia": "P.280.17_Branco Gelo GE17"
+    }, 
+    {
+      "nivel": "Térreo", 
+      "xyz_mm": [
+        1745.0, 
+        12075.0, 
+        1400.0
+      ], 
+      "ambiente": "varanda 119", 
+      "desc": "Pia de cozinha", 
+      "pressao_min_kpa": 5, 
+      "peso": 0.69999999999999996, 
+      "vazao_ls": 0.25, 
+      "familia": "torneira misturador de bancada_growarq", 
+      "familias_agrupadas": [
+        "cuba parede cortina_growarq", 
+        "cuba embutida especial_growarq", 
+        "torneira misturador de bancada_growarq"
+      ], 
+      "ids_agrupados": [
+        3895429, 
+        3895430, 
+        3896825
+      ], 
+      "motivo": "torneira solta - depende do ambiente (pia x lavatorio)", 
+      "tipo_peca": "pia", 
+      "confianca": "inferido pelo ambiente", 
+      "esgoto_uhc": 3, 
+      "id": 3896825, 
+      "tipo_familia": "torneira misturador de bancada_growarq"
+    }, 
+    {
+      "nivel": "Térreo", 
+      "xyz_mm": [
+        1745.0, 
+        9165.0, 
+        1400.0
+      ], 
+      "ambiente": "cozinha 113", 
+      "desc": "Pia de cozinha", 
+      "pressao_min_kpa": 5, 
+      "peso": 0.69999999999999996, 
+      "vazao_ls": 0.25, 
+      "familia": "torneira misturador de bancada_growarq", 
+      "familias_agrupadas": [
+        "cuba parede cortina_growarq", 
+        "cuba embutida especial_growarq", 
+        "torneira misturador de bancada_growarq"
+      ], 
+      "ids_agrupados": [
+        3895579, 
+        3895580, 
+        3895754
+      ], 
+      "motivo": "torneira solta - depende do ambiente (pia x lavatorio)", 
+      "tipo_peca": "pia", 
+      "confianca": "inferido pelo ambiente", 
+      "esgoto_uhc": 3, 
+      "id": 3895754, 
+      "tipo_familia": "torneira misturador de bancada_growarq"
+    }, 
+    {
+      "nivel": "Térreo", 
+      "xyz_mm": [
+        9110.0, 
+        13650.0, 
+        500.0
+      ], 
+      "ambiente": "lavanderia 109", 
+      "desc": "Tanque de lavar roupa", 
+      "pressao_min_kpa": 5, 
+      "peso": 0.69999999999999996, 
+      "vazao_ls": 0.25, 
+      "familia": "tanque cerâmico_growarq", 
+      "familias_agrupadas": [
+        "tanque cerâmico_growarq"
+      ], 
+      "ids_agrupados": [
+        3897703
+      ], 
+      "motivo": "", 
+      "tipo_peca": "tanque", 
+      "confianca": "regra de nome", 
+      "esgoto_uhc": 3, 
+      "id": 3897703, 
+      "tipo_familia": "tanque cerâmico_growarq"
+    }, 
+    {
+      "nivel": "Térreo", 
+      "xyz_mm": [
+        9090.0, 
+        13800.0, 
+        2500.0
+      ], 
+      "ambiente": "banho suíte 108", 
+      "desc": "Chuveiro ou ducha", 
+      "pressao_min_kpa": 10, 
+      "peso": 0.40000000000000002, 
+      "vazao_ls": 0.20000000000000001, 
+      "familia": "chuveiro quadrado_growarq", 
+      "familias_agrupadas": [
+        "chuveiro quadrado_growarq"
+      ], 
+      "ids_agrupados": [
+        3936415
+      ], 
+      "motivo": "", 
+      "tipo_peca": "chuveiro", 
+      "confianca": "regra de nome", 
+      "esgoto_uhc": 2, 
+      "id": 3936415, 
+      "tipo_familia": "chuveiro quadrado_growarq"
+    }
+  ], 
+  "norma": "NBR 5626 - metodo dos pesos relativos", 
+  "ambientes": [
+    {
+      "nome": "garagem 104", 
+      "id": 3893019, 
+      "area_m2": 24.690000000000001, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "dormitório 02 105", 
+      "id": 3893022, 
+      "area_m2": 10.740000000000000, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "dormitório 01 106", 
+      "id": 3893025, 
+      "area_m2": 8.9100000000000001, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "closet 107", 
+      "id": 3893028, 
+      "area_m2": 6.8300000000000001, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "banho suíte 108", 
+      "id": 3893031, 
+      "area_m2": 3.8999999999999999, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "lavanderia 109", 
+      "id": 3893034, 
+      "area_m2": 5.5899999999999999, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "circulação 111", 
+      "id": 3893040, 
+      "area_m2": 6.4500000000000002, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "jantar 112", 
+      "id": 3893043, 
+      "area_m2": 14.380000000000001, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "cozinha 113", 
+      "id": 3893046, 
+      "area_m2": 11.260000000000000, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "banho social 115", 
+      "id": 3893382, 
+      "area_m2": 4.0499999999999998, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "hall 116", 
+      "id": 3893395, 
+      "area_m2": 2.6400000000000001, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "estar 118", 
+      "id": 3972134, 
+      "area_m2": 16.640000000000001, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "varanda 119", 
+      "id": 3972227, 
+      "area_m2": 14.800000000000001, 
+      "nivel": "Térreo"
+    }, 
+    {
+      "nome": "suíte 121", 
+      "id": 3985687, 
+      "area_m2": 14.410000000000000, 
+      "nivel": "Térreo"
+    }
+  ]
+}

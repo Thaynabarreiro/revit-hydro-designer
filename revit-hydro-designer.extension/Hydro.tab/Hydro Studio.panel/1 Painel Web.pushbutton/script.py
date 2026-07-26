@@ -124,6 +124,7 @@ class HydroStudioInteractiveWindow(Window):
             ("🌧️ Águas Pluviais (PLUV)", "PLUV"),
             ("🌱 Tratamento no Lote (TRAT)", "TRAT"),
             ("⚡ Moto-Bomba & Recalque", "REC"),
+            ("🏛️ Template Oficial (.rte)", "TPL"),
             ("🔍 Auditoria & Acervo", "AUDIT"),
             ("📄 Memoriais & Exportação", "DOC")
         ]
@@ -654,6 +655,54 @@ class HydroStudioInteractiveWindow(Window):
             if card_ambientes:
                 stack.Children.Add(card_ambientes)
 
+        elif code == "TPL":
+            tb_h = TextBlock()
+            tb_h.Text = "Criador de Template Oficial (.rte / .rvt)"
+            tb_h.FontSize = 22
+            tb_h.FontWeight = System.Windows.FontWeights.Bold
+            tb_h.Foreground = hex_b("#0f172a")
+            tb_h.Margin = Thickness(0, 0, 0, 15)
+            stack.Children.Add(tb_h)
+            
+            tpl_card = Border()
+            tpl_card.Background = hex_b("#ffffff")
+            tpl_card.BorderBrush = hex_b("#cbd5e1")
+            tpl_card.BorderThickness = Thickness(1)
+            tpl_card.CornerRadius = System.Windows.CornerRadius(12)
+            tpl_card.Padding = Thickness(20)
+            tpl_card.Margin = Thickness(0, 0, 0, 20)
+            
+            ts = StackPanel()
+            
+            lbl_t = TextBlock()
+            lbl_t.Text = "🏛️ Gerar Template Base Oficial do Plugin"
+            lbl_t.FontSize = 16
+            lbl_t.FontWeight = System.Windows.FontWeights.Bold
+            lbl_t.Foreground = hex_b("#d97706")
+            lbl_t.Margin = Thickness(0, 0, 0, 8)
+            ts.Children.Add(lbl_t)
+            
+            lbl_desc = TextBlock()
+            lbl_desc.Text = "Este gerador pega o projeto hidráulico atual com todas as famílias, preferências de roteamento, diâmetros, sistemas hidráulicos e modelos de vista, purga todas as instâncias de tubos/peças e gera o arquivo oficial de Template (.rte e .rvt) limpo para novos projetos."
+            lbl_desc.FontSize = 12
+            lbl_desc.Foreground = hex_b("#475569")
+            lbl_desc.TextWrapping = TextWrapping.Wrap
+            lbl_desc.Margin = Thickness(0, 0, 0, 15)
+            ts.Children.Add(lbl_desc)
+            
+            b_make_tpl = Button()
+            b_make_tpl.Content = "🏛️ Executar Purga & Gerar Template Oficial (.rte / .rvt)"
+            b_make_tpl.Background = hex_b("#d97706")
+            b_make_tpl.Foreground = hex_b("#ffffff")
+            b_make_tpl.FontWeight = System.Windows.FontWeights.Bold
+            b_make_tpl.FontSize = 13
+            b_make_tpl.Padding = Thickness(15, 10, 15, 10)
+            b_make_tpl.Click += lambda s, e: self.exec_tool("make_official_template.py", "Criação de Template Oficial (.rte)")
+            ts.Children.Add(b_make_tpl)
+            
+            tpl_card.Child = ts
+            stack.Children.Add(tpl_card)
+
         elif code == "AF":
             tb_h = TextBlock()
             tb_h.Text = "Água Fria (AF)"
@@ -704,7 +753,6 @@ class HydroStudioInteractiveWindow(Window):
                 m_panel.Children.Add(m_card)
             stack.Children.Add(m_panel)
             
-            # Nota explicativa de engenharia sobre o barrilete NBR 5626
             eng_note = Border()
             eng_note.Background = hex_b("#f0f9ff")
             eng_note.BorderBrush = hex_b("#bae6fd")
@@ -1234,7 +1282,7 @@ class HydroStudioInteractiveWindow(Window):
             ab_stack.Children.Add(b2)
             
             b3 = Button()
-            b3.Content = "🏛️ Convert Modelo Atual em Template Oficial (.rte / .rvt)"
+            b3.Content = "🏛️ Gerar Template Oficial (.rte / .rvt)"
             b3.Background = hex_b("#d97706")
             b3.Foreground = hex_b("#ffffff")
             b3.FontWeight = System.Windows.FontWeights.SemiBold

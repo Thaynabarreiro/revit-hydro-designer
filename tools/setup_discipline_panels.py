@@ -29,219 +29,16 @@ def make_button(panel_name, btn_dir_name, title, tooltip, script_code):
         f.write(yaml_content)
     print("Created:", btn_dir)
 
-# --- SETUP PANELS ---
-if not os.path.exists(TAB_DIR):
+# --- CLEAN UP OLD RIBBON PANELS ---
+if os.path.exists(TAB_DIR):
+    for sub in os.listdir(TAB_DIR):
+        if sub.endswith(".panel"):
+            shutil.rmtree(os.path.join(TAB_DIR, sub), ignore_errors=True)
+else:
     os.makedirs(TAB_DIR)
 
-# --- 1. AGUA FRIA E QUENTE PANEL ---
-p1 = "1 Agua Fria e Quente.panel"
-
-make_button(p1, "1 Configurar.pushbutton", "Configurar\nProjeto", "Formulário de dados do projeto, ocupação e reservação",
-"""# -*- coding: utf-8 -*-
-from pyrevit import script
-import hydro
-output = script.get_output()
-output.print_md("# Configurar Projeto")
-try:
-    s = hydro.rodar("m1_reader.py")
-    output.print_md(hydro.bloco(s))
-except hydro.ErroDeFerramenta as e:
-    hydro.relatar_erro(output, e)
-""")
-
-make_button(p1, "2 Dimensionar AF_AQ.pushbutton", "Dimensionar\nÁgua Fria/Quente", "Dimensionamento de consumo, reservatórios e barrilete (NBR 5626 / NBR 7198)",
-"""# -*- coding: utf-8 -*-
-from pyrevit import script
-import hydro
-output = script.get_output()
-output.print_md("# Dimensionamento de Água Fria e Quente")
-try:
-    s = hydro.rodar("m2_dimensionamento.py")
-    output.print_md(hydro.bloco(s))
-except hydro.ErroDeFerramenta as e:
-    hydro.relatar_erro(output, e)
-""")
-
-make_button(p1, "3 Gerar 3D AF_AQ.pushbutton", "Gerar Rede 3D\nAF/AQ", "Modelagem 3D ortogonal com curvas a 90° e descidas verticais de parede",
-"""# -*- coding: utf-8 -*-
-from pyrevit import script
-import hydro
-output = script.get_output()
-output.print_md("# Geração 3D AF/AQ")
-try:
-    s = hydro.rodar("m6g_rede_final.py")
-    output.print_md(hydro.bloco(s))
-except hydro.ErroDeFerramenta as e:
-    hydro.relatar_erro(output, e)
-""")
-
-make_button(p1, "4 Pranchas AF_AQ.pushbutton", "Gerar Pranchas\nDetalhes AF/AQ", "Geração automática de pranchas A4 por ambiente (Banheiro, Lavanderia, Cobertura)",
-"""# -*- coding: utf-8 -*-
-from pyrevit import script
-import hydro
-output = script.get_output()
-output.print_md("# Geração Automática de Pranchas por Ambiente")
-try:
-    s = hydro.rodar("m7_gerar_pranchas.py")
-    output.print_md(hydro.bloco(s))
-except hydro.ErroDeFerramenta as e:
-    hydro.relatar_erro(output, e)
-""")
-
-make_button(p1, "5 Memorial AF_AQ.pushbutton", "Memorial\nHidráulico", "Gera memorial hidráulico em HTML, PDF e DOCX (Word)",
-"""# -*- coding: utf-8 -*-
-import os, webbrowser
-from pyrevit import script
-import hydro
-output = script.get_output()
-output.print_md("# Memorial Hidráulico")
-try:
-    s = hydro.rodar("m8_memorial.py")
-    output.print_md(hydro.bloco(s))
-except hydro.ErroDeFerramenta as e:
-    hydro.relatar_erro(output, e)
-""")
-
-# --- 2. ESGOTO E VENTILACAO PANEL ---
-p2 = "2 Esgoto e Ventilacao.panel"
-
-make_button(p2, "1 Dimensionar ESG.pushbutton", "Dimensionar\nEsgoto/Ventilação", "Dimensionamento de esgoto e ventilação primária (NBR 8160)",
-"""# -*- coding: utf-8 -*-
-from pyrevit import script
-import hydro
-output = script.get_output()
-output.print_md("# Dimensionamento de Esgoto e Ventilação")
-try:
-    s = hydro.rodar("m2_dimensionamento_esg.py")
-    output.print_md(hydro.bloco(s))
-except hydro.ErroDeFerramenta as e:
-    hydro.relatar_erro(output, e)
-""")
-
-make_button(p2, "2 Gerar 3D ESG.pushbutton", "Gerar Rede 3D\nEsgoto", "Modelagem 3D por gravidade com declividade e prioridade Shaft",
-"""# -*- coding: utf-8 -*-
-from pyrevit import script
-import hydro
-output = script.get_output()
-output.print_md("# Geração 3D Esgoto")
-try:
-    s = hydro.rodar("m6_rede_esgoto.py")
-    output.print_md(hydro.bloco(s))
-except hydro.ErroDeFerramenta as e:
-    hydro.relatar_erro(output, e)
-""")
-
-make_button(p2, "3 Pranchas ESG.pushbutton", "Gerar Pranchas\nDetalhes ESG", "Geração automática de pranchas A4 por ambiente (Cozinha e Banheiro)",
-"""# -*- coding: utf-8 -*-
-from pyrevit import script
-import hydro
-output = script.get_output()
-output.print_md("# Geração Automática de Pranchas por Ambiente (ESG)")
-try:
-    s = hydro.rodar("m7_gerar_pranchas.py")
-    output.print_md(hydro.bloco(s))
-except hydro.ErroDeFerramenta as e:
-    hydro.relatar_erro(output, e)
-""")
-
-make_button(p2, "4 Memorial ESG.pushbutton", "Memorial\nSanitário", "Gera memorial sanitário em HTML, PDF e DOCX (Word)",
-"""# -*- coding: utf-8 -*-
-import os, webbrowser
-from pyrevit import script
-import hydro
-output = script.get_output()
-output.print_md("# Memorial Sanitário")
-try:
-    s = hydro.rodar("m8_memorial_esg.py")
-    output.print_md(hydro.bloco(s))
-except hydro.ErroDeFerramenta as e:
-    hydro.relatar_erro(output, e)
-""")
-
-# --- 3. PLUVIAL E TRATAMENTO PANEL ---
-p3 = "3 Pluvial e Tratamento.panel"
-
-make_button(p3, "1 Dimensionar PLUV.pushbutton", "Dimensionar\nPluvial", "Dimensionamento de Águas Pluviais (NBR 10844 / DTU 60.11)",
-"""# -*- coding: utf-8 -*-
-from pyrevit import script
-import hydro
-output = script.get_output()
-output.print_md("# Dimensionamento de Águas Pluviais")
-try:
-    s = hydro.rodar("m2_dimensionamento_pluv.py")
-    output.print_md(hydro.bloco(s))
-except hydro.ErroDeFerramenta as e:
-    hydro.relatar_erro(output, e)
-""")
-
-make_button(p3, "2 Dimensionar TRAT.pushbutton", "Dimensionar\nTratamento Lote", "Dimensionamento de Fossa Séptica, Filtro Anaeróbio e Sumidouro",
-"""# -*- coding: utf-8 -*-
-from pyrevit import script
-import hydro
-output = script.get_output()
-output.print_md("# Dimensionamento de Tratamento no Lote")
-try:
-    s = hydro.rodar("m2_dimensionamento_trat.py")
-    output.print_md(hydro.bloco(s))
-except hydro.ErroDeFerramenta as e:
-    hydro.relatar_erro(output, e)
-""")
-
-make_button(p3, "3 Dimensionar BOMBA.pushbutton", "Dimensionar\nMoto-Bomba", "Dimensionamento de Conjunto Moto-Bomba de Recalque",
-"""# -*- coding: utf-8 -*-
-from pyrevit import script
-import hydro
-output = script.get_output()
-output.print_md("# Dimensionamento de Moto-Bomba de Recalque")
-try:
-    s = hydro.rodar("m2_dimensionamento_bomba.py")
-    output.print_md(hydro.bloco(s))
-except hydro.ErroDeFerramenta as e:
-    hydro.relatar_erro(output, e)
-""")
-
-make_button(p3, "4 Pranchas PLUV.pushbutton", "Gerar Pranchas\nPluvial/Cobertura", "Geração automática de pranchas A4 da Cobertura e Pluvial",
-"""# -*- coding: utf-8 -*-
-from pyrevit import script
-import hydro
-output = script.get_output()
-output.print_md("# Geração Automática de Pranchas da Cobertura e Pluvial")
-try:
-    s = hydro.rodar("m7_gerar_pranchas.py")
-    output.print_md(hydro.bloco(s))
-except hydro.ErroDeFerramenta as e:
-    hydro.relatar_erro(output, e)
-""")
-
-make_button(p3, "5 Memorial PLUV.pushbutton", "Memorial\nPluvial", "Gera memorial pluvial em HTML, PDF e DOCX (Word)",
-"""# -*- coding: utf-8 -*-
-import os, webbrowser
-from pyrevit import script
-import hydro
-output = script.get_output()
-output.print_md("# Memorial Pluvial")
-try:
-    s = hydro.rodar("m8_memorial_pluv.py")
-    output.print_md(hydro.bloco(s))
-except hydro.ErroDeFerramenta as e:
-    hydro.relatar_erro(output, e)
-""")
-
-# --- 4. FERRAMENTAS PANEL ---
-p4 = "4 Ferramentas.panel"
-
-make_button(p4, "1 Auditoria.pushbutton", "Auditoria\ne BCL", "Auditoria de interferências e verificação de regras",
-"""# -*- coding: utf-8 -*-
-from pyrevit import script
-import hydro
-output = script.get_output()
-output.print_md("# Auditoria e BCL")
-try:
-    s = hydro.rodar("m0_audit_bridge.py")
-    output.print_md(hydro.bloco(s))
-except hydro.ErroDeFerramenta as e:
-    hydro.relatar_erro(output, e)
-""")
+# --- CREATE SINGLE CONSOLIDATED STUDIO BIM PANEL ---
+p_studio = "Hydro Studio.panel"
 
 script_code_studio = """# -*- coding: utf-8 -*-
 import os, sys, json, clr
@@ -369,6 +166,7 @@ class HydroStudioInteractiveWindow(Window):
             ("🌧️ Águas Pluviais (PLUV)", "PLUV"),
             ("🌱 Tratamento no Lote (TRAT)", "TRAT"),
             ("⚡ Moto-Bomba & Recalque", "REC"),
+            ("🏛️ Template Oficial (.rte)", "TPL"),
             ("🔍 Auditoria & Acervo", "AUDIT"),
             ("📄 Memoriais & Exportação", "DOC")
         ]
@@ -899,6 +697,54 @@ class HydroStudioInteractiveWindow(Window):
             if card_ambientes:
                 stack.Children.Add(card_ambientes)
 
+        elif code == "TPL":
+            tb_h = TextBlock()
+            tb_h.Text = "Criador de Template Oficial (.rte / .rvt)"
+            tb_h.FontSize = 22
+            tb_h.FontWeight = System.Windows.FontWeights.Bold
+            tb_h.Foreground = hex_b("#0f172a")
+            tb_h.Margin = Thickness(0, 0, 0, 15)
+            stack.Children.Add(tb_h)
+            
+            tpl_card = Border()
+            tpl_card.Background = hex_b("#ffffff")
+            tpl_card.BorderBrush = hex_b("#cbd5e1")
+            tpl_card.BorderThickness = Thickness(1)
+            tpl_card.CornerRadius = System.Windows.CornerRadius(12)
+            tpl_card.Padding = Thickness(20)
+            tpl_card.Margin = Thickness(0, 0, 0, 20)
+            
+            ts = StackPanel()
+            
+            lbl_t = TextBlock()
+            lbl_t.Text = "🏛️ Gerar Template Base Oficial do Plugin"
+            lbl_t.FontSize = 16
+            lbl_t.FontWeight = System.Windows.FontWeights.Bold
+            lbl_t.Foreground = hex_b("#d97706")
+            lbl_t.Margin = Thickness(0, 0, 0, 8)
+            ts.Children.Add(lbl_t)
+            
+            lbl_desc = TextBlock()
+            lbl_desc.Text = "Este gerador pega o projeto hidráulico atual com todas as famílias, preferências de roteamento, diâmetros, sistemas hidráulicos e modelos de vista, purga todas as instâncias de tubos/peças e gera o arquivo oficial de Template (.rte e .rvt) limpo para novos projetos."
+            lbl_desc.FontSize = 12
+            lbl_desc.Foreground = hex_b("#475569")
+            lbl_desc.TextWrapping = TextWrapping.Wrap
+            lbl_desc.Margin = Thickness(0, 0, 0, 15)
+            ts.Children.Add(lbl_desc)
+            
+            b_make_tpl = Button()
+            b_make_tpl.Content = "🏛️ Executar Purga & Gerar Template Oficial (.rte / .rvt)"
+            b_make_tpl.Background = hex_b("#d97706")
+            b_make_tpl.Foreground = hex_b("#ffffff")
+            b_make_tpl.FontWeight = System.Windows.FontWeights.Bold
+            b_make_tpl.FontSize = 13
+            b_make_tpl.Padding = Thickness(15, 10, 15, 10)
+            b_make_tpl.Click += lambda s, e: self.exec_tool("make_official_template.py", "Criação de Template Oficial (.rte)")
+            ts.Children.Add(b_make_tpl)
+            
+            tpl_card.Child = ts
+            stack.Children.Add(tpl_card)
+
         elif code == "AF":
             tb_h = TextBlock()
             tb_h.Text = "Água Fria (AF)"
@@ -949,7 +795,6 @@ class HydroStudioInteractiveWindow(Window):
                 m_panel.Children.Add(m_card)
             stack.Children.Add(m_panel)
             
-            # Nota explicativa de engenharia sobre o barrilete NBR 5626
             eng_note = Border()
             eng_note.Background = hex_b("#f0f9ff")
             eng_note.BorderBrush = hex_b("#bae6fd")
@@ -1479,7 +1324,7 @@ class HydroStudioInteractiveWindow(Window):
             ab_stack.Children.Add(b2)
             
             b3 = Button()
-            b3.Content = "🏛️ Convert Modelo Atual em Template Oficial (.rte / .rvt)"
+            b3.Content = "🏛️ Gerar Template Oficial (.rte / .rvt)"
             b3.Background = hex_b("#d97706")
             b3.Foreground = hex_b("#ffffff")
             b3.FontWeight = System.Windows.FontWeights.SemiBold
@@ -1572,5 +1417,5 @@ win = HydroStudioInteractiveWindow()
 win.ShowDialog()
 """
 
-make_button(p4, "2 Painel Web.pushbutton", "Hydro Design\nHub (Studio)", "Abre o Studio BIM interativo com o novo layout claro DENTRO do Revit", script_code_studio)
-print("New discipline-based ribbon panels created successfully!")
+make_button(p_studio, "1 Painel Web.pushbutton", "Hydro Design\nHub (Studio)", "Abre o Studio BIM interativo com o novo layout claro DENTRO do Revit", script_code_studio)
+print("Single consolidated Studio BIM ribbon panel created successfully!")

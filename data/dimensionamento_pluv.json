@@ -1,23 +1,23 @@
 {
-  "projeto": {
-    "norma": "NBR", 
-    "cidade": "Porto Alegre", 
-    "nome": "Casa A&R", 
-    "pais": "BR"
-  }, 
   "pluvial": {
-    "declividade_min_coletor": "0.5%", 
-    "dn_condutor_mm": 100, 
     "vazao_total_lmin": 390.0, 
-    "origem_dados": "Base Pluviométrica (BR - RS)", 
-    "dn_coletor_horizontal_mm": 150, 
-    "vazao_por_condutor_ls": 3.25, 
-    "cidade": "Porto Alegre", 
-    "vazao_total_ls": 6.5, 
+    "norma": "NBR 10844 (Brasil)", 
     "pais": "BR", 
     "area_cobertura_m2": 150.0, 
-    "norma": "NBR 10844 (Brasil)", 
+    "dn_condutor_mm": 100, 
+    "intensidade_mm_h": 156.0, 
+    "dn_coletor_horizontal_mm": 150, 
+    "vazao_total_ls": 6.5, 
     "n_condutores_verticais": 2, 
-    "intensidade_mm_h": 156.0
+    "origem_dados": "Base Pluviométrica (BR - RS)", 
+    "declividade_min_coletor": "0.5%", 
+    "vazao_por_condutor_ls": 3.25, 
+    "cidade": "Porto Alegre"
+  }, 
+  "projeto": {
+    "pais": "BR", 
+    "nome": "Casa A&R", 
+    "norma": "NBR", 
+    "cidade": "Porto Alegre"
   }
 }

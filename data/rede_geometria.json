@@ -1,5 +1,5 @@
 {
-  "_sobre": "Escrito pelo roteador. O M9 le daqui a altura real do barrilete.", 
-  "z_ponto_mais_alto_mm": 3100.0, 
-  "z_barrilete_mm": 3500.0
+  "z_ponto_mais_alto_mm": 1400.0, 
+  "z_barrilete_mm": 2900.0, 
+  "_sobre": "Escrito pelo roteador. O M9 le daqui a altura real do barrilete."
 }
