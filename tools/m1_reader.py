@@ -317,9 +317,37 @@ resultado = {
 if not os.path.isdir(os.path.dirname(ARQ_SAIDA)):
     os.makedirs(os.path.dirname(ARQ_SAIDA))
 
+# Salva Água Fria
 f = codecs.open(ARQ_SAIDA, "w", encoding="utf-8")
 f.write(json.dumps(resultado, indent=2, ensure_ascii=False))
 f.close()
+
+# Separa Água Quente (chuveiros, lavatorios, pias, duchas, misturadores)
+pontos_aq = [p for p in pontos if p["tipo_peca"] in ("chuveiro", "lavatorio", "pia", "ducha_higienica", "bide", "banheira")]
+res_aq = dict(resultado)
+res_aq["pontos_consumo"] = pontos_aq
+f_aq = codecs.open(os.path.join(D, "pontos_consumo_aq.json"), "w", encoding="utf-8")
+f_aq.write(json.dumps(res_aq, indent=2, ensure_ascii=False))
+f_aq.close()
+
+# Separa Esgoto (peças com UHC > 0)
+pontos_esg = [p for p in pontos if p.get("esgoto_uhc", 0) > 0 or p["tipo_peca"] in ("bacia_caixa", "bacia_valvula", "lavatorio", "chuveiro", "pia", "tanque", "ralo_sifonado")]
+res_esg = dict(resultado)
+res_esg["pontos_consumo"] = pontos_esg
+f_esg = codecs.open(os.path.join(D, "pontos_consumo_esg.json"), "w", encoding="utf-8")
+f_esg.write(json.dumps(res_esg, indent=2, ensure_ascii=False))
+f_esg.close()
+
+# Separa Pluvial & Tratamento
+pontos_pluv = [p for p in pontos if "pluvial" in p["tipo_peca"] or "calha" in p["tipo_peca"] or "fossa" in p["tipo_peca"] or p["ambiente"] in ("cobertura", "varanda", "externo")]
+if not pontos_pluv:
+    # Fallback para captar ralos de varanda/cobertura se houver
+    pontos_pluv = [p for p in pontos if p["ambiente"] in ("varanda", "cobertura", "telhado")]
+res_pluv = dict(resultado)
+res_pluv["pontos_consumo"] = pontos_pluv
+f_pluv = codecs.open(os.path.join(D, "pontos_consumo_pluv.json"), "w", encoding="utf-8")
+f_pluv.write(json.dumps(res_pluv, indent=2, ensure_ascii=False))
+f_pluv.close()
 
 # ------------------------------------------------------------ relatorio
 print("=== M1 READER ===")

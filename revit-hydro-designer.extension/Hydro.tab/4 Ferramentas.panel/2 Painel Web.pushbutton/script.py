@@ -229,16 +229,36 @@ class HydroStudioInteractiveWindow(Window):
         except Exception as ex:
             self.status_txt.Text = "Aviso ao selecionar elemento: {0}".format(str(ex))
 
-    def carregar_elementos_identificados(self):
-        # Carrega loucas/pecas do pontos_consumo.json e trechos do rede_ids.json
+    def carregar_elementos_identificados(self, code="HID"):
         lst = ListBox()
         lst.Height = 180
         lst.Margin = Thickness(0, 10, 0, 15)
         lst.SelectionChanged += self.on_select_element_in_app
         
-        json_pontos = os.path.join(hydro.DATA, "pontos_consumo.json")
-        json_rede = os.path.join(hydro.DATA, "rede_ids.json")
-        
+        if code == "ESG":
+            json_pontos = os.path.join(hydro.DATA, "pontos_consumo_esg.json")
+            json_rede = os.path.join(hydro.DATA, "rede_ids_esg.json")
+            tag_p = "🚽 [Esgoto - Peça Sanitária ID: {0}]"
+            tag_r = "🚽 [Esgoto - Prumada/Ramal ID: {0}]"
+        elif code == "PLUV":
+            json_pontos = os.path.join(hydro.DATA, "pontos_consumo_pluv.json")
+            json_rede = os.path.join(hydro.DATA, "rede_ids_pluv.json")
+            tag_p = "🌧️ [Pluvial - Calha/Ralo ID: {0}]"
+            tag_r = "🌧️ [Pluvial - Condutor ID: {0}]"
+        elif code == "REC":
+            json_pontos = os.path.join(hydro.DATA, "pontos_consumo.json")
+            json_rede = os.path.join(hydro.DATA, "rede_ids.json")
+            tag_p = "⚡ [Moto-Bomba - Ponto Recalque ID: {0}]"
+            tag_r = "⚡ [Moto-Bomba - Tubo Recalque ID: {0}]"
+        else: # "HID"
+            json_pontos = os.path.join(hydro.DATA, "pontos_consumo.json")
+            json_rede = os.path.join(hydro.DATA, "rede_ids.json")
+            tag_p = "💧 [Água Fria - Louça ID: {0}]"
+            tag_r = "💧 [Água Fria - Barrilete ID: {0}]"
+
+        if not os.path.exists(json_pontos):
+            json_pontos = os.path.join(hydro.DATA, "pontos_consumo.json")
+            
         items_added = 0
         if os.path.exists(json_pontos):
             try:
@@ -246,8 +266,8 @@ class HydroStudioInteractiveWindow(Window):
                     data = json.load(f)
                 for pt in data.get("pontos_consumo", []):
                     item = ListBoxItem()
-                    item.Content = "📍 [Louça ID: {0}] {1} — {2} (Peso: {3})".format(
-                        pt.get("id"), pt.get("ambiente", "Ambiente"), pt.get("desc", "Peça"), pt.get("peso", 0.3)
+                    item.Content = (tag_p + " {1} — {2}").format(
+                        pt.get("id"), pt.get("ambiente", "Ambiente"), pt.get("desc", "Peça")
                     )
                     item.Tag = pt.get("id")
                     item.FontSize = 11
@@ -264,18 +284,8 @@ class HydroStudioInteractiveWindow(Window):
                     b_id = no.get("barr")
                     if b_id:
                         item = ListBoxItem()
-                        item.Content = "💧 [Trecho Barrilete ID: {0}] Tubulação Principal (Peso Acum: {1})".format(
-                            b_id, no.get("peso_acum", 0.0)
-                        )
+                        item.Content = (tag_r + " Tubulação Principal").format(b_id)
                         item.Tag = b_id
-                        item.FontSize = 11
-                        lst.Items.Add(item)
-                        items_added += 1
-                    v_id = no.get("vert")
-                    if v_id:
-                        item = ListBoxItem()
-                        item.Content = "💧 [Trecho Descida ID: {0}] Descida de Parede / Prumada".format(v_id)
-                        item.Tag = v_id
                         item.FontSize = 11
                         lst.Items.Add(item)
                         items_added += 1
@@ -284,7 +294,7 @@ class HydroStudioInteractiveWindow(Window):
                 
         if items_added == 0:
             item = ListBoxItem()
-            item.Content = "(Nenhum elemento identificado ainda. Clique em 'Leitura (M1)' ou 'Calcula' para popular)"
+            item.Content = "(Nenhum elemento desta disciplina identificado ainda. Clique em 'Dimensionar' para calcular)"
             item.FontSize = 11
             lst.Items.Add(item)
             
@@ -437,7 +447,7 @@ class HydroStudioInteractiveWindow(Window):
             stack.Children.Add(lbl_tree)
             
             # ListBox of elements
-            stack.Children.Add(self.carregar_elementos_identificados())
+            stack.Children.Add(self.carregar_elementos_identificados("HID"))
             
             action_bar = Border()
             action_bar.Background = hex_b("#ffffff")
@@ -536,7 +546,7 @@ class HydroStudioInteractiveWindow(Window):
             lbl_tree.Foreground = hex_b("#0f172a")
             stack.Children.Add(lbl_tree)
             
-            stack.Children.Add(self.carregar_elementos_identificados())
+            stack.Children.Add(self.carregar_elementos_identificados("ESG"))
             
             action_bar = Border()
             action_bar.Background = hex_b("#ffffff")
@@ -635,7 +645,7 @@ class HydroStudioInteractiveWindow(Window):
             lbl_tree.Foreground = hex_b("#0f172a")
             stack.Children.Add(lbl_tree)
             
-            stack.Children.Add(self.carregar_elementos_identificados())
+            stack.Children.Add(self.carregar_elementos_identificados("PLUV"))
             
             action_bar = Border()
             action_bar.Background = hex_b("#ffffff")
