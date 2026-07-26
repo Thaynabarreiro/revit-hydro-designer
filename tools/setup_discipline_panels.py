@@ -806,6 +806,47 @@ class HydroStudioInteractiveWindow(Window):
             lbl_desc.Margin = Thickness(0, 0, 0, 15)
             ts.Children.Add(lbl_desc)
             
+            # Card com caminhos oficiais dos arquivos
+            paths_box = Border()
+            paths_box.Background = hex_b("#f8fafc")
+            paths_box.BorderBrush = hex_b("#e2e8f0")
+            paths_box.BorderThickness = Thickness(1)
+            paths_box.CornerRadius = System.Windows.CornerRadius(8)
+            paths_box.Padding = Thickness(12)
+            paths_box.Margin = Thickness(0, 0, 0, 15)
+            
+            p_stack = StackPanel()
+            
+            rte_path = os.path.join(RAIZ, "template", "Revit_Hydro_Designer_Template_NBR.rte")
+            rvt_path = os.path.join(RAIZ, "template", "Revit_Hydro_Designer_Template_NBR.rvt")
+            doc_path = revit.doc.PathName if (revit.doc and revit.doc.PathName) else "HID_CT_PROJETO TIOS_AP_00_RV00;.rvt"
+            
+            t1 = TextBlock()
+            t1.Text = "📍 Camiho Salvo do Template (.rte):\n   " + rte_path
+            t1.FontSize = 11
+            t1.FontWeight = System.Windows.FontWeights.SemiBold
+            t1.Foreground = hex_b("#0284c7")
+            t1.Margin = Thickness(0, 0, 0, 8)
+            p_stack.Children.Add(t1)
+            
+            t2 = TextBlock()
+            t2.Text = "📍 Caminho Salvo do Template (.rvt):\n   " + rvt_path
+            t2.FontSize = 11
+            t2.FontWeight = System.Windows.FontWeights.SemiBold
+            t2.Foreground = hex_b("#059669")
+            t2.Margin = Thickness(0, 0, 0, 8)
+            p_stack.Children.Add(t2)
+            
+            t3 = TextBlock()
+            t3.Text = "📍 Modelo Arquitetônico / Hidráulico Atual:\n   " + doc_path
+            t3.FontSize = 11
+            t3.FontWeight = System.Windows.FontWeights.SemiBold
+            t3.Foreground = hex_b("#475569")
+            p_stack.Children.Add(t3)
+            
+            paths_box.Child = p_stack
+            ts.Children.Add(paths_box)
+            
             b_make_tpl = Button()
             b_make_tpl.Content = "🏛️ Executar Purga & Gerar Template Oficial (.rte / .rvt)"
             b_make_tpl.Background = hex_b("#d97706")

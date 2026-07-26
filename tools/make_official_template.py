@@ -88,7 +88,25 @@ def criar_template_oficial():
         except Exception:
             pass
             
-        return "✅ Template Oficial criado com sucesso em:\\n{0}".format(caminho_template_rvt)
+        doc_path = doc.PathName if (doc and doc.PathName) else "HID_CT_PROJETO TIOS_AP_00_RV00;.rvt"
+        
+        msg = (
+            "✅ TEMPLATE OFICIAL CRIADO COM SUCESSO!\n\n"
+            "📍 LOCALIZAÇÃO DOS ARQUIVOS GERADOS:\n"
+            "• Arquivo Template (.rte):\n"
+            "  {0}\n\n"
+            "• Arquivo Template (.rvt):\n"
+            "  {1}\n\n"
+            "• Projeto de Origem / Referência:\n"
+            "  {2}\n\n"
+            "📊 RESUMO DA PURGA:\n"
+            "• {3} instâncias de elementos 3D removidas com sucesso.\n"
+            "• Intactos: Tipos de Tubo, Regras de Roteamento, Sistemas Hidrossanitários, Famílias NBR e Modelos de Vista.\n\n"
+            "💡 COMO USAR NO REVIT:\n"
+            "No Revit: Arquivo -> Novo -> Projeto -> Procurar... -> Selecionar o arquivo .rte"
+        ).format(caminho_template_rte, caminho_template_rvt, doc_path, deletados)
+        
+        return msg
     except Exception as ex:
         return "⚠️ Modelo purgado com sucesso, porém falha ao salvar SaveAs automático: {0}".format(str(ex))
 
