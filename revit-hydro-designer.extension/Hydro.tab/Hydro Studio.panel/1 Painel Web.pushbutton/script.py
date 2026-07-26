@@ -30,7 +30,7 @@ class HydroStudioInteractiveWindow(Window):
         self.Height = 840
         self.WindowStartupLocation = WindowStartupLocation.CenterScreen
         self.Background = hex_b("#f8fafc")
-        self.active_tab = "CFG"
+        self.active_tab = "GUIDE"
         
         self.carregar_config_projeto()
         
@@ -117,6 +117,7 @@ class HydroStudioInteractiveWindow(Window):
         side_stack.Children.Add(btn_sync)
         
         disc_items = [
+            ("📖 Guia do Projetista (Passo a Passo)", "GUIDE"),
             ("⚙️ Configurações do Projeto", "CFG"),
             ("💧 Água Fria (AF)", "AF"),
             ("🔥 Água Quente (AQ)", "AQ"),
@@ -156,7 +157,7 @@ class HydroStudioInteractiveWindow(Window):
         main_grid.Children.Add(self.main_content)
         self.Content = main_grid
         
-        self.render_tab("CFG")
+        self.render_tab("GUIDE")
 
     def carregar_config_projeto(self):
         path_cfg = os.path.join(hydro.DATA, "config_projeto.json")
@@ -444,7 +445,7 @@ class HydroStudioInteractiveWindow(Window):
                 b_amb.BorderBrush = hex_b("#cbd5e1")
                 b_amb.Padding = Thickness(8, 4, 8, 4)
                 b_amb.Margin = Thickness(0, 0, 6, 4)
-                b_amb.Click += lambda s, e, elem_id=e_id, a_nome=amb_nome: self.atribuir_ambiente_peca(elem_id, a_nome)
+                b_amb.Click += lambda s, e: self.atribuir_ambiente_peca(e_id, amb_nome)
                 btn_row.Children.Add(b_amb)
                 
             p_panel.Children.Add(btn_row)
@@ -553,7 +554,85 @@ class HydroStudioInteractiveWindow(Window):
         cd_calculado = hab_num * 150.0
         vres_calculado = cd_calculado * dias_num
         
-        if code == "CFG":
+        if code == "GUIDE":
+            tb_h = TextBlock()
+            tb_h.Text = "📖 Guia do Projetista — Passo a Passo de Uso"
+            tb_h.FontSize = 22
+            tb_h.FontWeight = System.Windows.FontWeights.Bold
+            tb_h.Foreground = hex_b("#0f172a")
+            tb_h.Margin = Thickness(0, 0, 0, 15)
+            stack.Children.Add(tb_h)
+            
+            passos = [
+                ("PASSO 0 · Preparação do Modelo & Template", 
+                 "Abra o Revit com o Template Oficial do Plugin (.rte) em '🏛️ Template Oficial' ou vincule a arquitetura. Certifique-se de que os ambientes (Rooms) do projeto tenham nomes claros (ex: Banheiro Social, Cozinha).",
+                 "#0284c7"),
+                ("PASSO 1 · Configurações do Projeto (Aba ⚙️ Configurações)", 
+                 "Acesse a aba '⚙️ Configurações do Projeto', informe o Nome do Cliente, Número de Moradores e Dias de Reservação. Clique em '💾 Salvar Configurações'.",
+                 "#059669"),
+                ("PASSO 2 · Leitura Automatizada do Modelo Arquitetônico (M1)", 
+                 "Clique em '📋 Executar Leitura (M1)'. O plugin escaneará o modelo, mapeará todos os ambientes e louças e gerará a lista de pontos de consumo. Se houver louças pendentes de ambiente, use os botões rápidos do assistente.",
+                 "#d97706"),
+                ("PASSO 3 · Seleção de Disciplina e Escolha da Tubulação", 
+                 "No menu lateral, escolha qual sistema deseja projetar:
+• 💧 Água Fria: Tubos PVC Soldável NBR 5626 (DN 25, 32, 50mm)
+• 🔥 Água Quente: CPVC Ultraterm / PPR NBR 7198 (Resistente a 80°C)
+• 🚽 Esgoto: PVC Sanitário NBR 8160 com Caixas de Gordura / Passagem
+• 🌧️ Pluvial: PVC Pluvial NBR 10844 com Calhas e Ralos
+• 🌱 Tratamento: Fossa Séptica, Filtro Anaeróbio e Sumidouro",
+                 "#0f172a"),
+                ("PASSO 4 · Cálculos Normativos & Dimensionamento de Vazão/Pressão", 
+                 "Na aba da disciplina escolhida, clique em '⚡ Calcula & Dimensiona'. O plugin executará as equações de norma (vazões por pesos relativos Q=0,3√ΣP, velocidades máximas v≤3,0m/s e volumes de reservação).",
+                 "#7c3aed"),
+                ("PASSO 5 · Geração 3D Automática da Rede MEP no Revit", 
+                 "Clique em '📦 Gera Rede 3D no Revit'. O plugin traçará automaticamente toda a tubulação 3D, conectando louças, descidas por dentro das paredes, curvas a 90° e tês de redução.",
+                 "#2563eb"),
+                ("PASSO 6 · Geração de Pranchas A4 & Memoriais de Cálculo", 
+                 "Clique em '📐 Gera Pranchas A4' para detalhamento isométrico dos ambientes e vá na aba '📄 Memoriais' para exportar relatórios completos em PDF, DOCX (Word) e HTML!",
+                 "#059669")
+            ]
+            
+            for p_title, p_desc, p_color in passos:
+                p_card = Border()
+                p_card.Background = hex_b("#ffffff")
+                p_card.BorderBrush = hex_b("#e2e8f0")
+                p_card.BorderThickness = Thickness(1)
+                p_card.CornerRadius = System.Windows.CornerRadius(10)
+                p_card.Padding = Thickness(15)
+                p_card.Margin = Thickness(0, 0, 0, 12)
+                
+                ps = StackPanel()
+                
+                t_lbl = TextBlock()
+                t_lbl.Text = p_title
+                t_lbl.FontSize = 13
+                t_lbl.FontWeight = System.Windows.FontWeights.Bold
+                t_lbl.Foreground = hex_b(p_color)
+                t_lbl.Margin = Thickness(0, 0, 0, 6)
+                ps.Children.Add(t_lbl)
+                
+                d_lbl = TextBlock()
+                d_lbl.Text = p_desc
+                d_lbl.FontSize = 11
+                d_lbl.Foreground = hex_b("#475569")
+                d_lbl.TextWrapping = TextWrapping.Wrap
+                ps.Children.Add(d_lbl)
+                
+                p_card.Child = ps
+                stack.Children.Add(p_card)
+                
+            b_start = Button()
+            b_start.Content = "🚀 Começar Agora (Ir para ⚙️ Configurações do Projeto)"
+            b_start.Background = hex_b("#0284c7")
+            b_start.Foreground = hex_b("#ffffff")
+            b_start.FontWeight = System.Windows.FontWeights.Bold
+            b_start.FontSize = 13
+            b_start.Padding = Thickness(15, 10, 15, 10)
+            b_start.Margin = Thickness(0, 10, 0, 0)
+            b_start.Click += lambda s, e: self.render_tab("CFG")
+            stack.Children.Add(b_start)
+
+        elif code == "CFG":
             tb_h = TextBlock()
             tb_h.Text = "Configurações do Projeto & Leitura BIM"
             tb_h.FontSize = 22
