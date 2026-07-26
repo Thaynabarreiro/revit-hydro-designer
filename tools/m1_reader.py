@@ -35,7 +35,7 @@ def nm(el):
         return "(?)"
     try:
         v = Element.Name.__get__(el)
-        return v if isinstance(v, basestring) else "(?)"
+        return v if isinstance(v, (str, bytes)) or type(v).__name__ in ('str', 'unicode') else "(?)"
     except Exception:
         return "(?)"
 
