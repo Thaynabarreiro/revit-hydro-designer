@@ -240,7 +240,13 @@ t.Commit()
 p_res = res_inst.Location.Point if res_inst is not None else XYZ(
     sum([x["org"].X for x in pecas]) / len(pecas),
     sum([x["org"].Y for x in pecas]) / len(pecas), nivel_topo.Elevation)
-x_esp = p_res.X
+
+# Limita o eixo da espinha DENTRO do contorno interno das louças (evita varandas/externo)
+min_x = min([x["org"].X for x in pecas])
+max_x = max([x["org"].X for x in pecas])
+x_esp = max(min_x + ft(300.0), min(max_x - ft(300.0), p_res.X))
+print("Espinha posicionada internamente em X = {0:.0f} mm (Limites Peças: {1:.0f} a {2:.0f} mm)".format(
+    mm(x_esp), mm(min_x), mm(max_x)))
 
 # ------------------------------------------------------------- faixas
 pecas.sort(key=lambda x: x["org"].Y)
@@ -426,7 +432,17 @@ def liga(a, b, ponto, rot, terceiro=None):
             doc.Create.NewElbowFitting(ca, cb)
         fit_ok += 1
     except Exception as e:
-        fit_falha.append((rot, str(e)[:50]))
+        # Fallback de conexao direta caso a regra de preferencia falhe
+        try:
+            if not ca.IsConnected and not cb.IsConnected:
+                ca.ConnectTo(cb)
+            if terceiro is not None:
+                cc = conector_perto(terceiro, ponto)
+                if cc and not cc.IsConnected and not ca.IsConnected:
+                    ca.ConnectTo(cc)
+            fit_ok += 1
+        except Exception as ex2:
+            fit_falha.append((rot, str(e)[:50]))
 
 
 # Joelhos no percurso externo da caixa d'agua
@@ -503,7 +519,10 @@ print("conexoes    : " + str(FilteredElementCollector(doc).OfCategory(
 print("comprimento : {0:.2f} m".format(mm(comp) / 1000.0))
 print("warnings    : " + str(len(doc.GetWarnings())))
 
-o = SaveOptions()
-o.Compact = True
-doc.Save(o)
-print("salvo.")
+try:
+    o = SaveOptions()
+    o.Compact = True
+    doc.Save(o)
+    print("salvo.")
+except Exception as e:
+    print("Aviso ao salvar documento: " + str(e)[:60])
