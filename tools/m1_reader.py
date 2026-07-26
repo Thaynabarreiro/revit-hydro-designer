@@ -28,8 +28,9 @@ elif "__file__" in globals():
     RAIZ = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
 else:
     RAIZ = os.environ.get("HYDRO_PROJECT_ROOT", os.getcwd())
-ARQ_NORMA = os.path.join(RAIZ, "data", "pecas_br.json")
-ARQ_SAIDA = os.path.join(RAIZ, "data", "pontos_consumo.json")
+D = os.path.join(RAIZ, "data")
+ARQ_NORMA = os.path.join(D, "pecas_br.json")
+ARQ_SAIDA = os.path.join(D, "pontos_consumo.json")
 
 
 def nm(el):

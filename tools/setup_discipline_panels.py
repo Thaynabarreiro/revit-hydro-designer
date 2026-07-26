@@ -270,12 +270,14 @@ def hex_b(hex_code):
 
 class HydroStudioInteractiveWindow(Window):
     def __init__(self):
-        self.Title = "Revit Hydro Designer — Studio BIM (Bi-directional Highlight)"
+        self.Title = "Revit Hydro Designer — Studio BIM"
         self.Width = 1240
         self.Height = 820
         self.WindowStartupLocation = WindowStartupLocation.CenterScreen
         self.Background = hex_b("#f8fafc")
         self.active_tab = "CFG"
+        
+        self.carregar_config_projeto()
         
         main_grid = Grid()
         col_side = ColumnDefinition()
@@ -349,7 +351,6 @@ class HydroStudioInteractiveWindow(Window):
         status_card.Child = tb_status
         side_stack.Children.Add(status_card)
         
-        # Sync Button
         btn_sync = Button()
         btn_sync.Content = "📍 Ler Seleção Atual do Revit"
         btn_sync.Background = hex_b("#0284c7")
@@ -399,6 +400,42 @@ class HydroStudioInteractiveWindow(Window):
         
         self.render_tab("CFG")
 
+    def carregar_config_projeto(self):
+        path_cfg = os.path.join(hydro.DATA, "config_projeto.json")
+        if os.path.exists(path_cfg):
+            try:
+                with open(path_cfg, "r") as f:
+                    c = json.load(f)
+                self.cfg_nome = c.get("projeto", {}).get("nome", "Casa Unifamiliar Henrique & Suelen")
+                self.cfg_hab = str(c.get("ocupacao", {}).get("habitantes", 6))
+                self.cfg_dias = str(c.get("reservacao", {}).get("dias_autonomia", 2))
+                return
+            except Exception:
+                pass
+        self.cfg_nome = "Casa Unifamiliar Henrique & Suelen"
+        self.cfg_hab = "6"
+        self.cfg_dias = "2"
+
+    def salvar_config_projeto(self, sender, args):
+        self.cfg_nome = self.txt_nome.Text
+        self.cfg_hab = self.txt_hab.Text
+        self.cfg_dias = self.txt_dias.Text
+        path_cfg = os.path.join(hydro.DATA, "config_projeto.json")
+        try:
+            if os.path.exists(path_cfg):
+                with open(path_cfg, "r") as f:
+                    c = json.load(f)
+            else:
+                c = {}
+            c.setdefault("projeto", {})["nome"] = self.cfg_nome
+            c.setdefault("ocupacao", {})["habitantes"] = int(self.cfg_hab) if self.cfg_hab.isdigit() else 6
+            c.setdefault("reservacao", {})["dias_autonomia"] = float(self.cfg_dias) if self.cfg_dias else 2.0
+            with open(path_cfg, "w") as f:
+                json.dump(c, f, indent=2, ensure_ascii=False)
+            self.status_txt.Text = "💾 Configurações do Projeto salvas com sucesso em config_projeto.json!"
+        except Exception as ex:
+            self.status_txt.Text = "Aviso ao salvar configurações: " + str(ex)
+
     def highlight_tab(self, code):
         for c, btn in self.btn_map.items():
             if c == code:
@@ -431,36 +468,24 @@ class HydroStudioInteractiveWindow(Window):
         else:
             self.status_txt.Text = "Nenhum elemento selecionado no modelo do Revit."
 
-    def on_select_element_in_app(self, sender, args):
-        if not sender.SelectedItem:
-            return
-        elem_id_int = getattr(sender.SelectedItem, "Tag", None)
-        if not elem_id_int:
-            return
-            
+    def zoom_elemento_revit(self, elem_id_int):
         uidoc = revit.uidoc
         doc = revit.doc
         if not uidoc or not doc:
             return
-            
         try:
             elem_id = DB.ElementId(System.Int64(elem_id_int))
             el = doc.GetElement(elem_id)
             if el:
-                # Set selection in Revit
                 coll = System.Collections.Generic.List[DB.ElementId]()
                 coll.Add(elem_id)
                 uidoc.Selection.SetElementIds(coll)
-                
-                # Show / Zoom in Revit
                 uidoc.ShowElements(elem_id)
-                
-                # Apply Graphic Override (Cyan Line/Highlight)
-                tx = DB.Transaction(doc, "Destacar Elemento Studio BIM")
+                tx = DB.Transaction(doc, "Destacar Louça Pendente")
                 tx.Start()
                 try:
                     ov = DB.OverrideGraphicSettings()
-                    c = DB.Color(0, 210, 255)
+                    c = DB.Color(255, 140, 0)
                     ov.SetProjectionLineColor(c)
                     ov.SetProjectionLineWeight(8)
                     doc.ActiveView.SetElementOverrides(elem_id, ov)
@@ -469,10 +494,124 @@ class HydroStudioInteractiveWindow(Window):
                     pass
                 finally:
                     tx.Commit()
-                    
-                self.status_txt.Text = "✨ [ID: {0}] {1} selecionado e PINTADO de ciano no Revit!".format(elem_id_int, el.Name)
+                self.status_txt.Text = "📍 Louça [ID: {0}] {1} destacada em Laranja no Revit!".format(elem_id_int, el.Name)
         except Exception as ex:
-            self.status_txt.Text = "Aviso ao selecionar elemento: {0}".format(str(ex))
+            self.status_txt.Text = "Aviso ao destacar louça: " + str(ex)
+
+    def atribuir_ambiente_peca(self, elem_id_int, ambiente_nome):
+        path_pontos = os.path.join(hydro.DATA, "pontos_consumo.json")
+        if not os.path.exists(path_pontos):
+            return
+        try:
+            with open(path_pontos, "r") as f:
+                data = json.load(f)
+            revisar = data.get("revisar", [])
+            pontos = data.get("pontos_consumo", [])
+            
+            alvo = None
+            novos_revisar = []
+            for r in revisar:
+                if r.get("id") == elem_id_int:
+                    alvo = r
+                else:
+                    novos_revisar.append(r)
+                    
+            if alvo:
+                alvo["ambiente"] = ambiente_nome
+                alvo["confianca"] = "atribuido manualmente pelo usuario"
+                pontos.append(alvo)
+                data["revisar"] = novos_revisar
+                data["pontos_consumo"] = pontos
+                with open(path_pontos, "w") as f:
+                    json.dump(data, f, indent=2, ensure_ascii=False)
+                self.status_txt.Text = "✅ Louça [ID: {0}] atribuída com sucesso ao {1}!".format(elem_id_int, ambiente_nome)
+                self.render_tab(self.active_tab)
+        except Exception as ex:
+            self.status_txt.Text = "Aviso ao atribuir ambiente: " + str(ex)
+
+    def carregar_card_loucas_pendentes(self):
+        path_pontos = os.path.join(hydro.DATA, "pontos_consumo.json")
+        if not os.path.exists(path_pontos):
+            return None
+        try:
+            with open(path_pontos, "r") as f:
+                data = json.load(f)
+            revisar = data.get("revisar", [])
+        except Exception:
+            return None
+            
+        if not revisar:
+            return None
+            
+        card = Border()
+        card.Background = hex_b("#fffbe6")
+        card.BorderBrush = hex_b("#ffe58f")
+        card.BorderThickness = Thickness(1)
+        card.CornerRadius = System.Windows.CornerRadius(10)
+        card.Padding = Thickness(15)
+        card.Margin = Thickness(0, 0, 0, 15)
+        
+        c_stack = StackPanel()
+        
+        lbl_t = TextBlock()
+        lbl_t.Text = "⚠️ {0} Louça(s) Pendente(s) de Atribuição de Ambiente".format(len(revisar))
+        lbl_t.FontSize = 13
+        lbl_t.FontWeight = System.Windows.FontWeights.Bold
+        lbl_t.Foreground = hex_b("#d48806")
+        lbl_t.Margin = Thickness(0, 0, 0, 10)
+        c_stack.Children.Add(lbl_t)
+        
+        for item_rev in revisar[:5]:
+            p_panel = StackPanel()
+            p_panel.Margin = Thickness(0, 0, 0, 10)
+            
+            tb_desc = TextBlock()
+            tb_desc.Text = "• [ID: {0}] {1}".format(
+                item_rev.get("id"), item_rev.get("familia", "Peça")
+            )
+            tb_desc.FontSize = 11
+            tb_desc.FontWeight = System.Windows.FontWeights.SemiBold
+            p_panel.Children.Add(tb_desc)
+            
+            btn_row = WrapPanel()
+            btn_row.Margin = Thickness(0, 4, 0, 0)
+            
+            e_id = item_rev.get("id")
+            
+            b_rev = Button()
+            b_rev.Content = "📍 Ver no Revit"
+            b_rev.Background = hex_b("#0284c7")
+            b_rev.Foreground = hex_b("#ffffff")
+            b_rev.Padding = Thickness(8, 4, 8, 4)
+            b_rev.Margin = Thickness(0, 0, 8, 4)
+            b_rev.Click += lambda s, e, elem_id=e_id: self.zoom_elemento_revit(elem_id)
+            btn_row.Children.Add(b_rev)
+            
+            ambientes_rapidos = ["Banheiro 1", "Banheiro Suíte", "Cozinha", "Lavanderia", "Lavabo"]
+            for amb_nome in ambientes_rapidos:
+                b_amb = Button()
+                b_amb.Content = amb_nome
+                b_amb.Background = hex_b("#ffffff")
+                b_amb.Foreground = hex_b("#0f172a")
+                b_amb.BorderBrush = hex_b("#cbd5e1")
+                b_amb.Padding = Thickness(8, 4, 8, 4)
+                b_amb.Margin = Thickness(0, 0, 6, 4)
+                b_amb.Click += lambda s, e, elem_id=e_id, a_nome=amb_nome: self.atribuir_ambiente_peca(elem_id, a_nome)
+                btn_row.Children.Add(b_amb)
+                
+            p_panel.Children.Add(btn_row)
+            c_stack.Children.Add(p_panel)
+            
+        card.Child = c_stack
+        return card
+
+    def on_select_element_in_app(self, sender, args):
+        if not sender.SelectedItem:
+            return
+        elem_id_int = getattr(sender.SelectedItem, "Tag", None)
+        if not elem_id_int:
+            return
+        self.zoom_elemento_revit(elem_id_int)
 
     def carregar_elementos_identificados(self, code="HID"):
         lst = ListBox()
@@ -495,7 +634,7 @@ class HydroStudioInteractiveWindow(Window):
             json_rede = os.path.join(hydro.DATA, "rede_ids.json")
             tag_p = "⚡ [Moto-Bomba - Ponto Recalque ID: {0}]"
             tag_r = "⚡ [Moto-Bomba - Tubo Recalque ID: {0}]"
-        else: # "HID"
+        else:
             json_pontos = os.path.join(hydro.DATA, "pontos_consumo.json")
             json_rede = os.path.join(hydro.DATA, "rede_ids.json")
             tag_p = "💧 [Água Fria - Louça ID: {0}]"
@@ -546,6 +685,7 @@ class HydroStudioInteractiveWindow(Window):
         return lst
 
     def render_tab(self, code):
+        self.active_tab = code
         self.highlight_tab(code)
         stack = StackPanel()
         
@@ -577,7 +717,7 @@ class HydroStudioInteractiveWindow(Window):
             fs.Children.Add(lbl1)
             
             self.txt_nome = TextBox()
-            self.txt_nome.Text = "Casa Unifamiliar Henrique & Suelen"
+            self.txt_nome.Text = self.cfg_nome
             self.txt_nome.Padding = Thickness(8, 6, 8, 6)
             self.txt_nome.Margin = Thickness(0, 0, 0, 12)
             fs.Children.Add(self.txt_nome)
@@ -591,7 +731,7 @@ class HydroStudioInteractiveWindow(Window):
             fs.Children.Add(lbl2)
             
             self.txt_hab = TextBox()
-            self.txt_hab.Text = "6"
+            self.txt_hab.Text = self.cfg_hab
             self.txt_hab.Padding = Thickness(8, 6, 8, 6)
             self.txt_hab.Margin = Thickness(0, 0, 0, 12)
             fs.Children.Add(self.txt_hab)
@@ -605,13 +745,27 @@ class HydroStudioInteractiveWindow(Window):
             fs.Children.Add(lbl3)
             
             self.txt_dias = TextBox()
-            self.txt_dias.Text = "2"
+            self.txt_dias.Text = self.cfg_dias
             self.txt_dias.Padding = Thickness(8, 6, 8, 6)
             self.txt_dias.Margin = Thickness(0, 0, 0, 15)
             fs.Children.Add(self.txt_dias)
             
+            btn_save = Button()
+            btn_save.Content = "💾 Salvar Configurações do Projeto"
+            btn_save.Background = hex_b("#059669")
+            btn_save.Foreground = hex_b("#ffffff")
+            btn_save.FontWeight = System.Windows.FontWeights.SemiBold
+            btn_save.Padding = Thickness(12, 8, 12, 8)
+            btn_save.Click += self.salvar_config_projeto
+            fs.Children.Add(btn_save)
+            
             form_card.Child = fs
             stack.Children.Add(form_card)
+            
+            # Card de Louças Pendentes se houver
+            card_pendentes = self.carregar_card_loucas_pendentes()
+            if card_pendentes:
+                stack.Children.Add(card_pendentes)
             
             action_bar = Border()
             action_bar.Background = hex_b("#ffffff")
@@ -683,7 +837,10 @@ class HydroStudioInteractiveWindow(Window):
                 m_panel.Children.Add(m_card)
             stack.Children.Add(m_panel)
             
-            # Element Tree Header
+            card_pendentes = self.carregar_card_loucas_pendentes()
+            if card_pendentes:
+                stack.Children.Add(card_pendentes)
+            
             lbl_tree = TextBlock()
             lbl_tree.Text = "📍 Elementos & Trechos Identificados (Clique para Destacar no Revit):"
             lbl_tree.FontSize = 12
@@ -691,7 +848,6 @@ class HydroStudioInteractiveWindow(Window):
             lbl_tree.Foreground = hex_b("#0f172a")
             stack.Children.Add(lbl_tree)
             
-            # ListBox of elements
             stack.Children.Add(self.carregar_elementos_identificados("HID"))
             
             action_bar = Border()
@@ -1124,6 +1280,7 @@ class HydroStudioInteractiveWindow(Window):
         try:
             res = hydro.rodar(script_name)
             self.status_txt.Text = "✅ {0} concluído com sucesso!\\n\\n{1}".format(description, str(res)[:300])
+            self.render_tab(self.active_tab)
         except Exception as ex:
             self.status_txt.Text = "⚠️ Aviso ao executar {0}: {1}".format(description, str(ex))
 
