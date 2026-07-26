@@ -284,6 +284,83 @@ class HydroStudioInteractiveWindow(Window):
         except Exception as ex:
             self.status_txt.Text = "Aviso ao atribuir ambiente: " + str(ex)
 
+    def carregar_card_ambientes_lidos(self):
+        path_pontos = os.path.join(hydro.DATA, "pontos_consumo.json")
+        if not os.path.exists(path_pontos):
+            return None
+        try:
+            with open(path_pontos, "r") as f:
+                data = json.load(f)
+            pontos = data.get("pontos_consumo", [])
+        except Exception:
+            return None
+            
+        if not pontos:
+            return None
+            
+        card = Border()
+        card.Background = hex_b("#ffffff")
+        card.BorderBrush = hex_b("#cbd5e1")
+        card.BorderThickness = Thickness(1)
+        card.CornerRadius = System.Windows.CornerRadius(12)
+        card.Padding = Thickness(20)
+        card.Margin = Thickness(0, 0, 0, 20)
+        
+        c_stack = StackPanel()
+        
+        header = TextBlock()
+        header.Text = "🏡 Ambientes & Louças Identificados no Modelo ({0} Pontos de Consumo)".format(len(pontos))
+        header.FontSize = 14
+        header.FontWeight = System.Windows.FontWeights.Bold
+        header.Foreground = hex_b("#0f172a")
+        header.Margin = Thickness(0, 0, 0, 12)
+        c_stack.Children.Add(header)
+        
+        por_amb = {}
+        for p in pontos:
+            amb = p.get("ambiente", "Sem Ambiente")
+            por_amb.setdefault(amb, []).append(p)
+            
+        for amb_nome in sorted(por_amb.keys()):
+            lista_pecas = por_amb[amb_nome]
+            peso_total_amb = sum([pt.get("peso", 0.3) for pt in lista_pecas])
+            
+            amb_box = Border()
+            amb_box.Background = hex_b("#f8fafc")
+            amb_box.BorderBrush = hex_b("#e2e8f0")
+            amb_box.BorderThickness = Thickness(1)
+            amb_box.CornerRadius = System.Windows.CornerRadius(8)
+            amb_box.Padding = Thickness(12)
+            amb_box.Margin = Thickness(0, 0, 0, 8)
+            
+            a_stack = StackPanel()
+            
+            tb_title = TextBlock()
+            tb_title.Text = "📍 {0} ({1} peça(s) · Peso Total: {2:.2f})".format(
+                amb_nome.title(), len(lista_pecas), peso_total_amb
+            )
+            tb_title.FontSize = 12
+            tb_title.FontWeight = System.Windows.FontWeights.SemiBold
+            tb_title.Foreground = hex_b("#0284c7")
+            a_stack.Children.Add(tb_title)
+            
+            desc_pecas = []
+            for pt in lista_pecas:
+                desc_pecas.append("{0} [Peso: {1}]".format(pt.get("desc", "Peça"), pt.get("peso", 0.3)))
+                
+            tb_pecas = TextBlock()
+            tb_pecas.Text = "   • " + "\n   • ".join(desc_pecas)
+            tb_pecas.FontSize = 11
+            tb_pecas.Foreground = hex_b("#475569")
+            tb_pecas.Margin = Thickness(0, 4, 0, 0)
+            a_stack.Children.Add(tb_pecas)
+            
+            amb_box.Child = a_stack
+            c_stack.Children.Add(amb_box)
+            
+        card.Child = c_stack
+        return card
+
     def carregar_card_loucas_pendentes(self):
         path_pontos = os.path.join(hydro.DATA, "pontos_consumo.json")
         if not os.path.exists(path_pontos):
@@ -517,17 +594,17 @@ class HydroStudioInteractiveWindow(Window):
             form_card.Child = fs
             stack.Children.Add(form_card)
             
-            # Card de Louças Pendentes se houver
             card_pendentes = self.carregar_card_loucas_pendentes()
             if card_pendentes:
                 stack.Children.Add(card_pendentes)
-            
+                
             action_bar = Border()
             action_bar.Background = hex_b("#ffffff")
             action_bar.BorderBrush = hex_b("#cbd5e1")
             action_bar.BorderThickness = Thickness(1)
             action_bar.CornerRadius = System.Windows.CornerRadius(12)
             action_bar.Padding = Thickness(15)
+            action_bar.Margin = Thickness(0, 0, 0, 20)
             ab_stack = WrapPanel()
             
             b1 = Button()
@@ -541,6 +618,10 @@ class HydroStudioInteractiveWindow(Window):
             
             action_bar.Child = ab_stack
             stack.Children.Add(action_bar)
+            
+            card_ambientes = self.carregar_card_ambientes_lidos()
+            if card_ambientes:
+                stack.Children.Add(card_ambientes)
 
         elif code == "HID":
             tb_h = TextBlock()
