@@ -198,7 +198,6 @@ class HydroStudioInteractiveWindow(Window):
                 json.dump(c, f, indent=2, ensure_ascii=False)
             self.status_txt.Text = "💾 Configurações do Projeto salvas com sucesso em config_projeto.json!"
             
-            # Recalcula dinamicamente M2 com o novo numero de habitantes
             try:
                 hydro.rodar("m2_dimensionamento.py")
             except Exception:
@@ -547,7 +546,6 @@ class HydroStudioInteractiveWindow(Window):
         self.highlight_tab(code)
         stack = StackPanel()
         
-        # Le métricas calculadas em tempo real de config_projeto.json / dimensionamento.json
         hab_num = int(self.cfg_hab) if self.cfg_hab.isdigit() else 6
         dias_num = float(self.cfg_dias) if self.cfg_dias else 2.0
         
@@ -668,10 +666,10 @@ class HydroStudioInteractiveWindow(Window):
             m_panel = WrapPanel()
             m_panel.Margin = Thickness(0, 0, 0, 15)
             m_data = [
-                ("Consumo Diário Total", "{0:,.0f} L/dia".format(cd_calculado).replace(",", "."), "per capita: 150 L/hab.dia", "#0284c7"),
-                ("Volume Reservatório", "{0:,.0f} L".format(vres_calculado).replace(",", "."), "60% inferior / 40% superior", "#d97706"),
-                ("Vazão de Projeto Q", "1.42 L/s", "Q = 0,3·√ΣP (NBR 5626)", "#059669"),
-                ("Diâmetro Barrilete", "DN 32 mm", "v ≤ 3,0 m/s", "#475569")
+                ("Consumo Diário Total", "{0:,.0f} L/dia".format(cd_calculado).replace(",", "."), "{0} hab x 150 L/hab.dia".format(hab_num), "#0284c7"),
+                ("Volume Reservatório", "{0:,.0f} L".format(vres_calculado).replace(",", "."), "Autonomia: {0} dias".format(dias_num), "#d97706"),
+                ("Vazão de Projeto Q", "0,70 L/s", "Q = 0,3·√ΣP (ΣP=5.50)", "#059669"),
+                ("Diâmetro Barrilete", "DN 32 mm", "v = 1,16 m/s (NBR 5626)", "#475569")
             ]
             for title, val, note, color in m_data:
                 m_card = Border()
@@ -705,6 +703,23 @@ class HydroStudioInteractiveWindow(Window):
                 m_card.Child = ms
                 m_panel.Children.Add(m_card)
             stack.Children.Add(m_panel)
+            
+            # Nota explicativa de engenharia sobre o barrilete NBR 5626
+            eng_note = Border()
+            eng_note.Background = hex_b("#f0f9ff")
+            eng_note.BorderBrush = hex_b("#bae6fd")
+            eng_note.BorderThickness = Thickness(1)
+            eng_note.CornerRadius = System.Windows.CornerRadius(10)
+            eng_note.Padding = Thickness(12)
+            eng_note.Margin = Thickness(0, 0, 0, 15)
+            
+            en_txt = TextBlock()
+            en_txt.Text = "💡 Nota Técnica de Engenharia (NBR 5626):\nO aumento de moradores ({0} pessoas) eleva a Demanda Diária ({1:,.0f} L/dia) e o Reservatório ({2:,.0f} L).\nA vazão instantânea do barrilete (Q = 0,70 L/s) depende da soma dos pesos das louças (ΣP = 5,50). O diâmetro DN 32 mm opera com velocidade confortável de 1,16 m/s (limite NBR 5626: ≤ 3,0 m/s). Caso mais banheiros sejam adicionados ao projeto, o barrilete subirá para DN 40 mm ou DN 50 mm.".format(hab_num, cd_calculado, vres_calculado).replace(",", ".")
+            en_txt.FontSize = 11
+            en_txt.Foreground = hex_b("#0369a1")
+            en_txt.TextWrapping = TextWrapping.Wrap
+            eng_note.Child = en_txt
+            stack.Children.Add(eng_note)
             
             lbl_tree = TextBlock()
             lbl_tree.Text = "📍 Elementos & Trechos Água Fria (Clique para Destacar no Revit):"
@@ -943,7 +958,7 @@ class HydroStudioInteractiveWindow(Window):
             
             action_bar.Child = ab_stack
             stack.Children.Add(action_bar)
-            
+
         elif code == "PLUV":
             tb_h = TextBlock()
             tb_h.Text = "Águas Pluviais (PLUV)"
