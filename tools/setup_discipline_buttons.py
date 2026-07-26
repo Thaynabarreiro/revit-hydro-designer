@@ -3,7 +3,9 @@
 import os
 import shutil
 
-BASE_DIR = r"c:\Users\Shadow\Documents\00 - Claude - Revit\revit-hydro-designer.extension\Hydro.tab"
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+_proj_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+BASE_DIR = os.path.join(_proj_root, "revit-hydro-designer.extension", "Hydro.tab")
 
 def create_button(panel, name, title, tooltip, script_content, src_icon):
     btn_dir = os.path.join(BASE_DIR, panel, name + ".pushbutton")

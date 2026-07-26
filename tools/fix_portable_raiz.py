@@ -3,8 +3,10 @@
 import os
 import glob
 
-TOOLS_DIR = r"c:\Users\Shadow\Documents\00 - Claude - Revit\tools"
-EXT_LIB = r"c:\Users\Shadow\Documents\00 - Claude - Revit\revit-hydro-designer.extension\lib\hydro.py"
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+_proj_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+TOOLS_DIR = os.path.join(_proj_root, "tools")
+EXT_LIB = os.path.join(_proj_root, "revit-hydro-designer.extension", "lib", "hydro.py")
 
 PORTABLE_HEADER = """_this_dir = os.path.dirname(os.path.abspath(__file__))
 _auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir

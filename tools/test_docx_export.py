@@ -3,8 +3,10 @@ from docx import Document
 from htmldocx import HtmlToDocx
 import re
 
-html_file = r"c:\Users\Shadow\Documents\00 - Claude - Revit\memoriais\Memorial_Hidraulico_Henrique_e_Suelen.html"
-docx_file = r"c:\Users\Shadow\Documents\00 - Claude - Revit\memoriais\Memorial_Hidraulico_Henrique_e_Suelen.docx"
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+_proj_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+html_file = os.path.join(_proj_root, "memoriais", "Memorial_Hidraulico_Henrique_e_Suelen.html")
+docx_file = os.path.join(_proj_root, "memoriais", "Memorial_Hidraulico_Henrique_e_Suelen.docx")
 
 doc = Document()
 html_parser = HtmlToDocx()

@@ -4,9 +4,9 @@ Automated plumbing design for Autodesk Revit — reads an architectural BIM mode
 sizes the cold-water system to code, models the pipe network, verifies pressure,
 and issues a calculation report ready for an engineer's signature.
 
-Built with [pyRevit](https://github.com/pyrevitlabs/pyRevit) and driven through
-the pyRevit Routes REST API, so any MCP-capable AI assistant (such as Claude Code) can develop against
-a live Revit session.
+The project is developed against a live Revit session through pyRevit Routes,
+with an optional local MCP configuration for compatible AI development
+assistants such as Claude Code.
 
 > **Status: work in progress.** Cold water is implemented end to end, including
 > head-loss verification. Hot water, sanitary drainage and venting, stormwater
@@ -18,7 +18,7 @@ a live Revit session.
 
 > [!WARNING]
 > **Engineering Disclaimer**
-> This tool is an automated calculation and modeling assistant for qualified civil and building-services engineers. It automates repetitive NBR 5626, NBR 8160, and NBR 10844 calculations and geometry generation. All sizing outputs, pressure verification, and generated reports MUST be reviewed, validated, and approved by a licensed engineer prior to construction or municipal submission.
+> This tool is an automated calculation and modeling assistant for qualified civil and building-services engineers. The current implementation automates selected cold-water calculations and geometry generation based on the documented NBR 5626 workflow. Sanitary drainage, venting, stormwater, and on-site sewage treatment modules are planned for future releases and are not yet included in the current version. All sizing outputs, pressure verification, and generated reports MUST be reviewed, validated, and approved by a licensed engineer prior to construction or municipal submission.
 
 ---
 
@@ -155,7 +155,7 @@ flowchart TD
 
 ## Requirements
 
-- **Autodesk Revit 2027** (currently verified version; API calls used are designed for cross-version compatibility).
+- **Autodesk Revit 2027**, the currently tested version. Other Revit versions may work, but have not yet been formally validated.
 - [pyRevit v4.8+](https://github.com/pyrevitlabs/pyRevit)
 - A Revit template containing plumbing families with configured routing preferences.
 

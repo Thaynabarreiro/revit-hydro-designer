@@ -7,9 +7,7 @@ _this_dir = os.path.dirname(os.path.abspath(__file__))
 _proj_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
 BASE_DIR = os.path.join(_proj_root, "revit-hydro-designer.extension", "Hydro.tab")
 
-# Search for icon artifacts in local artifacts directory if present
-user_profile = os.environ.get("USERPROFILE", "")
-ARTIFACTS_DIR = os.path.join(user_profile, ".gemini", "antigravity", "brain")
+ASSETS_DIR = os.path.join(_proj_root, "data")
 
 icon_config = os.path.join(_proj_root, "data", "icon_config.png")
 icon_sizing = os.path.join(_proj_root, "data", "icon_sizing.png")

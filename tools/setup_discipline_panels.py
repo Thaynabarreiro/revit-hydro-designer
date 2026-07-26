@@ -4,7 +4,9 @@ import os
 import shutil
 import codecs
 
-EXTENSION_DIR = r"c:\Users\Shadow\Documents\00 - Claude - Revit\revit-hydro-designer.extension"
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+_proj_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+EXTENSION_DIR = os.path.join(_proj_root, "revit-hydro-designer.extension")
 TAB_DIR = os.path.join(EXTENSION_DIR, "Hydro.tab")
 
 def make_button(panel_name, btn_dir_name, title, tooltip, script_code):
