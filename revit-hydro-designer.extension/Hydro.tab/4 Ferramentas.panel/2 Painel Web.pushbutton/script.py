@@ -26,8 +26,8 @@ def hex_b(hex_code):
 class HydroStudioInteractiveWindow(Window):
     def __init__(self):
         self.Title = "Revit Hydro Designer — Studio BIM"
-        self.Width = 1240
-        self.Height = 820
+        self.Width = 1260
+        self.Height = 840
         self.WindowStartupLocation = WindowStartupLocation.CenterScreen
         self.Background = hex_b("#f8fafc")
         self.active_tab = "CFG"
@@ -118,9 +118,11 @@ class HydroStudioInteractiveWindow(Window):
         
         disc_items = [
             ("⚙️ Configurações do Projeto", "CFG"),
-            ("💧 Água Fria & Quente", "HID"),
-            ("🚽 Esgoto & Ventilação", "ESG"),
-            ("🌧️ Pluvial & Tratamento", "PLUV"),
+            ("💧 Água Fria (AF)", "AF"),
+            ("🔥 Água Quente (AQ)", "AQ"),
+            ("🚽 Esgoto & Ventilação (ESG)", "ESG"),
+            ("🌧️ Águas Pluviais (PLUV)", "PLUV"),
+            ("🌱 Tratamento no Lote (TRAT)", "TRAT"),
             ("⚡ Moto-Bomba & Recalque", "REC"),
             ("🔍 Auditoria & Acervo", "AUDIT"),
             ("📄 Memoriais & Exportação", "DOC")
@@ -162,8 +164,10 @@ class HydroStudioInteractiveWindow(Window):
                 with open(path_cfg, "r") as f:
                     c = json.load(f)
                 self.cfg_nome = c.get("projeto", {}).get("nome", "Casa Unifamiliar Henrique & Suelen")
-                self.cfg_hab = str(c.get("ocupacao", {}).get("habitantes", 6))
-                self.cfg_dias = str(c.get("reservacao", {}).get("dias_autonomia", 2))
+                hab = c.get("ocupacao", {}).get("habitantes") or c.get("ocupacao", {}).get("moradores_override") or 6
+                self.cfg_hab = str(hab)
+                dias = c.get("reservacao", {}).get("dias_autonomia", 2)
+                self.cfg_dias = str(dias)
                 return
             except Exception:
                 pass
@@ -182,12 +186,24 @@ class HydroStudioInteractiveWindow(Window):
                     c = json.load(f)
             else:
                 c = {}
+            hab_val = int(self.cfg_hab) if self.cfg_hab.isdigit() else 6
+            dias_val = float(self.cfg_dias) if self.cfg_dias else 2.0
+            
             c.setdefault("projeto", {})["nome"] = self.cfg_nome
-            c.setdefault("ocupacao", {})["habitantes"] = int(self.cfg_hab) if self.cfg_hab.isdigit() else 6
-            c.setdefault("reservacao", {})["dias_autonomia"] = float(self.cfg_dias) if self.cfg_dias else 2.0
+            c.setdefault("ocupacao", {})["habitantes"] = hab_val
+            c.setdefault("ocupacao", {})["moradores_override"] = hab_val
+            c.setdefault("reservacao", {})["dias_autonomia"] = dias_val
+            
             with open(path_cfg, "w") as f:
                 json.dump(c, f, indent=2, ensure_ascii=False)
             self.status_txt.Text = "💾 Configurações do Projeto salvas com sucesso em config_projeto.json!"
+            
+            # Recalcula dinamicamente M2 com o novo numero de habitantes
+            try:
+                hydro.rodar("m2_dimensionamento.py")
+            except Exception:
+                pass
+            self.render_tab("CFG")
         except Exception as ex:
             self.status_txt.Text = "Aviso ao salvar configurações: " + str(ex)
 
@@ -236,11 +252,11 @@ class HydroStudioInteractiveWindow(Window):
                 coll.Add(elem_id)
                 uidoc.Selection.SetElementIds(coll)
                 uidoc.ShowElements(elem_id)
-                tx = DB.Transaction(doc, "Destacar Louça Pendente")
+                tx = DB.Transaction(doc, "Destacar Elemento Studio BIM")
                 tx.Start()
                 try:
                     ov = DB.OverrideGraphicSettings()
-                    c = DB.Color(255, 140, 0)
+                    c = DB.Color(0, 210, 255)
                     ov.SetProjectionLineColor(c)
                     ov.SetProjectionLineWeight(8)
                     doc.ActiveView.SetElementOverrides(elem_id, ov)
@@ -249,9 +265,9 @@ class HydroStudioInteractiveWindow(Window):
                     pass
                 finally:
                     tx.Commit()
-                self.status_txt.Text = "📍 Louça [ID: {0}] {1} destacada em Laranja no Revit!".format(elem_id_int, el.Name)
+                self.status_txt.Text = "📍 Elemento [ID: {0}] {1} destacado em Ciano no Revit!".format(elem_id_int, el.Name)
         except Exception as ex:
-            self.status_txt.Text = "Aviso ao destacar louça: " + str(ex)
+            self.status_txt.Text = "Aviso ao destacar elemento: " + str(ex)
 
     def atribuir_ambiente_peca(self, elem_id_int, ambiente_nome):
         path_pontos = os.path.join(hydro.DATA, "pontos_consumo.json")
@@ -445,13 +461,18 @@ class HydroStudioInteractiveWindow(Window):
             return
         self.zoom_elemento_revit(elem_id_int)
 
-    def carregar_elementos_identificados(self, code="HID"):
+    def carregar_elementos_identificados(self, code="AF"):
         lst = ListBox()
         lst.Height = 180
         lst.Margin = Thickness(0, 10, 0, 15)
         lst.SelectionChanged += self.on_select_element_in_app
         
-        if code == "ESG":
+        if code == "AQ":
+            json_pontos = os.path.join(hydro.DATA, "pontos_consumo_aq.json")
+            json_rede = os.path.join(hydro.DATA, "rede_ids_aq.json")
+            tag_p = "🔥 [Água Quente - Ponto ID: {0}]"
+            tag_r = "🔥 [Água Quente - Tubo ID: {0}]"
+        elif code == "ESG":
             json_pontos = os.path.join(hydro.DATA, "pontos_consumo_esg.json")
             json_rede = os.path.join(hydro.DATA, "rede_ids_esg.json")
             tag_p = "🚽 [Esgoto - Peça Sanitária ID: {0}]"
@@ -461,12 +482,17 @@ class HydroStudioInteractiveWindow(Window):
             json_rede = os.path.join(hydro.DATA, "rede_ids_pluv.json")
             tag_p = "🌧️ [Pluvial - Calha/Ralo ID: {0}]"
             tag_r = "🌧️ [Pluvial - Condutor ID: {0}]"
+        elif code == "TRAT":
+            json_pontos = os.path.join(hydro.DATA, "pontos_consumo_esg.json")
+            json_rede = os.path.join(hydro.DATA, "rede_ids_esg.json")
+            tag_p = "🌱 [Tratamento - Ponto ID: {0}]"
+            tag_r = "🌱 [Tratamento - Efluente ID: {0}]"
         elif code == "REC":
             json_pontos = os.path.join(hydro.DATA, "pontos_consumo.json")
             json_rede = os.path.join(hydro.DATA, "rede_ids.json")
-            tag_p = "⚡ [Moto-Bomba - Ponto Recalque ID: {0}]"
-            tag_r = "⚡ [Moto-Bomba - Tubo Recalque ID: {0}]"
-        else:
+            tag_p = "⚡ [Moto-Bomba - Recalque ID: {0}]"
+            tag_r = "⚡ [Moto-Bomba - Tubo ID: {0}]"
+        else: # "AF"
             json_pontos = os.path.join(hydro.DATA, "pontos_consumo.json")
             json_rede = os.path.join(hydro.DATA, "rede_ids.json")
             tag_p = "💧 [Água Fria - Louça ID: {0}]"
@@ -520,6 +546,13 @@ class HydroStudioInteractiveWindow(Window):
         self.active_tab = code
         self.highlight_tab(code)
         stack = StackPanel()
+        
+        # Le métricas calculadas em tempo real de config_projeto.json / dimensionamento.json
+        hab_num = int(self.cfg_hab) if self.cfg_hab.isdigit() else 6
+        dias_num = float(self.cfg_dias) if self.cfg_dias else 2.0
+        
+        cd_calculado = hab_num * 150.0
+        vres_calculado = cd_calculado * dias_num
         
         if code == "CFG":
             tb_h = TextBlock()
@@ -623,9 +656,9 @@ class HydroStudioInteractiveWindow(Window):
             if card_ambientes:
                 stack.Children.Add(card_ambientes)
 
-        elif code == "HID":
+        elif code == "AF":
             tb_h = TextBlock()
-            tb_h.Text = "Água Fria & Quente (HID)"
+            tb_h.Text = "Água Fria (AF)"
             tb_h.FontSize = 22
             tb_h.FontWeight = System.Windows.FontWeights.Bold
             tb_h.Foreground = hex_b("#0f172a")
@@ -635,10 +668,10 @@ class HydroStudioInteractiveWindow(Window):
             m_panel = WrapPanel()
             m_panel.Margin = Thickness(0, 0, 0, 15)
             m_data = [
-                ("Consumo Diário Total", "1.800 L/dia", "per capita: 150 L/hab.dia", "#0284c7"),
-                ("Volume Reservatório", "3.600 L", "60% inferior / 40% superior", "#d97706"),
-                ("Vazão de Projeto Q", "1.42 L/s", "Q = 0,3·√ΣP", "#059669"),
-                ("Diâmetro Barrilete", "DN 32 mm", "v ≤ 3,0 m/s (NBR 5626)", "#475569")
+                ("Consumo Diário Total", "{0:,.0f} L/dia".format(cd_calculado).replace(",", "."), "per capita: 150 L/hab.dia", "#0284c7"),
+                ("Volume Reservatório", "{0:,.0f} L".format(vres_calculado).replace(",", "."), "60% inferior / 40% superior", "#d97706"),
+                ("Vazão de Projeto Q", "1.42 L/s", "Q = 0,3·√ΣP (NBR 5626)", "#059669"),
+                ("Diâmetro Barrilete", "DN 32 mm", "v ≤ 3,0 m/s", "#475569")
             ]
             for title, val, note, color in m_data:
                 m_card = Border()
@@ -673,18 +706,14 @@ class HydroStudioInteractiveWindow(Window):
                 m_panel.Children.Add(m_card)
             stack.Children.Add(m_panel)
             
-            card_pendentes = self.carregar_card_loucas_pendentes()
-            if card_pendentes:
-                stack.Children.Add(card_pendentes)
-            
             lbl_tree = TextBlock()
-            lbl_tree.Text = "📍 Elementos & Trechos Identificados (Clique para Destacar no Revit):"
+            lbl_tree.Text = "📍 Elementos & Trechos Água Fria (Clique para Destacar no Revit):"
             lbl_tree.FontSize = 12
             lbl_tree.FontWeight = System.Windows.FontWeights.SemiBold
             lbl_tree.Foreground = hex_b("#0f172a")
             stack.Children.Add(lbl_tree)
             
-            stack.Children.Add(self.carregar_elementos_identificados("HID"))
+            stack.Children.Add(self.carregar_elementos_identificados("AF"))
             
             action_bar = Border()
             action_bar.Background = hex_b("#ffffff")
@@ -695,33 +724,123 @@ class HydroStudioInteractiveWindow(Window):
             ab_stack = WrapPanel()
             
             b1 = Button()
-            b1.Content = "⚡ Calcula & Dimensiona AF/AQ"
+            b1.Content = "⚡ Calcula & Dimensiona Água Fria"
             b1.Background = hex_b("#0284c7")
             b1.Foreground = hex_b("#ffffff")
             b1.FontWeight = System.Windows.FontWeights.SemiBold
             b1.Padding = Thickness(15, 10, 15, 10)
             b1.Margin = Thickness(0, 0, 10, 0)
-            b1.Click += lambda s, e: self.exec_tool("m2_dimensionamento.py", "Dimensionamento AF/AQ")
+            b1.Click += lambda s, e: self.exec_tool("m2_dimensionamento.py", "Dimensionamento Água Fria")
             ab_stack.Children.Add(b1)
             
             b2 = Button()
-            b2.Content = "📦 Gera Rede 3D Ortogonal no Revit"
+            b2.Content = "📦 Gera Rede 3D Água Fria no Revit"
             b2.Background = hex_b("#059669")
             b2.Foreground = hex_b("#ffffff")
             b2.FontWeight = System.Windows.FontWeights.SemiBold
             b2.Padding = Thickness(15, 10, 15, 10)
             b2.Margin = Thickness(0, 0, 10, 0)
-            b2.Click += lambda s, e: self.exec_tool("m6g_rede_final.py", "Modelagem 3D AF/AQ")
+            b2.Click += lambda s, e: self.exec_tool("m6g_rede_final.py", "Modelagem 3D AF")
             ab_stack.Children.Add(b2)
             
             b3 = Button()
-            b3.Content = "📐 Gera Pranchas A4 por Ambiente"
+            b3.Content = "📐 Gera Pranchas A4 Água Fria"
             b3.Background = hex_b("#475569")
             b3.Foreground = hex_b("#ffffff")
             b3.FontWeight = System.Windows.FontWeights.SemiBold
             b3.Padding = Thickness(15, 10, 15, 10)
-            b3.Click += lambda s, e: self.exec_tool("m7_gerar_pranchas.py", "Pranchas A4")
+            b3.Click += lambda s, e: self.exec_tool("m7_gerar_pranchas.py", "Pranchas AF")
             ab_stack.Children.Add(b3)
+            
+            action_bar.Child = ab_stack
+            stack.Children.Add(action_bar)
+
+        elif code == "AQ":
+            tb_h = TextBlock()
+            tb_h.Text = "Água Quente (AQ)"
+            tb_h.FontSize = 22
+            tb_h.FontWeight = System.Windows.FontWeights.Bold
+            tb_h.Foreground = hex_b("#0f172a")
+            tb_h.Margin = Thickness(0, 0, 0, 15)
+            stack.Children.Add(tb_h)
+            
+            m_panel = WrapPanel()
+            m_panel.Margin = Thickness(0, 0, 0, 15)
+            m_data = [
+                ("Consumo Água Quente", "{0:,.0f} L/dia".format(cd_calculado * 0.40).replace(",", "."), "per capita: 60 L/hab.dia", "#d97706"),
+                ("Volume Boiler / Aquecedor", "{0:,.0f} L".format(cd_calculado * 0.50).replace(",", "."), "Acumulação / Solar", "#0284c7"),
+                ("Vazão de Projeto Q_aq", "0.85 L/s", "NBR 7198", "#059669"),
+                ("Tubulação Adotada", "CPVC / PPR", "Resistente a 80°C", "#475569")
+            ]
+            for title, val, note, color in m_data:
+                m_card = Border()
+                m_card.Width = 200
+                m_card.Background = hex_b("#ffffff")
+                m_card.BorderBrush = hex_b("#e2e8f0")
+                m_card.BorderThickness = Thickness(1)
+                m_card.CornerRadius = System.Windows.CornerRadius(10)
+                m_card.Padding = Thickness(15)
+                m_card.Margin = Thickness(0, 0, 12, 12)
+                
+                ms = StackPanel()
+                t_lbl = TextBlock()
+                t_lbl.Text = title
+                t_lbl.FontSize = 11
+                t_lbl.Foreground = hex_b("#64748b")
+                v_lbl = TextBlock()
+                v_lbl.Text = val
+                v_lbl.FontSize = 20
+                v_lbl.FontWeight = System.Windows.FontWeights.Bold
+                v_lbl.Foreground = hex_b(color)
+                v_lbl.Margin = Thickness(0, 4, 0, 4)
+                n_lbl = TextBlock()
+                n_lbl.Text = note
+                n_lbl.FontSize = 10
+                n_lbl.Foreground = hex_b("#94a3b8")
+                
+                ms.Children.Add(t_lbl)
+                ms.Children.Add(v_lbl)
+                ms.Children.Add(n_lbl)
+                m_card.Child = ms
+                m_panel.Children.Add(m_card)
+            stack.Children.Add(m_panel)
+            
+            lbl_tree = TextBlock()
+            lbl_tree.Text = "📍 Pontos de Água Quente (Chuveiros, Misturadores, Pias AQ):"
+            lbl_tree.FontSize = 12
+            lbl_tree.FontWeight = System.Windows.FontWeights.SemiBold
+            lbl_tree.Foreground = hex_b("#0f172a")
+            stack.Children.Add(lbl_tree)
+            
+            stack.Children.Add(self.carregar_elementos_identificados("AQ"))
+            
+            action_bar = Border()
+            action_bar.Background = hex_b("#ffffff")
+            action_bar.BorderBrush = hex_b("#cbd5e1")
+            action_bar.BorderThickness = Thickness(1)
+            action_bar.CornerRadius = System.Windows.CornerRadius(12)
+            action_bar.Padding = Thickness(15)
+            ab_stack = WrapPanel()
+            
+            b1 = Button()
+            b1.Content = "⚡ Calcula Água Quente (NBR 7198)"
+            b1.Background = hex_b("#d97706")
+            b1.Foreground = hex_b("#ffffff")
+            b1.FontWeight = System.Windows.FontWeights.SemiBold
+            b1.Padding = Thickness(15, 10, 15, 10)
+            b1.Margin = Thickness(0, 0, 10, 0)
+            b1.Click += lambda s, e: self.exec_tool("m2_dimensionamento_aq.py", "Dimensionamento Água Quente")
+            ab_stack.Children.Add(b1)
+            
+            b2 = Button()
+            b2.Content = "📦 Gera Rede 3D CPVC/PPR no Revit"
+            b2.Background = hex_b("#059669")
+            b2.Foreground = hex_b("#ffffff")
+            b2.FontWeight = System.Windows.FontWeights.SemiBold
+            b2.Padding = Thickness(15, 10, 15, 10)
+            b2.Margin = Thickness(0, 0, 10, 0)
+            b2.Click += lambda s, e: self.exec_tool("m6_rede_agua_quente.py", "Modelagem 3D AQ")
+            ab_stack.Children.Add(b2)
             
             action_bar.Child = ab_stack
             stack.Children.Add(action_bar)
@@ -814,7 +933,7 @@ class HydroStudioInteractiveWindow(Window):
             ab_stack.Children.Add(b2)
             
             b3 = Button()
-            b3.Content = "📐 Pranchas ESG (Cozinha 04/001 / Banheiro 08/001)"
+            b3.Content = "📐 Pranchas ESG (Cozinha / Banheiro)"
             b3.Background = hex_b("#475569")
             b3.Foreground = hex_b("#ffffff")
             b3.FontWeight = System.Windows.FontWeights.SemiBold
@@ -827,7 +946,7 @@ class HydroStudioInteractiveWindow(Window):
             
         elif code == "PLUV":
             tb_h = TextBlock()
-            tb_h.Text = "Pluvial & Tratamento (PLUV / TRAT)"
+            tb_h.Text = "Águas Pluviais (PLUV)"
             tb_h.FontSize = 22
             tb_h.FontWeight = System.Windows.FontWeights.Bold
             tb_h.Foreground = hex_b("#0f172a")
@@ -840,7 +959,7 @@ class HydroStudioInteractiveWindow(Window):
                 ("Intensidade IDF (i)", "156,0 mm/h", "Porto Alegre / SFS", "#0284c7"),
                 ("Vazão de Projeto Q", "6,50 L/s", "Q = (i · A) / 3600", "#d97706"),
                 ("Condutores Verticais", "2x DN 100", "NBR 10844 / DTU 60.11", "#059669"),
-                ("Fossa Séptica", "2.000 L", "NBR 7229 / NBR 13969", "#475569")
+                ("Área de Cobertura", "150 m²", "Área de contribuição", "#475569")
             ]
             for title, val, note, color in m_data:
                 m_card = Border()
@@ -876,7 +995,7 @@ class HydroStudioInteractiveWindow(Window):
             stack.Children.Add(m_panel)
             
             lbl_tree = TextBlock()
-            lbl_tree.Text = "📍 Elementos Pluviais & Tratamento (Clique para Destacar no Revit):"
+            lbl_tree.Text = "📍 Elementos Pluviais (Calhas, Ralos Cobertura, Condutores):"
             lbl_tree.FontSize = 12
             lbl_tree.FontWeight = System.Windows.FontWeights.SemiBold
             lbl_tree.Foreground = hex_b("#0f172a")
@@ -893,7 +1012,7 @@ class HydroStudioInteractiveWindow(Window):
             ab_stack = WrapPanel()
             
             b1 = Button()
-            b1.Content = "⚡ Calcula Pluvial NBR 10844 / DTU 60.11"
+            b1.Content = "⚡ Calcula Pluvial (NBR 10844 / DTU 60.11)"
             b1.Background = hex_b("#0284c7")
             b1.Foreground = hex_b("#ffffff")
             b1.FontWeight = System.Windows.FontWeights.SemiBold
@@ -903,27 +1022,96 @@ class HydroStudioInteractiveWindow(Window):
             ab_stack.Children.Add(b1)
             
             b2 = Button()
-            b2.Content = "🌱 Dimensionar Tratamento (Fossa/Filtro/Sumidouro)"
-            b2.Background = hex_b("#d97706")
+            b2.Content = "📐 Gera Pranchas Pluvial/Cobertura"
+            b2.Background = hex_b("#475569")
             b2.Foreground = hex_b("#ffffff")
             b2.FontWeight = System.Windows.FontWeights.SemiBold
             b2.Padding = Thickness(15, 10, 15, 10)
-            b2.Margin = Thickness(0, 0, 10, 0)
-            b2.Click += lambda s, e: self.exec_tool("m2_dimensionamento_trat.py", "Dimensionamento Tratamento")
+            b2.Click += lambda s, e: self.exec_tool("m7_gerar_pranchas.py", "Pranchas Pluvial")
             ab_stack.Children.Add(b2)
-            
-            b3 = Button()
-            b3.Content = "📐 Gera Pranchas Pluvial/Cobertura (13/001)"
-            b3.Background = hex_b("#475569")
-            b3.Foreground = hex_b("#ffffff")
-            b3.FontWeight = System.Windows.FontWeights.SemiBold
-            b3.Padding = Thickness(15, 10, 15, 10)
-            b3.Click += lambda s, e: self.exec_tool("m7_gerar_pranchas.py", "Pranchas Pluvial")
-            ab_stack.Children.Add(b3)
             
             action_bar.Child = ab_stack
             stack.Children.Add(action_bar)
+
+        elif code == "TRAT":
+            tb_h = TextBlock()
+            tb_h.Text = "Tratamento no Lote (TRAT)"
+            tb_h.FontSize = 22
+            tb_h.FontWeight = System.Windows.FontWeights.Bold
+            tb_h.Foreground = hex_b("#0f172a")
+            tb_h.Margin = Thickness(0, 0, 0, 15)
+            stack.Children.Add(tb_h)
             
+            m_panel = WrapPanel()
+            m_panel.Margin = Thickness(0, 0, 0, 15)
+            m_data = [
+                ("Contribuição Esgoto", "{0:,.0f} L/dia".format(cd_calculado * 0.80).replace(",", "."), "80% do consumo de água", "#0284c7"),
+                ("Fossa Séptica", "2.000 L", "NBR 7229 (Prisma / Cilíndrica)", "#d97706"),
+                ("Filtro Anaeróbio", "1.200 L", "NBR 13969 (Leito filtrante)", "#059669"),
+                ("Sumidouro / Vala", "12,5 m²", "Área de infiltração", "#475569")
+            ]
+            for title, val, note, color in m_data:
+                m_card = Border()
+                m_card.Width = 200
+                m_card.Background = hex_b("#ffffff")
+                m_card.BorderBrush = hex_b("#e2e8f0")
+                m_card.BorderThickness = Thickness(1)
+                m_card.CornerRadius = System.Windows.CornerRadius(10)
+                m_card.Padding = Thickness(15)
+                m_card.Margin = Thickness(0, 0, 12, 12)
+                
+                ms = StackPanel()
+                t_lbl = TextBlock()
+                t_lbl.Text = title
+                t_lbl.FontSize = 11
+                t_lbl.Foreground = hex_b("#64748b")
+                v_lbl = TextBlock()
+                v_lbl.Text = val
+                v_lbl.FontSize = 20
+                v_lbl.FontWeight = System.Windows.FontWeights.Bold
+                v_lbl.Foreground = hex_b(color)
+                v_lbl.Margin = Thickness(0, 4, 0, 4)
+                n_lbl = TextBlock()
+                n_lbl.Text = note
+                n_lbl.FontSize = 10
+                n_lbl.Foreground = hex_b("#94a3b8")
+                
+                ms.Children.Add(t_lbl)
+                ms.Children.Add(v_lbl)
+                ms.Children.Add(n_lbl)
+                m_card.Child = ms
+                m_panel.Children.Add(m_card)
+            stack.Children.Add(m_panel)
+            
+            lbl_tree = TextBlock()
+            lbl_tree.Text = "📍 Dispositivos de Tratamento no Lote:"
+            lbl_tree.FontSize = 12
+            lbl_tree.FontWeight = System.Windows.FontWeights.SemiBold
+            lbl_tree.Foreground = hex_b("#0f172a")
+            stack.Children.Add(lbl_tree)
+            
+            stack.Children.Add(self.carregar_elementos_identificados("TRAT"))
+            
+            action_bar = Border()
+            action_bar.Background = hex_b("#ffffff")
+            action_bar.BorderBrush = hex_b("#cbd5e1")
+            action_bar.BorderThickness = Thickness(1)
+            action_bar.CornerRadius = System.Windows.CornerRadius(12)
+            action_bar.Padding = Thickness(15)
+            ab_stack = WrapPanel()
+            
+            b1 = Button()
+            b1.Content = "🌱 Dimensionar Fossa Séptica, Filtro & Sumidouro"
+            b1.Background = hex_b("#059669")
+            b1.Foreground = hex_b("#ffffff")
+            b1.FontWeight = System.Windows.FontWeights.SemiBold
+            b1.Padding = Thickness(15, 10, 15, 10)
+            b1.Click += lambda s, e: self.exec_tool("m2_dimensionamento_trat.py", "Dimensionamento Tratamento")
+            ab_stack.Children.Add(b1)
+            
+            action_bar.Child = ab_stack
+            stack.Children.Add(action_bar)
+
         elif code == "REC":
             tb_h = TextBlock()
             tb_h.Text = "Moto-Bomba & Recalque"

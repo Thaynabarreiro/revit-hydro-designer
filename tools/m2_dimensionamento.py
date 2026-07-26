@@ -124,13 +124,16 @@ dorms = [a for a in CONS["ambientes"]
          if re.search(oc["regex_dormitorio"], normalizar(a["nome"]))
          and not (excluir and re.search(excluir, normalizar(a["nome"])))]
 
-if oc.get("moradores_override"):
-    moradores = oc["moradores_override"]
-    origem_ocup = "definido manualmente na configuracao"
+if oc.get("habitantes"):
+    moradores = int(oc["habitantes"])
+    origem_ocup = "definido em habitantes no config_projeto.json"
+elif oc.get("moradores_override"):
+    moradores = int(oc["moradores_override"])
+    origem_ocup = "definido em moradores_override no config_projeto.json"
 else:
-    moradores = len(dorms) * oc["pessoas_por_dormitorio"]
+    moradores = len(dorms) * oc.get("pessoas_por_dormitorio", 2)
     origem_ocup = "{0} dormitorio(s) x {1} pessoa(s)".format(
-        len(dorms), oc["pessoas_por_dormitorio"])
+        len(dorms), oc.get("pessoas_por_dormitorio", 2))
 
 passo("Ocupacao",
       "dormitorios identificados: " + ", ".join([d["nome"] for d in dorms]),
