@@ -4,9 +4,15 @@ import os
 import shutil
 import codecs
 
-_this_dir = os.path.dirname(os.path.abspath(__file__))
-_proj_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
-EXTENSION_DIR = os.path.join(_proj_root, "revit-hydro-designer.extension")
+if "RAIZ" in globals():
+    RAIZ = globals()["RAIZ"]
+elif "__file__" in globals():
+    _this_dir = os.path.dirname(os.path.abspath(__file__))
+    RAIZ = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+else:
+    RAIZ = os.environ.get("HYDRO_PROJECT_ROOT", os.getcwd())
+
+EXTENSION_DIR = os.path.join(RAIZ, "revit-hydro-designer.extension")
 TAB_DIR = os.path.join(EXTENSION_DIR, "Hydro.tab")
 
 def make_button(panel_name, btn_dir_name, title, tooltip, script_code):
@@ -23,14 +29,9 @@ def make_button(panel_name, btn_dir_name, title, tooltip, script_code):
         f.write(yaml_content)
     print("Created:", btn_dir)
 
-# --- CLEAN AND SETUP PANELS ---
+# --- SETUP PANELS ---
 if not os.path.exists(TAB_DIR):
     os.makedirs(TAB_DIR)
-
-for item in os.listdir(TAB_DIR):
-    item_path = os.path.join(TAB_DIR, item)
-    if os.path.isdir(item_path) and item_path.endswith(".panel"):
-        shutil.rmtree(item_path)
 
 # --- 1. AGUA FRIA E QUENTE PANEL ---
 p1 = "1 Agua Fria e Quente.panel"
@@ -272,7 +273,7 @@ class HydroStudioInteractiveWindow(Window):
         self.Height = 780
         self.WindowStartupLocation = WindowStartupLocation.CenterScreen
         self.Background = hex_b("#f8fafc")
-        self.active_tab = "HID"
+        self.active_tab = "CFG"
         
         main_grid = Grid()
         col_side = ColumnDefinition()
@@ -347,10 +348,12 @@ class HydroStudioInteractiveWindow(Window):
         side_stack.Children.Add(status_card)
         
         disc_items = [
+            ("⚙️ Configurações do Projeto", "CFG"),
             ("💧 Água Fria & Quente", "HID"),
             ("🚽 Esgoto & Ventilação", "ESG"),
             ("🌧️ Pluvial & Tratamento", "PLUV"),
             ("⚡ Moto-Bomba & Recalque", "REC"),
+            ("🔍 Auditoria & Acervo", "AUDIT"),
             ("📄 Memoriais & Exportação", "DOC")
         ]
         
@@ -381,7 +384,7 @@ class HydroStudioInteractiveWindow(Window):
         main_grid.Children.Add(self.main_content)
         self.Content = main_grid
         
-        self.render_tab("HID")
+        self.render_tab("CFG")
 
     def highlight_tab(self, code):
         for c, btn in self.btn_map.items():
@@ -402,7 +405,92 @@ class HydroStudioInteractiveWindow(Window):
         self.highlight_tab(code)
         stack = StackPanel()
         
-        if code == "HID":
+        if code == "CFG":
+            tb_h = TextBlock()
+            tb_h.Text = "Configurações do Projeto & Leitura BIM"
+            tb_h.FontSize = 22
+            tb_h.FontWeight = System.Windows.FontWeights.Bold
+            tb_h.Foreground = hex_b("#0f172a")
+            tb_h.Margin = Thickness(0, 0, 0, 15)
+            stack.Children.Add(tb_h)
+            
+            # Form Inputs Card
+            form_card = Border()
+            form_card.Background = hex_b("#ffffff")
+            form_card.BorderBrush = hex_b("#cbd5e1")
+            form_card.BorderThickness = Thickness(1)
+            form_card.CornerRadius = System.Windows.CornerRadius(12)
+            form_card.Padding = Thickness(20)
+            form_card.Margin = Thickness(0, 0, 0, 20)
+            
+            fs = StackPanel()
+            
+            lbl1 = TextBlock()
+            lbl1.Text = "Nome do Projeto / Cliente:"
+            lbl1.FontSize = 12
+            lbl1.FontWeight = System.Windows.FontWeights.SemiBold
+            lbl1.Foreground = hex_b("#475569")
+            lbl1.Margin = Thickness(0, 0, 0, 4)
+            fs.Children.Add(lbl1)
+            
+            self.txt_nome = TextBox()
+            self.txt_nome.Text = "Casa Unifamiliar Henrique & Suelen"
+            self.txt_nome.Padding = Thickness(8, 6, 8, 6)
+            self.txt_nome.Margin = Thickness(0, 0, 0, 12)
+            fs.Children.Add(self.txt_nome)
+            
+            lbl2 = TextBlock()
+            lbl2.Text = "Número de Moradores (Habitantes):"
+            lbl2.FontSize = 12
+            lbl2.FontWeight = System.Windows.FontWeights.SemiBold
+            lbl2.Foreground = hex_b("#475569")
+            lbl2.Margin = Thickness(0, 0, 0, 4)
+            fs.Children.Add(lbl2)
+            
+            self.txt_hab = TextBox()
+            self.txt_hab.Text = "6"
+            self.txt_hab.Padding = Thickness(8, 6, 8, 6)
+            self.txt_hab.Margin = Thickness(0, 0, 0, 12)
+            fs.Children.Add(self.txt_hab)
+            
+            lbl3 = TextBlock()
+            lbl3.Text = "Dias de Reservação d'Água (Autonomia):"
+            lbl3.FontSize = 12
+            lbl3.FontWeight = System.Windows.FontWeights.SemiBold
+            lbl3.Foreground = hex_b("#475569")
+            lbl3.Margin = Thickness(0, 0, 0, 4)
+            fs.Children.Add(lbl3)
+            
+            self.txt_dias = TextBox()
+            self.txt_dias.Text = "2"
+            self.txt_dias.Padding = Thickness(8, 6, 8, 6)
+            self.txt_dias.Margin = Thickness(0, 0, 0, 15)
+            fs.Children.Add(self.txt_dias)
+            
+            form_card.Child = fs
+            stack.Children.Add(form_card)
+            
+            action_bar = Border()
+            action_bar.Background = hex_b("#ffffff")
+            action_bar.BorderBrush = hex_b("#cbd5e1")
+            action_bar.BorderThickness = Thickness(1)
+            action_bar.CornerRadius = System.Windows.CornerRadius(12)
+            action_bar.Padding = Thickness(15)
+            ab_stack = WrapPanel()
+            
+            b1 = Button()
+            b1.Content = "📋 Executar Leitura de Ambientes e Peças (M1)"
+            b1.Background = hex_b("#0284c7")
+            b1.Foreground = hex_b("#ffffff")
+            b1.FontWeight = System.Windows.FontWeights.SemiBold
+            b1.Padding = Thickness(15, 10, 15, 10)
+            b1.Click += lambda s, e: self.exec_tool("m1_reader.py", "Leitura do Modelo Arquitetônico (M1)")
+            ab_stack.Children.Add(b1)
+            
+            action_bar.Child = ab_stack
+            stack.Children.Add(action_bar)
+
+        elif code == "HID":
             tb_h = TextBlock()
             tb_h.Text = "Água Fria & Quente (HID)"
             tb_h.FontSize = 22
@@ -741,6 +829,45 @@ class HydroStudioInteractiveWindow(Window):
             action_bar.Child = ab_stack
             stack.Children.Add(action_bar)
             
+        elif code == "AUDIT":
+            tb_h = TextBlock()
+            tb_h.Text = "Auditoria e Verificação do Modelo BIM"
+            tb_h.FontSize = 22
+            tb_h.FontWeight = System.Windows.FontWeights.Bold
+            tb_h.Foreground = hex_b("#0f172a")
+            tb_h.Margin = Thickness(0, 0, 0, 15)
+            stack.Children.Add(tb_h)
+            
+            action_bar = Border()
+            action_bar.Background = hex_b("#ffffff")
+            action_bar.BorderBrush = hex_b("#cbd5e1")
+            action_bar.BorderThickness = Thickness(1)
+            action_bar.CornerRadius = System.Windows.CornerRadius(12)
+            action_bar.Padding = Thickness(15)
+            ab_stack = WrapPanel()
+            
+            b1 = Button()
+            b1.Content = "🔍 Executar Auditoria de Interferências & Regras"
+            b1.Background = hex_b("#0284c7")
+            b1.Foreground = hex_b("#ffffff")
+            b1.FontWeight = System.Windows.FontWeights.SemiBold
+            b1.Padding = Thickness(15, 10, 15, 10)
+            b1.Margin = Thickness(0, 0, 10, 0)
+            b1.Click += lambda s, e: self.exec_tool("m0_audit_bridge.py", "Auditoria de Modelo")
+            ab_stack.Children.Add(b1)
+            
+            b2 = Button()
+            b2.Content = "📚 Verificar Acervo de Famílias no Template"
+            b2.Background = hex_b("#475569")
+            b2.Foreground = hex_b("#ffffff")
+            b2.FontWeight = System.Windows.FontWeights.SemiBold
+            b2.Padding = Thickness(15, 10, 15, 10)
+            b2.Click += lambda s, e: self.exec_tool("verificar_acervo.py", "Verificação do Acervo")
+            ab_stack.Children.Add(b2)
+            
+            action_bar.Child = ab_stack
+            stack.Children.Add(action_bar)
+
         elif code == "DOC":
             tb_h = TextBlock()
             tb_h.Text = "Memoriais & Exportação (HTML, PDF, DOCX)"

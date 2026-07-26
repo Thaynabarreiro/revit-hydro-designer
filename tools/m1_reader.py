@@ -21,9 +21,13 @@ from Autodesk.Revit.DB import (
     UnitUtils,
 )
 
-_this_dir = os.path.dirname(os.path.abspath(__file__))
-_auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
-RAIZ = globals().get("RAIZ", os.environ.get("HYDRO_PROJECT_ROOT", _auto_root))
+if "RAIZ" in globals():
+    RAIZ = globals()["RAIZ"]
+elif "__file__" in globals():
+    _this_dir = os.path.dirname(os.path.abspath(__file__))
+    RAIZ = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+else:
+    RAIZ = os.environ.get("HYDRO_PROJECT_ROOT", os.getcwd())
 ARQ_NORMA = os.path.join(RAIZ, "data", "pecas_br.json")
 ARQ_SAIDA = os.path.join(RAIZ, "data", "pontos_consumo.json")
 

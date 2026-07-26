@@ -25,9 +25,13 @@ from System.Windows.Controls import (
 )
 from System.Windows.Media import SolidColorBrush, ColorConverter, FontFamily
 
-_this_dir = os.path.dirname(os.path.abspath(__file__))
-_auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
-RAIZ = globals().get("RAIZ", os.environ.get("HYDRO_PROJECT_ROOT", _auto_root))
+if "RAIZ" in globals():
+    RAIZ = globals()["RAIZ"]
+elif "__file__" in globals():
+    _this_dir = os.path.dirname(os.path.abspath(__file__))
+    RAIZ = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+else:
+    RAIZ = os.environ.get("HYDRO_PROJECT_ROOT", os.getcwd())
 D = os.path.join(RAIZ, "data")
 
 def hex_brush(hex_code):

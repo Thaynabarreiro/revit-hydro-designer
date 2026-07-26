@@ -3,16 +3,32 @@
 import os
 import glob
 
-_this_dir = os.path.dirname(os.path.abspath(__file__))
+if "RAIZ" in globals():
+    RAIZ = globals()["RAIZ"]
+elif "__file__" in globals():
+    _this_dir = os.path.dirname(os.path.abspath(__file__))
+    RAIZ = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+else:
+    RAIZ = os.environ.get("HYDRO_PROJECT_ROOT", os.getcwd())
 _proj_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
 TOOLS_DIR = os.path.join(_proj_root, "tools")
 EXT_LIB = os.path.join(_proj_root, "revit-hydro-designer.extension", "lib", "hydro.py")
 
-PORTABLE_HEADER = """_this_dir = os.path.dirname(os.path.abspath(__file__))
+if "RAIZ" in globals():
+    RAIZ = globals()["RAIZ"]
+elif "__file__" in globals():
+    _this_dir = os.path.dirname(os.path.abspath(__file__))
+    RAIZ = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+else:
+    RAIZ = os.environ.get("HYDRO_PROJECT_ROOT", os.getcwd())
 _auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
-_this_dir = os.path.dirname(os.path.abspath(__file__))
-_auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
-RAIZ = globals().get("RAIZ", os.environ.get("HYDRO_PROJECT_ROOT", _auto_root))
+if "RAIZ" in globals():
+    RAIZ = globals()["RAIZ"]
+elif "__file__" in globals():
+    _this_dir = os.path.dirname(os.path.abspath(__file__))
+    RAIZ = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+else:
+    RAIZ = os.environ.get("HYDRO_PROJECT_ROOT", os.getcwd())
 
 # Target scripts to replace
 py_files = glob.glob(os.path.join(TOOLS_DIR, "*.py"))
@@ -22,25 +38,41 @@ for py_file in py_files:
     with open(py_file, "r", encoding="utf-8") as f:
         content = f.read()
     
-_this_dir = os.path.dirname(os.path.abspath(__file__))
-_auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
-RAIZ = globals().get("RAIZ", os.environ.get("HYDRO_PROJECT_ROOT", _auto_root))
+if "RAIZ" in globals():
+    RAIZ = globals()["RAIZ"]
+elif "__file__" in globals():
+    _this_dir = os.path.dirname(os.path.abspath(__file__))
+    RAIZ = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+else:
+    RAIZ = os.environ.get("HYDRO_PROJECT_ROOT", os.getcwd())
     lines = content.splitlines()
     new_lines = []
     modified = False
     for line in lines:
-_this_dir = os.path.dirname(os.path.abspath(__file__))
-_auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
-RAIZ = globals().get("RAIZ", os.environ.get("HYDRO_PROJECT_ROOT", _auto_root))
+if "RAIZ" in globals():
+    RAIZ = globals()["RAIZ"]
+elif "__file__" in globals():
+    _this_dir = os.path.dirname(os.path.abspath(__file__))
+    RAIZ = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+else:
+    RAIZ = os.environ.get("HYDRO_PROJECT_ROOT", os.getcwd())
             new_lines.append(PORTABLE_HEADER)
             modified = True
-_this_dir = os.path.dirname(os.path.abspath(__file__))
-_auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
-RAIZ = globals().get("RAIZ", os.environ.get("HYDRO_PROJECT_ROOT", _auto_root))
+if "RAIZ" in globals():
+    RAIZ = globals()["RAIZ"]
+elif "__file__" in globals():
+    _this_dir = os.path.dirname(os.path.abspath(__file__))
+    RAIZ = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+else:
+    RAIZ = os.environ.get("HYDRO_PROJECT_ROOT", os.getcwd())
 D = os.path.join(RAIZ, "data")
-_this_dir = os.path.dirname(os.path.abspath(__file__))
-_auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
-RAIZ = globals().get("RAIZ", os.environ.get("HYDRO_PROJECT_ROOT", _auto_root))
+if "RAIZ" in globals():
+    RAIZ = globals()["RAIZ"]
+elif "__file__" in globals():
+    _this_dir = os.path.dirname(os.path.abspath(__file__))
+    RAIZ = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+else:
+    RAIZ = os.environ.get("HYDRO_PROJECT_ROOT", os.getcwd())
             modified = True
         else:
             new_lines.append(line)

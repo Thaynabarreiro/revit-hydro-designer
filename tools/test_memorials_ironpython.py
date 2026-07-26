@@ -5,7 +5,13 @@ import os
 
 print("=== TESTING MEMORIAL SCRIPTS FOR IRONPYTHON / PYTHON 2 & 3 COMPATIBILITY ===")
 
-_this_dir = os.path.dirname(os.path.abspath(__file__))
+if "RAIZ" in globals():
+    RAIZ = globals()["RAIZ"]
+elif "__file__" in globals():
+    _this_dir = os.path.dirname(os.path.abspath(__file__))
+    RAIZ = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+else:
+    RAIZ = os.environ.get("HYDRO_PROJECT_ROOT", os.getcwd())
 _proj_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
 for sc in ["m8_memorial.py", "m8_memorial_esg.py", "m8_memorial_pluv.py"]:
     print("Testing script:", sc)

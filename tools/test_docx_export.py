@@ -3,7 +3,13 @@ from docx import Document
 from htmldocx import HtmlToDocx
 import re
 
-_this_dir = os.path.dirname(os.path.abspath(__file__))
+if "RAIZ" in globals():
+    RAIZ = globals()["RAIZ"]
+elif "__file__" in globals():
+    _this_dir = os.path.dirname(os.path.abspath(__file__))
+    RAIZ = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+else:
+    RAIZ = os.environ.get("HYDRO_PROJECT_ROOT", os.getcwd())
 _proj_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
 html_file = os.path.join(_proj_root, "memoriais", "Memorial_Hidraulico_Henrique_e_Suelen.html")
 docx_file = os.path.join(_proj_root, "memoriais", "Memorial_Hidraulico_Henrique_e_Suelen.docx")

@@ -29,9 +29,13 @@ import System
 
 # Aceita RAIZ injetada pelo chamador (os botoes pyRevit descobrem a raiz a
 # partir da propria localizacao). O literal e apenas o fallback do bridge.
-_this_dir = os.path.dirname(os.path.abspath(__file__))
-_auto_root = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
-RAIZ = globals().get("RAIZ", os.environ.get("HYDRO_PROJECT_ROOT", _auto_root))
+if "RAIZ" in globals():
+    RAIZ = globals()["RAIZ"]
+elif "__file__" in globals():
+    _this_dir = os.path.dirname(os.path.abspath(__file__))
+    RAIZ = os.path.dirname(_this_dir) if os.path.basename(_this_dir) == "tools" else _this_dir
+else:
+    RAIZ = os.environ.get("HYDRO_PROJECT_ROOT", os.getcwd())
 D = os.path.join(RAIZ, "data")
 
 
