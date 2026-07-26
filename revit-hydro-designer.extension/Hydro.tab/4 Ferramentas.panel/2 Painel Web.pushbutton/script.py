@@ -569,9 +569,7 @@ class HydroStudioInteractiveWindow(Window):
         self.status_txt.Text = "⏳ Executando {0} no Revit... por favor aguarde.".format(description)
         try:
             res = hydro.rodar(script_name)
-            self.status_txt.Text = "✅ {0} concluído com sucesso!
-
-{1}".format(description, str(res)[:300])
+            self.status_txt.Text = "✅ {0} concluído com sucesso!\n\n{1}".format(description, str(res)[:300])
         except Exception as ex:
             self.status_txt.Text = "⚠️ Aviso ao executar {0}: {1}".format(description, str(ex))
 
