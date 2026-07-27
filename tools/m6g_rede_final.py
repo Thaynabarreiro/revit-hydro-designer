@@ -243,7 +243,12 @@ peso_total = sum([x["peso"] for x in pecas])
 # O barrilete precisa ficar ACIMA de todos os pontos de utilizacao: chuveiros
 # conectam a 3100 mm, o que deixava a "descida" com 200 mm e sem espaco.
 z_top_peca = max([p["org"].Z for p in pecas])
-z_barr = max(ft(H_BARRILETE), z_top_peca + ft(400.0))
+if res_inst is not None:
+    z_barr = max(ft(H_BARRILETE), z_top_peca + ft(400.0))
+else:
+    # Sem reservatorio no telhado, o barrilete/prumada fica contido a h=2700mm (abaixo da laje de +3,0m)
+    z_barr = nivel_base.Elevation + ft(H_BARRILETE)
+
 print("barrilete em z = {0:.0f} mm (ponto mais alto: {1:.0f} mm)".format(
     mm(z_barr), mm(z_top_peca)))
 

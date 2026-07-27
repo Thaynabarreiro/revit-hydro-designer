@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
-"""Gerador Automático do Banheiro Demo Completo (Arquitetura + Estrutura + Instalações Hidrossanitárias).
+"""Gerador Automático do Banheiro Demo Completo (Arquitetura + Louças Reais 3D + Instalações Hidrossanitárias).
 
 Cria:
 1. Piso Térreo (Z=0,00m)
 2. 4 Paredes Perimetrais (h=3,00m)
 3. Laje Superior / Teto (Z=+3,00m, apoiada exatamente sobre as 4 paredes)
-4. Louças Sanitárias Hidráulicas (Bacia, Lavatório, Chuveiro)
-5. 4 Disciplinas MEP independentes com tubulações e conexões NBR:
-   - Água Fria (AF): PVC Soldável Marrom 25mm / 32mm por dentro das paredes
+4. Instanciação Automática das 3 Louças Reais (Bacia Sanitária, Lavatório, Chuveiro)
+5. 4 Disciplinas MEP independentes com tubulações NBR embutidas na alvenaria:
+   - Água Fria (AF): PVC Soldável Marrom 25mm / 32mm por dentro das paredes (h=2.70m)
    - Água Quente (AQ): CPVC Ultraterm / PPR 22mm / 25mm
-   - Esgoto Sanitário (ESG): PVC Sanitário Branco 40mm / 50mm / 100mm com declividade
-   - Ventilação (VENT): Coluna de Ventilação PVC Branco DN 75mm subindo pela laje superior
-6. Configuração da Vista 3D com Detalhe ALTO e 65% de Transparência de Vidro nas Paredes e Lajes.
+   - Esgoto Sanitário (ESG): PVC Sanitário Branco 40mm / 50mm / 100mm sob o piso
+   - Ventilação (VENT): Coluna de Ventilação PVC Branco DN 75mm subindo pela laje
+6. Vista Corte Maquete 3D: Oculta a parede frontal e aplica 65% de transparência nas paredes laterais/laje para enxergar o interior completo!
 """
 import os
 import sys
@@ -51,7 +51,7 @@ def gerar_banheiro_e_configurar_vista():
     if not doc:
         return "Erro: Nenhum documento ativo no Revit."
 
-    print("=== 1. CRIANDO ESTRUTURA COMPLETA (PISO + PAREDES + LAJE SUPERIOR FLUSH AT +3.00M) ===")
+    print("=== 1. CRIANDO ESTRUTURA ARQUITETÔNICA (PISO + PAREDES + LAJE SUPERIOR) ===")
     
     # Nível Térreo (Base)
     levels = sorted(list(DB.FilteredElementCollector(doc).OfClass(DB.Level).ToElements()), key=lambda x: x.Elevation)
@@ -67,19 +67,19 @@ def gerar_banheiro_e_configurar_vista():
         return "Erro: Nenhum WallType disponível no modelo."
     floor_type = floor_types[0] if floor_types else None
     
-    tx = DB.Transaction(doc, "Gerar Banheiro Demo Completo (Piso, Paredes e Laje Flutuante Corrigida)")
+    tx = DB.Transaction(doc, "Gerar Banheiro Demo Completo (Arquitetura + Louças Reais)")
     tx.Start()
     
     # Retângulo do Banheiro em pés (1 ft = 304.8 mm): 3.0m x 2.5m
     p0 = DB.XYZ(0, 0, 0)
-    p1 = DB.XYZ(10, 0, 0)   # ~3.05m
-    p2 = DB.XYZ(10, 8, 0)   # ~2.44m
-    p3 = DB.XYZ(0, 8, 0)
+    p1 = DB.XYZ(10, 0, 0)   # ~3.05m (Parede Frontal)
+    p2 = DB.XYZ(10, 8, 0)   # ~2.44m (Parede Lateral Direita)
+    p3 = DB.XYZ(0, 8, 0)    # Parede de Fundo
     
-    line1 = DB.Line.CreateBound(p0, p1)
-    line2 = DB.Line.CreateBound(p1, p2)
-    line3 = DB.Line.CreateBound(p2, p3)
-    line4 = DB.Line.CreateBound(p3, p0)
+    line1 = DB.Line.CreateBound(p0, p1) # Frontal
+    line2 = DB.Line.CreateBound(p1, p2) # Direita
+    line3 = DB.Line.CreateBound(p2, p3) # Fundo
+    line4 = DB.Line.CreateBound(p3, p0) # Esquerda
     
     h_feet = 9.84 # ~3.0m de altura
     
@@ -115,7 +115,7 @@ def gerar_banheiro_e_configurar_vista():
             try:
                 param_off = laje_superior.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)
                 if param_off and not param_off.IsReadOnly:
-                    param_off.Set(h_feet) # Exatamente a +3.00m (9.84 ft)
+                    param_off.Set(h_feet) # Exatamente a +3.00m
             except Exception:
                 pass
             print("Laje Superior / Teto apoiada a Z=+3,00m criada com sucesso.")
@@ -134,85 +134,108 @@ def gerar_banheiro_e_configurar_vista():
         
     tx.Commit()
 
-    # --- VERIFICAÇÃO E INSERÇÃO DE LOUÇAS SANITÁRIAS NAS PAREDES ---
-    fixt_instances = list(
+    # --- INSERÇÃO / ATUALIZAÇÃO DAS 3 LOUÇAS SANITÁRIAS REAIS ---
+    symbols = list(
         DB.FilteredElementCollector(doc)
         .OfCategory(DB.BuiltInCategory.OST_PlumbingFixtures)
-        .WhereElementIsNotElementType()
+        .OfClass(DB.FamilySymbol)
         .ToElements()
     )
     
-    loucas_reais = []
-    for inst in fixt_instances:
+    # Busca símbolos específicos para Bacia, Lavatório e Chuveiro
+    sym_bacia, sym_lavat, sym_chuv = None, None, None
+    for s in symbols:
+        s_name = nm(s).lower()
+        s_fam = ""
         try:
-            fn = inst.Symbol.FamilyName
-            if "Reservatorio" not in fn and "Cavalete" not in fn:
-                loucas_reais.append(inst)
+            s_fam = s.FamilyName.lower()
         except Exception:
             pass
-            
-    if len(loucas_reais) == 0:
-        print("Nenhuma louça sanitária encontrada no Banheiro. Instanciando louças de teste alinhadas à parede...")
-        symbols = list(
-            DB.FilteredElementCollector(doc)
-            .OfCategory(DB.BuiltInCategory.OST_PlumbingFixtures)
-            .OfClass(DB.FamilySymbol)
-            .ToElements()
+        combined = s_name + " " + s_fam
+        
+        if ("bacia" in combined or "vaso" in combined or "sanit" in combined or "wc" in combined) and not sym_bacia:
+            sym_bacia = s
+        elif ("lavat" in combined or "pia" in combined or "cuba" in combined or "sink" in combined) and not sym_lavat:
+            sym_lavat = s
+        elif ("chuveiro" in combined or "ducha" in combined or "shower" in combined) and not sym_chuv:
+            sym_chuv = s
+
+    # Fallbacks se não achou famílias específicas
+    symbols_genericos = [s for s in symbols if "reservatorio" not in nm(s).lower() and "cavalete" not in nm(s).lower()]
+    if not sym_bacia and symbols_genericos:
+        sym_bacia = symbols_genericos[0]
+    if not sym_lavat and symbols_genericos:
+        sym_lavat = symbols_genericos[min(1, len(symbols_genericos)-1)]
+    if not sym_chuv and symbols_genericos:
+        sym_chuv = symbols_genericos[min(2, len(symbols_genericos)-1)]
+
+    if sym_bacia:
+        tx_f = DB.Transaction(doc, "Inserir Louças Hidráulicas Reais no Banheiro Demo")
+        tx_f.Start()
+        try:
+            # Apaga stubs antigos se houver
+            fixt_antigos = list(DB.FilteredElementCollector(doc).OfCategory(DB.BuiltInCategory.OST_PlumbingFixtures).WhereElementIsNotElementType().ToElements())
+            for fa in fixt_antigos:
+                try:
+                    if "Reservatorio" not in fa.Symbol.FamilyName and "Cavalete" not in fa.Symbol.FamilyName:
+                        col_del = System.Collections.Generic.List[DB.ElementId]()
+                        col_del.Add(fa.Id)
+                        doc.Delete(col_del)
+                except Exception:
+                    pass
+
+            # Posiciona as 3 louças encostadas nas paredes para passar a tubulação embutida
+            # Bacia Sanitária (encostada na parede de fundo Y=7.2)
+            if not sym_bacia.IsActive:
+                sym_bacia.Activate()
+            inst_bacia = doc.Create.NewFamilyInstance(DB.XYZ(2.5, 7.2, 0), sym_bacia, level_base, DB.Structure.StructuralType.NonStructural)
+
+            # Lavatório (encostado na parede de fundo Y=7.2)
+            if sym_lavat:
+                if not sym_lavat.IsActive:
+                    sym_lavat.Activate()
+                inst_lavat = doc.Create.NewFamilyInstance(DB.XYZ(7.5, 7.2, 0), sym_lavat, level_base, DB.Structure.StructuralType.NonStructural)
+
+            # Chuveiro (encostado na parede lateral direita X=9.5, h=2.10m)
+            if sym_chuv:
+                if not sym_chuv.IsActive:
+                    sym_chuv.Activate()
+                inst_chuv = doc.Create.NewFamilyInstance(DB.XYZ(9.5, 4.0, 0), sym_chuv, level_base, DB.Structure.StructuralType.NonStructural)
+
+            print("3 Louças Sanitárias Reais (Bacia, Lavatório, Chuveiro) posicionadas com sucesso!")
+            tx_f.Commit()
+        except Exception as ex_inst:
+            tx_f.RollBack()
+            print("Aviso ao posicionar louças: " + str(ex_inst))
+    else:
+        return (
+            "⚠️ O arquivo atual não contém famílias de Louças Hidráulicas (Bacia, Lavatório, Chuveiro) pré-carregadas.\n\n"
+            "💡 POR FAVOR: Abra o arquivo de Template Oficial (.rte):\n"
+            "   1. Abra o arquivo 'template/Revit_Hydro_Designer_Template_NBR.rte'\n"
+            "   2. Ou clique na aba '🏛️ Template Oficial (.rte)' no Studio BIM!"
         )
-        
-        symbols_loucas = []
-        for s in symbols:
-            s_name = nm(s).lower()
-            s_fam = ""
-            try:
-                s_fam = s.FamilyName.lower()
-            except Exception:
-                pass
-            if "reservatorio" not in s_name and "reservatorio" not in s_fam and "cavalete" not in s_name and "cavalete" not in s_fam:
-                symbols_loucas.append(s)
-        
-        if symbols_loucas:
-            tx_f = DB.Transaction(doc, "Inserir Louças Hidráulicas de Teste no Banheiro Demo")
-            tx_f.Start()
-            try:
-                # Posiciona louças encostadas nas paredes para passar a tubulação embutida
-                posicoes = [
-                    DB.XYZ(2.5, 0.5, 0),  # Bacia Sanitária encostada na parede de trás
-                    DB.XYZ(7.5, 0.5, 0),  # Lavatório encostado na parede de trás
-                    DB.XYZ(5.0, 7.5, 0)   # Chuveiro encostado na parede da frente
-                ]
-                
-                for idx, pos in enumerate(posicoes):
-                    sym = symbols_loucas[idx % len(symbols_loucas)]
-                    if not sym.IsActive:
-                        sym.Activate()
-                    doc.Create.NewFamilyInstance(pos, sym, level_base, DB.Structure.StructuralType.NonStructural)
-                    
-                print("3 Louças Hidráulicas de teste instanciadas com sucesso no Banheiro Demo.")
-                tx_f.Commit()
-            except Exception as ex_inst:
-                tx_f.RollBack()
-                print("Aviso ao instanciar louças: " + str(ex_inst))
-        else:
-            return (
-                "⚠️ O arquivo atual não contém famílias de Louças Hidráulicas (Bacia, Lavatório, Chuveiro) pré-carregadas.\n\n"
-                "💡 POR FAVOR: Abra o arquivo de Template Oficial (.rte):\n"
-                "   1. Abra o arquivo 'template/Revit_Hydro_Designer_Template_NBR.rte'\n"
-                "   2. Ou clique na aba '🏛️ Template Oficial (.rte)' no Studio BIM!"
-            )
-            
+
     print("")
-    print("=== 2. CONFIGURANDO A VISTA 3D PARA TRANSPARÊNCIA DE VIDRO MULTIDISCIPLINAR ===")
+    print("=== 2. CONFIGURANDO VISTA 3D CORTE MAQUETE (OCULTA PAREDE FRONTAL & TRANSPARÊNCIA) ===")
     
     view = doc.ActiveView
     if view and (view.ViewType == DB.ViewType.ThreeD or view.ViewType == DB.ViewType.FloorPlan):
-        tx_v = DB.Transaction(doc, "Ajustar Transparência Multidisciplinar da Vista 3D")
+        tx_v = DB.Transaction(doc, "Ajustar Vista 3D Maquete Corte Banheiro")
         tx_v.Start()
         try:
             view.DetailLevel = DB.ViewDetailLevel.Fine
             view.DisplayStyle = DB.DisplayStyle.Shaded
             
-            # Configura 65% de transparência nas Paredes, Pisos e Telhados/Lajes
+            # Oculta a Parede Frontal (w1) para transformar a vista em um Maquete Corte 3D realista
+            coll_hide = System.Collections.Generic.List[DB.ElementId]()
+            coll_hide.Add(w1.Id)
+            try:
+                view.HideElements(coll_hide)
+                print("Parede Frontal ocultada para corte maquete 3D.")
+            except Exception:
+                pass
+                
+            # Configura 65% de transparência nas demais Paredes, Pisos e Lajes
             ov = DB.OverrideGraphicSettings()
             ov.SetSurfaceTransparency(65)
             
@@ -231,9 +254,9 @@ def gerar_banheiro_e_configurar_vista():
                     
             if uidoc:
                 uidoc.RefreshActiveView()
-            print("Vista 3D configurada: Detalhe ALTO, Paredes, Piso e Laje com 65% de Transparência de Vidro.")
+            print("Vista 3D configurada: Detalhe ALTO, Corte Maquete e Transparência aplicada.")
         except Exception as ex_v:
-            print("Aviso ao aplicar transparência na vista: " + str(ex_v))
+            print("Aviso ao aplicar corte/transparência na vista: " + str(ex_v))
         finally:
             tx_v.Commit()
             
@@ -276,13 +299,14 @@ def gerar_banheiro_e_configurar_vista():
         
     msg_sucesso = (
         "✅ PROCESSO MULTIDISCIPLINAR EXECUTADO COM SUCESSO!\n\n"
-        "1. ESTRUTURA COMPLETA GERADA: Piso Térreo (Z=0,00m), 4 Paredes (h=3,00m) e Laje Superior / Teto perfeitamente apoiada a Z=+3,00m sobre as paredes.\n"
-        "2. VISTA 3D TRANSPARENTE: Paredes, Piso e Laje configurados com 65% de transparência para visualização dos tubos internos.\n"
-        "3. 4 DISCIPLINAS INDEPENDENTES MODELADAS NO REVIT:\n"
-        "   • 💧 Água Fria (AF): Tubos PVC Soldável Marrom (DN 25mm / 32mm) EMBUTIDOS NAS PAREDES com Barrilete a h=2.70m.\n"
-        "   • 🔥 Água Quente (AQ): Tubos CPVC / PPR (DN 22mm / 25mm) para Água Quente.\n"
+        "1. ARQUITETURA & ESTRUTURA COMPLETA: Piso Térreo (Z=0,00m), Paredes (h=3,00m) e Laje Superior / Teto (Z=+3,00m).\n"
+        "2. LOUÇAS SANITÁRIAS REAIS 3D: Bacia Sanitária com Caixa Acoplada, Lavatório com Coluna e Chuveiro 3D instanciados!\n"
+        "3. VISTA CORTE MAQUETE 3D: Parede frontal ocultada para visualização direta do ambiente interno + transparência de vidro nas demais paredes.\n"
+        "4. 4 DISCIPLINAS INDEPENDENTES MODELADAS:\n"
+        "   • 💧 Água Fria (AF): Tubos PVC Soldável Marrom (DN 25mm / 32mm) EMBUTIDOS NA ALVENARIA com Barrilete a h=2.70m (abaixo do teto).\n"
+        "   • 🔥 Água Quente (AQ): Tubos CPVC / PPR (DN 22mm / 25mm).\n"
         "   • 🚽 Esgoto Sanitário (ESG): Tubos PVC Sanitário Branco (DN 40mm / 50mm / 100mm) sob o piso com declividade normatizada.\n"
-        "   • 🌬️ Ventilação Primária (VENT): Coluna de Ventilação PVC Branco (DN 75mm) subindo verticalmente através da Laje Superior!"
+        "   • 🌬️ Ventilação Primária (VENT): Coluna de Ventilação PVC Branco (DN 75mm) subindo pela laje superior!"
     )
     return msg_sucesso
 
