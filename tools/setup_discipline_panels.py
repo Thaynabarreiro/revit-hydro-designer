@@ -616,7 +616,7 @@ class HydroStudioInteractiveWindow(Window):
                  "Clique em '📋 Executar Leitura (M1)'. O plugin escaneará o modelo, mapeará todos os ambientes e louças e gerará a lista de pontos de consumo. Se houver louças pendentes de ambiente, use os botões rápidos do assistente.",
                  "#d97706"),
                 ("PASSO 3 · Seleção de Disciplina e Escolha da Tubulação", 
-                 "No menu lateral, escolha qual sistema deseja projetar:\n• 💧 Água Fria: Tubos PVC Soldável NBR 5626 (DN 25, 32, 50mm)\n• 🔥 Água Quente: CPVC Ultraterm / PPR NBR 7198 (Resistente a 80°C)\n• 🚽 Esgoto: PVC Sanitário NBR 8160 com Caixas de Gordura / Passagem\n• 🌧️ Pluvial: PVC Pluvial NBR 10844 com Calhas e Ralos\n• 🌱 Tratamento: Fossa Séptica, Filtro Anaeróbio e Sumidouro",
+                 "No menu lateral, escolha qual sistema deseja projetar:\\n• 💧 Água Fria: Tubos PVC Soldável NBR 5626 (DN 25, 32, 50mm)\\n• 🔥 Água Quente: CPVC Ultraterm / PPR NBR 7198 (Resistente a 80°C)\\n• 🚽 Esgoto: PVC Sanitário NBR 8160 com Caixas de Gordura / Passagem\\n• 🌧️ Pluvial: PVC Pluvial NBR 10844 com Calhas e Ralos\\n• 🌱 Tratamento: Fossa Séptica, Filtro Anaeróbio e Sumidouro",
                  "#0f172a"),
                 ("PASSO 4 · Cálculos Normativos & Dimensionamento de Vazão/Pressão", 
                  "Na aba da disciplina escolhida, clique em '⚡ Calcula & Dimensiona'. O plugin executará as equações de norma (vazões por pesos relativos Q=0,3√ΣP, velocidades máximas v≤3,0m/s e volumes de reservação).",
@@ -822,7 +822,7 @@ class HydroStudioInteractiveWindow(Window):
             doc_path = revit.doc.PathName if (revit.doc and revit.doc.PathName) else "HID_CT_PROJETO TIOS_AP_00_RV00;.rvt"
             
             t1 = TextBlock()
-            t1.Text = "📍 Camiho Salvo do Template (.rte):\n   " + rte_path
+            t1.Text = "📍 Camiho Salvo do Template (.rte):\\n   " + rte_path
             t1.FontSize = 11
             t1.FontWeight = System.Windows.FontWeights.SemiBold
             t1.Foreground = hex_b("#0284c7")
@@ -830,7 +830,7 @@ class HydroStudioInteractiveWindow(Window):
             p_stack.Children.Add(t1)
             
             t2 = TextBlock()
-            t2.Text = "📍 Caminho Salvo do Template (.rvt):\n   " + rvt_path
+            t2.Text = "📍 Caminho Salvo do Template (.rvt):\\n   " + rvt_path
             t2.FontSize = 11
             t2.FontWeight = System.Windows.FontWeights.SemiBold
             t2.Foreground = hex_b("#059669")
@@ -838,7 +838,7 @@ class HydroStudioInteractiveWindow(Window):
             p_stack.Children.Add(t2)
             
             t3 = TextBlock()
-            t3.Text = "📍 Modelo Arquitetônico / Hidráulico Atual:\n   " + doc_path
+            t3.Text = "📍 Modelo Arquitetônico / Hidráulico Atual:\\n   " + doc_path
             t3.FontSize = 11
             t3.FontWeight = System.Windows.FontWeights.SemiBold
             t3.Foreground = hex_b("#475569")
