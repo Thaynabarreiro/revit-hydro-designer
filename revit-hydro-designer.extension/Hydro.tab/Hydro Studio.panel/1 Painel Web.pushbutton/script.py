@@ -571,7 +571,7 @@ class HydroStudioInteractiveWindow(Window):
                  "Acesse a aba '⚙️ Configurações do Projeto', informe o Nome do Cliente, Número de Moradores e Dias de Reservação. Clique em '💾 Salvar Configurações'.",
                  "#059669"),
                 ("PASSO 2 · Leitura Automatizada do Modelo Arquitetônico (M1)", 
-                 "Clique em '📋 Executar Leitura (M1)'. O plugin escaneará o modelo, mapeará todos os ambientes e louças e gerará a lista de pontos de consumo. Se houver louças pendentes de ambiente, use os botões rápidos do assistente.",
+                 "Clique em '📋 Executar Leitura (M1)'. O plugin escaneará o modelo e mapeará os ambientes e louças. Se houver louças pendentes de ambiente, aparecerá o card amarelo '⚠️ Louças Pendentes' com os Botões Rápidos de Ambiente ([Banheiro 1], [Banheiro Suíte], [Cozinha], [Lavanderia], [Lavabo]) para associar a louça ao cômodo correto com 1 único clique! Você também pode clicar em '📍 Ver no Revit' para o Revit destacar a peça em Laranja no 3D.",
                  "#d97706"),
                 ("PASSO 3 · Seleção de Disciplina e Escolha da Tubulação", 
                  "No menu lateral, escolha qual sistema deseja projetar:\n• 💧 Água Fria: Tubos PVC Soldável NBR 5626 (DN 25, 32, 50mm)\n• 🔥 Água Quente: CPVC Ultraterm / PPR NBR 7198 (Resistente a 80°C)\n• 🚽 Esgoto: PVC Sanitário NBR 8160 com Caixas de Gordura / Passagem\n• 🌧️ Pluvial: PVC Pluvial NBR 10844 com Calhas e Ralos\n• 🌱 Tratamento: Fossa Séptica, Filtro Anaeróbio e Sumidouro",
