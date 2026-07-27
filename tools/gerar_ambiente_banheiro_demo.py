@@ -18,6 +18,23 @@ else:
 from pyrevit import revit, DB
 import hydro
 
+def nm(el):
+    if el is None:
+        return "(?)"
+    try:
+        v = DB.Element.Name.__get__(el)
+        if isinstance(v, str):
+            return v
+        return str(v)
+    except Exception:
+        try:
+            p = el.get_Parameter(DB.BuiltInParameter.SYMBOL_NAME_PARAM)
+            if p and p.AsString():
+                return p.AsString()
+        except Exception:
+            pass
+        return "(?)"
+
 def gerar_banheiro_e_configurar_vista():
     doc = revit.doc
     uidoc = revit.uidoc
@@ -104,8 +121,17 @@ def gerar_banheiro_e_configurar_vista():
             .ToElements()
         )
         
-        # Filtra símbolos de louça
-        symbols_loucas = [s for s in symbols if "reservatorio" not in s.Name.lower() and "cavalete" not in s.Name.lower()]
+        # Filtra símbolos de louça usando nm(s) seguro
+        symbols_loucas = []
+        for s in symbols:
+            s_name = nm(s).lower()
+            s_fam = ""
+            try:
+                s_fam = s.FamilyName.lower()
+            except Exception:
+                pass
+            if "reservatorio" not in s_name and "reservatorio" not in s_fam and "cavalete" not in s_name and "cavalete" not in s_fam:
+                symbols_loucas.append(s)
         
         if symbols_loucas:
             tx_f = DB.Transaction(doc, "Inserir Louças Hidráulicas de Teste no Banheiro Demo")
