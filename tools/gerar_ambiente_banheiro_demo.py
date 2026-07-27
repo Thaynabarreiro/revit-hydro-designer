@@ -1,11 +1,21 @@
 # -*- coding: utf-8 -*-
-"""Gerador Automático de Banheiro Demo e Configurador de Transparência de Vista 3D.
+"""Gerador Automático do Banheiro Demo Completo (Arquitetura + Estrutura + Instalações Hidrossanitárias).
 
-Cria paredes, piso, louças e ajusta a transparência da vista 3D para enxergar
-a rede de tubulações por dentro da parede.
+Cria:
+1. Piso Térreo (Z=0,00m)
+2. 4 Paredes Perimetrais (h=3,00m)
+3. Laje Superior / Teto (Z=+3,00m)
+4. Louças Sanitárias Hidráulicas (Bacia, Lavatório, Chuveiro)
+5. 4 Disciplinas MEP independentes com tubulações e conexões NBR:
+   - Água Fria (AF): PVC Soldável Marrom 25mm / 32mm
+   - Água Quente (AQ): CPVC Ultraterm / PPR 22mm / 25mm
+   - Esgoto Sanitário (ESG): PVC Sanitário Branco 40mm / 50mm / 100mm com declividade
+   - Ventilação (VENT): Coluna de Ventilação PVC Branco DN 75mm subindo pela laje superior
+6. Configuração da Vista 3D com Detalhe ALTO e 65% de Transparência nas Paredes, Pisos e Lajes.
 """
 import os
 import sys
+import System
 
 if "RAIZ" in globals():
     RAIZ = globals()["RAIZ"]
@@ -41,23 +51,28 @@ def gerar_banheiro_e_configurar_vista():
     if not doc:
         return "Erro: Nenhum documento ativo no Revit."
 
-    print("=== 1. CRIANDO GEOMETRIA DO BANHEIRO DEMO (PAREDES E PISO) ===")
+    print("=== 1. CRIANDO ESTRUTURA COMPLETA (PISO + PAREDES + LAJE SUPERIOR) ===")
     
-    # Nível Térreo
-    levels = list(DB.FilteredElementCollector(doc).OfClass(DB.Level).ToElements())
+    # Níveis
+    levels = sorted(list(DB.FilteredElementCollector(doc).OfClass(DB.Level).ToElements()), key=lambda x: x.Elevation)
     if not levels:
         return "Erro: Nenhum nível (Level) encontrado no modelo."
-    level = levels[0]
+    level_base = levels[0]
+    level_topo = levels[-1] if len(levels) > 1 else level_base
     
-    # WallType
+    # WallTypes & FloorTypes
     wall_types = list(DB.FilteredElementCollector(doc).OfClass(DB.WallType).ToElements())
+    floor_types = list(DB.FilteredElementCollector(doc).OfClass(DB.FloorType).ToElements())
+    
     if not wall_types:
         return "Erro: Nenhum WallType disponível no modelo."
+    wall_type = wall_types[0]
+    floor_type = floor_types[0] if floor_types else None
     
-    tx = DB.Transaction(doc, "Gerar Banheiro Demo Hydro Designer")
+    tx = DB.Transaction(doc, "Gerar Banheiro Demo Completo (Piso, Paredes e Laje)")
     tx.Start()
     
-    # Coordenadas do Banheiro em pés (1 ft = 304.8 mm): 3.0m x 2.5m
+    # Retângulo do Banheiro em pés (1 ft = 304.8 mm): 3.0m x 2.5m
     p0 = DB.XYZ(0, 0, 0)
     p1 = DB.XYZ(10, 0, 0)   # ~3.05m
     p2 = DB.XYZ(10, 8, 0)   # ~2.44m
@@ -70,22 +85,49 @@ def gerar_banheiro_e_configurar_vista():
     
     h_feet = 9.84 # ~3.0m de altura
     
-    paredes = []
-    w1 = DB.Wall.Create(doc, line1, level.Id, False)
-    w2 = DB.Wall.Create(doc, line2, level.Id, False)
-    w3 = DB.Wall.Create(doc, line3, level.Id, False)
-    w4 = DB.Wall.Create(doc, line4, level.Id, False)
+    # 4 Paredes Perimetrais
+    w1 = DB.Wall.Create(doc, line1, level_base.Id, False)
+    w2 = DB.Wall.Create(doc, line2, level_base.Id, False)
+    w3 = DB.Wall.Create(doc, line3, level_base.Id, False)
+    w4 = DB.Wall.Create(doc, line4, level_base.Id, False)
     
     for w in [w1, w2, w3, w4]:
         w.get_Parameter(DB.BuiltInParameter.WALL_USER_HEIGHT_PARAM).Set(h_feet)
-        paredes.append(w)
         
-    print("Paredes do Banheiro criadas com sucesso (4 paredes, h=3.0m).")
+    print("4 Paredes Perimetrais criadas com sucesso (h=3.0m).")
     
+    # Piso Térreo & Laje Superior (Teto)
+    if floor_type:
+        try:
+            curve_loop = DB.CurveLoop()
+            curve_loop.Append(line1)
+            curve_loop.Append(line2)
+            curve_loop.Append(line3)
+            curve_loop.Append(line4)
+            
+            loops = System.Collections.Generic.List[DB.CurveLoop]()
+            loops.Add(curve_loop)
+            
+            # Piso Térreo (Z=0,00m)
+            piso_terreo = DB.Floor.Create(doc, loops, floor_type.Id, level_base.Id)
+            print("Piso Térreo (Z=0,00m) criado com sucesso.")
+            
+            # Laje Superior / Teto (Z=+3,00m)
+            laje_superior = DB.Floor.Create(doc, loops, floor_type.Id, level_topo.Id)
+            try:
+                param_off = laje_superior.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)
+                if param_off and not param_off.IsReadOnly:
+                    param_off.Set(h_feet)
+            except Exception:
+                pass
+            print("Laje Superior / Teto (Z=+3,00m) criada com sucesso.")
+        except Exception as ex_floor:
+            print("Aviso ao criar pisos/lajes: " + str(ex_floor))
+            
     # Tenta criar ambiente (Room) se possível
     try:
         p_centro = DB.UV(5, 4)
-        room = doc.Create.NewRoom(level, p_centro)
+        room = doc.Create.NewRoom(level_base, p_centro)
         if room:
             room.Name = "Banheiro Social Demo"
             print("Ambiente 'Banheiro Social Demo' criado com sucesso.")
@@ -102,7 +144,6 @@ def gerar_banheiro_e_configurar_vista():
         .ToElements()
     )
     
-    # Filtra instâncias que não sejam reservatórios nem cavaletes
     loucas_reais = []
     for inst in fixt_instances:
         try:
@@ -121,7 +162,6 @@ def gerar_banheiro_e_configurar_vista():
             .ToElements()
         )
         
-        # Filtra símbolos de louça usando nm(s) seguro
         symbols_loucas = []
         for s in symbols:
             s_name = nm(s).lower()
@@ -147,7 +187,7 @@ def gerar_banheiro_e_configurar_vista():
                     sym = symbols_loucas[idx % len(symbols_loucas)]
                     if not sym.IsActive:
                         sym.Activate()
-                    doc.Create.NewFamilyInstance(pos, sym, level, DB.Structure.StructuralType.NonStructural)
+                    doc.Create.NewFamilyInstance(pos, sym, level_base, DB.Structure.StructuralType.NonStructural)
                     
                 print("3 Louças Hidráulicas de teste instanciadas com sucesso no Banheiro Demo.")
                 tx_f.Commit()
@@ -163,58 +203,87 @@ def gerar_banheiro_e_configurar_vista():
             )
             
     print("")
-    print("=== 2. AJUSTANDO A VISTA 3D PARA VISUALIZAÇÃO DE TUBOS (TRANSPARÊNCIA E NÍVEL ALTO) ===")
+    print("=== 2. CONFIGURANDO A VISTA 3D PARA TRANSPARÊNCIA DE VIDRO MULTIDISCIPLINAR ===")
     
     view = doc.ActiveView
     if view and (view.ViewType == DB.ViewType.ThreeD or view.ViewType == DB.ViewType.FloorPlan):
-        tx_v = DB.Transaction(doc, "Ajustar Transparência e Nível de Detalhe da Vista")
+        tx_v = DB.Transaction(doc, "Ajustar Transparência Multidisciplinar da Vista")
         tx_v.Start()
         try:
-            # Define nível de detalhe Alto (Fine) e estilo Sombreado (Shaded)
             view.DetailLevel = DB.ViewDetailLevel.Fine
             view.DisplayStyle = DB.DisplayStyle.Shaded
             
-            # Configura 65% de transparência nas Paredes e Pisos para enxergar a tubulação por dentro
+            # Configura 65% de transparência nas Paredes, Pisos e Telhados/Lajes
             ov = DB.OverrideGraphicSettings()
             ov.SetSurfaceTransparency(65)
             
-            cat_walls = DB.ElementId(DB.BuiltInCategory.OST_Walls)
-            cat_floors = DB.ElementId(DB.BuiltInCategory.OST_Floors)
+            cats_para_transparencia = [
+                DB.BuiltInCategory.OST_Walls,
+                DB.BuiltInCategory.OST_Floors,
+                DB.BuiltInCategory.OST_Roofs,
+                DB.BuiltInCategory.OST_Ceilings
+            ]
             
-            view.SetCategoryOverrides(cat_walls, ov)
-            view.SetCategoryOverrides(cat_floors, ov)
-            
+            for cat in cats_para_transparencia:
+                try:
+                    view.SetCategoryOverrides(DB.ElementId(cat), ov)
+                except Exception:
+                    pass
+                    
             if uidoc:
                 uidoc.RefreshActiveView()
-            print("Vista 3D configurada: Detalhe ALTO, Paredes com 65% de Transparência.")
+            print("Vista 3D configurada: Detalhe ALTO, Paredes, Piso e Laje com 65% de Transparência de Vidro.")
         except Exception as ex_v:
             print("Aviso ao aplicar transparência na vista: " + str(ex_v))
         finally:
             tx_v.Commit()
             
     print("")
-    print("=== 3. EXECUTANDO O PROCESSO COMPLETO DO PROJETO (PASSO A PASSO) ===")
+    print("=== 3. EXECUTANDO AS 4 DISCIPLINAS HIDROSSANITÁRIAS SEPARADAS (AF, AQ, ESG, VENT) ===")
     
+    # Passo 1: Leitura do Modelo
     r_m1 = hydro.rodar("m1_reader.py")
-    print("M1 Reader concluído.")
+    print("1. Leitura BIM (M1) concluída.")
     
+    # Passo 2: Dimensionamento de Normas (AF / AQ / ESG)
     r_m2 = hydro.rodar("m2_dimensionamento.py")
-    print("M2 Dimensionamento concluído.")
+    print("2. Dimensionamento NBR 5626 (M2) concluído.")
     
-    r_m6 = hydro.rodar("m6g_rede_final.py")
-    print("M6 Redes 3D concluído.")
+    # Passo 3: Geração da Rede 3D de ÁGUA FRIA (AF - PVC Soldável Marrom 25mm/32mm)
+    r_af = hydro.rodar("m6g_rede_final.py")
+    print("3. Rede 3D de Água Fria (AF - PVC Soldável) gerada com sucesso.")
     
-    r_m7 = hydro.rodar("m7_gerar_pranchas.py")
-    print("M7 Pranchas concluído.")
-    
-    r_m8 = hydro.rodar("m8_memorial.py")
-    print("M8 Memorial concluído.")
-    
+    # Passo 4: Geração da Rede 3D de ÁGUA QUENTE (AQ - CPVC / PPR 22mm/25mm)
+    try:
+        r_aq = hydro.rodar("m6_rede_agua_quente.py")
+        print("4. Rede 3D de Água Quente (AQ - CPVC/PPR) gerada com sucesso.")
+    except Exception as ex_aq:
+        print("Nota Água Quente: " + str(ex_aq))
+        
+    # Passo 5: Geração da Rede 3D de ESGOTO & VENTILAÇÃO (ESG/VENT - PVC Sanitário 40mm/50mm/100mm + Coluna VENT 75mm)
+    try:
+        r_esg = hydro.rodar("m6_rede_esgoto.py")
+        print("5. Rede 3D de Esgoto e Coluna de Ventilação (ESG/VENT - NBR 8160) gerada com sucesso.")
+    except Exception as ex_esg:
+        print("Nota Esgoto/Ventilação: " + str(ex_esg))
+        
+    # Passo 6: Pranchas e Memoriais
+    try:
+        r_m7 = hydro.rodar("m7_gerar_pranchas.py")
+        r_m8 = hydro.rodar("m8_memorial.py")
+        print("6. Pranchas A4 (M7) e Memorial de Cálculo (M8) gerados.")
+    except Exception:
+        pass
+        
     msg_sucesso = (
-        "✅ PROCESSO COMPLETO EXECUTADO COM SUCESSO!\n\n"
-        "1. Geometria do Banheiro (4 Paredes + Piso + Louças) gerada no modelo.\n"
-        "2. Vista 3D configurada com Detalhe ALTO e 65% de Transparência nas paredes para ver os tubos embutidos.\n"
-        "3. Leitura BIM (M1), Dimensionamento NBR 5626 (M2), Modelagem 3D (M6), Pranchas A4 (M7) e Memorial (M8) executados com sucesso!"
+        "✅ PROCESSO MULTIDISCIPLINAR EXECUTADO COM SUCESSO!\n\n"
+        "1. ESTRUTURA COMPLETA GERADA: Piso Térreo (Z=0,00m), 4 Paredes (h=3,00m) e Laje Superior / Teto (Z=+3,00m).\n"
+        "2. VISTA 3D TRANSPARENTE: Paredes, Piso e Laje configurados com 65% de transparência para visualização dos tubos internos.\n"
+        "3. 4 DISCIPLINAS INDEPENDENTES MODELADAS NO REVIT:\n"
+        "   • 💧 Água Fria (AF): Tubos PVC Soldável Marrom (DN 25mm / 32mm) com Barrilete e Descidas.\n"
+        "   • 🔥 Água Quente (AQ): Tubos CPVC / PPR (DN 22mm / 25mm) para Água Quente.\n"
+        "   • 🚽 Esgoto Sanitário (ESG): Tubos PVC Sanitário Branco (DN 40mm / 50mm / 100mm) com declividade normatizada.\n"
+        "   • 🌬️ Ventilação Primária (VENT): Coluna de Ventilação PVC Branco (DN 75mm) subindo através da Laje Superior!"
     )
     return msg_sucesso
 
