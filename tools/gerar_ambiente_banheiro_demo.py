@@ -4,14 +4,14 @@
 Cria:
 1. Piso Térreo (Z=0,00m)
 2. 4 Paredes Perimetrais (h=3,00m)
-3. Laje Superior / Teto (Z=+3,00m)
+3. Laje Superior / Teto (Z=+3,00m, apoiada exatamente sobre as 4 paredes)
 4. Louças Sanitárias Hidráulicas (Bacia, Lavatório, Chuveiro)
 5. 4 Disciplinas MEP independentes com tubulações e conexões NBR:
-   - Água Fria (AF): PVC Soldável Marrom 25mm / 32mm
+   - Água Fria (AF): PVC Soldável Marrom 25mm / 32mm por dentro das paredes
    - Água Quente (AQ): CPVC Ultraterm / PPR 22mm / 25mm
    - Esgoto Sanitário (ESG): PVC Sanitário Branco 40mm / 50mm / 100mm com declividade
    - Ventilação (VENT): Coluna de Ventilação PVC Branco DN 75mm subindo pela laje superior
-6. Configuração da Vista 3D com Detalhe ALTO e 65% de Transparência nas Paredes, Pisos e Lajes.
+6. Configuração da Vista 3D com Detalhe ALTO e 65% de Transparência de Vidro nas Paredes e Lajes.
 """
 import os
 import sys
@@ -51,14 +51,13 @@ def gerar_banheiro_e_configurar_vista():
     if not doc:
         return "Erro: Nenhum documento ativo no Revit."
 
-    print("=== 1. CRIANDO ESTRUTURA COMPLETA (PISO + PAREDES + LAJE SUPERIOR) ===")
+    print("=== 1. CRIANDO ESTRUTURA COMPLETA (PISO + PAREDES + LAJE SUPERIOR FLUSH AT +3.00M) ===")
     
-    # Níveis
+    # Nível Térreo (Base)
     levels = sorted(list(DB.FilteredElementCollector(doc).OfClass(DB.Level).ToElements()), key=lambda x: x.Elevation)
     if not levels:
         return "Erro: Nenhum nível (Level) encontrado no modelo."
     level_base = levels[0]
-    level_topo = levels[-1] if len(levels) > 1 else level_base
     
     # WallTypes & FloorTypes
     wall_types = list(DB.FilteredElementCollector(doc).OfClass(DB.WallType).ToElements())
@@ -66,10 +65,9 @@ def gerar_banheiro_e_configurar_vista():
     
     if not wall_types:
         return "Erro: Nenhum WallType disponível no modelo."
-    wall_type = wall_types[0]
     floor_type = floor_types[0] if floor_types else None
     
-    tx = DB.Transaction(doc, "Gerar Banheiro Demo Completo (Piso, Paredes e Laje)")
+    tx = DB.Transaction(doc, "Gerar Banheiro Demo Completo (Piso, Paredes e Laje Flutuante Corrigida)")
     tx.Start()
     
     # Retângulo do Banheiro em pés (1 ft = 304.8 mm): 3.0m x 2.5m
@@ -112,15 +110,15 @@ def gerar_banheiro_e_configurar_vista():
             piso_terreo = DB.Floor.Create(doc, loops, floor_type.Id, level_base.Id)
             print("Piso Térreo (Z=0,00m) criado com sucesso.")
             
-            # Laje Superior / Teto (Z=+3,00m)
-            laje_superior = DB.Floor.Create(doc, loops, floor_type.Id, level_topo.Id)
+            # Laje Superior / Teto apoiada EXATAMENTE a +3,00m acima do nível base
+            laje_superior = DB.Floor.Create(doc, loops, floor_type.Id, level_base.Id)
             try:
                 param_off = laje_superior.get_Parameter(DB.BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM)
                 if param_off and not param_off.IsReadOnly:
-                    param_off.Set(h_feet)
+                    param_off.Set(h_feet) # Exatamente a +3.00m (9.84 ft)
             except Exception:
                 pass
-            print("Laje Superior / Teto (Z=+3,00m) criada com sucesso.")
+            print("Laje Superior / Teto apoiada a Z=+3,00m criada com sucesso.")
         except Exception as ex_floor:
             print("Aviso ao criar pisos/lajes: " + str(ex_floor))
             
@@ -136,7 +134,7 @@ def gerar_banheiro_e_configurar_vista():
         
     tx.Commit()
 
-    # --- VERIFICAÇÃO E INSERÇÃO DE LOUÇAS SANITÁRIAS ---
+    # --- VERIFICAÇÃO E INSERÇÃO DE LOUÇAS SANITÁRIAS NAS PAREDES ---
     fixt_instances = list(
         DB.FilteredElementCollector(doc)
         .OfCategory(DB.BuiltInCategory.OST_PlumbingFixtures)
@@ -154,7 +152,7 @@ def gerar_banheiro_e_configurar_vista():
             pass
             
     if len(loucas_reais) == 0:
-        print("Nenhuma louça sanitária encontrada no Banheiro. Instanciando louças de teste...")
+        print("Nenhuma louça sanitária encontrada no Banheiro. Instanciando louças de teste alinhadas à parede...")
         symbols = list(
             DB.FilteredElementCollector(doc)
             .OfCategory(DB.BuiltInCategory.OST_PlumbingFixtures)
@@ -177,10 +175,11 @@ def gerar_banheiro_e_configurar_vista():
             tx_f = DB.Transaction(doc, "Inserir Louças Hidráulicas de Teste no Banheiro Demo")
             tx_f.Start()
             try:
+                # Posiciona louças encostadas nas paredes para passar a tubulação embutida
                 posicoes = [
-                    DB.XYZ(2.5, 1.5, 0),  # Bacia Sanitária
-                    DB.XYZ(7.5, 1.5, 0),  # Lavatório
-                    DB.XYZ(5.0, 6.5, 0)   # Chuveiro
+                    DB.XYZ(2.5, 0.5, 0),  # Bacia Sanitária encostada na parede de trás
+                    DB.XYZ(7.5, 0.5, 0),  # Lavatório encostado na parede de trás
+                    DB.XYZ(5.0, 7.5, 0)   # Chuveiro encostado na parede da frente
                 ]
                 
                 for idx, pos in enumerate(posicoes):
@@ -207,7 +206,7 @@ def gerar_banheiro_e_configurar_vista():
     
     view = doc.ActiveView
     if view and (view.ViewType == DB.ViewType.ThreeD or view.ViewType == DB.ViewType.FloorPlan):
-        tx_v = DB.Transaction(doc, "Ajustar Transparência Multidisciplinar da Vista")
+        tx_v = DB.Transaction(doc, "Ajustar Transparência Multidisciplinar da Vista 3D")
         tx_v.Start()
         try:
             view.DetailLevel = DB.ViewDetailLevel.Fine
@@ -249,7 +248,7 @@ def gerar_banheiro_e_configurar_vista():
     r_m2 = hydro.rodar("m2_dimensionamento.py")
     print("2. Dimensionamento NBR 5626 (M2) concluído.")
     
-    # Passo 3: Geração da Rede 3D de ÁGUA FRIA (AF - PVC Soldável Marrom 25mm/32mm)
+    # Passo 3: Geração da Rede 3D de ÁGUA FRIA (AF - PVC Soldável Marrom 25mm/32mm EMBUTIDO NA PAREDE)
     r_af = hydro.rodar("m6g_rede_final.py")
     print("3. Rede 3D de Água Fria (AF - PVC Soldável) gerada com sucesso.")
     
@@ -277,13 +276,13 @@ def gerar_banheiro_e_configurar_vista():
         
     msg_sucesso = (
         "✅ PROCESSO MULTIDISCIPLINAR EXECUTADO COM SUCESSO!\n\n"
-        "1. ESTRUTURA COMPLETA GERADA: Piso Térreo (Z=0,00m), 4 Paredes (h=3,00m) e Laje Superior / Teto (Z=+3,00m).\n"
+        "1. ESTRUTURA COMPLETA GERADA: Piso Térreo (Z=0,00m), 4 Paredes (h=3,00m) e Laje Superior / Teto perfeitamente apoiada a Z=+3,00m sobre as paredes.\n"
         "2. VISTA 3D TRANSPARENTE: Paredes, Piso e Laje configurados com 65% de transparência para visualização dos tubos internos.\n"
         "3. 4 DISCIPLINAS INDEPENDENTES MODELADAS NO REVIT:\n"
-        "   • 💧 Água Fria (AF): Tubos PVC Soldável Marrom (DN 25mm / 32mm) com Barrilete e Descidas.\n"
+        "   • 💧 Água Fria (AF): Tubos PVC Soldável Marrom (DN 25mm / 32mm) EMBUTIDOS NAS PAREDES com Barrilete a h=2.70m.\n"
         "   • 🔥 Água Quente (AQ): Tubos CPVC / PPR (DN 22mm / 25mm) para Água Quente.\n"
-        "   • 🚽 Esgoto Sanitário (ESG): Tubos PVC Sanitário Branco (DN 40mm / 50mm / 100mm) com declividade normatizada.\n"
-        "   • 🌬️ Ventilação Primária (VENT): Coluna de Ventilação PVC Branco (DN 75mm) subindo através da Laje Superior!"
+        "   • 🚽 Esgoto Sanitário (ESG): Tubos PVC Sanitário Branco (DN 40mm / 50mm / 100mm) sob o piso com declividade normatizada.\n"
+        "   • 🌬️ Ventilação Primária (VENT): Coluna de Ventilação PVC Branco (DN 75mm) subindo verticalmente através da Laje Superior!"
     )
     return msg_sucesso
 

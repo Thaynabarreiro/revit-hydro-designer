@@ -69,7 +69,7 @@ FAM = ler("familias_pecas.json")
 AF = CFG["agua_fria"]
 P_PESO = FAM["parametros"]["peso"]
 
-H_BARRILETE = 2900.0
+H_BARRILETE = 2700.0
 C = AF["coef_C"]
 TOL = 0.05          # ~15 mm: mesmo alinhamento
 BANDA_MM = 900.0    # pecas dentro desta faixa em Y compartilham um no
