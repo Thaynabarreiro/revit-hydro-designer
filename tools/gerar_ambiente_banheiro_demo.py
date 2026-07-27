@@ -77,7 +77,7 @@ def gerar_banheiro_e_configurar_vista():
         
     tx.Commit()
 
-    # --- VERIFICAÇÃO DE LOUÇAS SANITÁRIAS ---
+    # --- VERIFICAÇÃO E INSERÇÃO DE LOUÇAS SANITÁRIAS ---
     fixt_instances = list(
         DB.FilteredElementCollector(doc)
         .OfCategory(DB.BuiltInCategory.OST_PlumbingFixtures)
@@ -85,8 +85,18 @@ def gerar_banheiro_e_configurar_vista():
         .ToElements()
     )
     
-    if len(fixt_instances) == 0:
-        print("Nenhuma louça sanitária encontrada. Tentando instanciar louças do Template...")
+    # Filtra instâncias que não sejam reservatórios nem cavaletes
+    loucas_reais = []
+    for inst in fixt_instances:
+        try:
+            fn = inst.Symbol.FamilyName
+            if "Reservatorio" not in fn and "Cavalete" not in fn:
+                loucas_reais.append(inst)
+        except Exception:
+            pass
+            
+    if len(loucas_reais) == 0:
+        print("Nenhuma louça sanitária encontrada no Banheiro. Instanciando louças de teste...")
         symbols = list(
             DB.FilteredElementCollector(doc)
             .OfCategory(DB.BuiltInCategory.OST_PlumbingFixtures)
@@ -94,39 +104,36 @@ def gerar_banheiro_e_configurar_vista():
             .ToElements()
         )
         
-        if symbols:
+        # Filtra símbolos de louça
+        symbols_loucas = [s for s in symbols if "reservatorio" not in s.Name.lower() and "cavalete" not in s.Name.lower()]
+        
+        if symbols_loucas:
             tx_f = DB.Transaction(doc, "Inserir Louças Hidráulicas de Teste no Banheiro Demo")
             tx_f.Start()
             try:
-                # Prioriza símbolos com conector de água fria ou o primeiro dispoível
-                symbol_alvo = symbols[0]
-                for s in symbols:
-                    if "bacia" in s.Name.lower() or "lavatorio" in s.Name.lower() or "chuveiro" in s.Name.lower():
-                        symbol_alvo = s
-                        break
-                        
-                if not symbol_alvo.IsActive:
-                    symbol_alvo.Activate()
-                    
                 posicoes = [
                     DB.XYZ(2.5, 1.5, 0),  # Bacia Sanitária
                     DB.XYZ(7.5, 1.5, 0),  # Lavatório
                     DB.XYZ(5.0, 6.5, 0)   # Chuveiro
                 ]
                 
-                for pos in posicoes:
-                    doc.Create.NewFamilyInstance(pos, symbol_alvo, level, DB.Structure.StructuralType.NonStructural)
-                print("3 Louças Hidráulicas de teste instanciadas no Banheiro Demo.")
+                for idx, pos in enumerate(posicoes):
+                    sym = symbols_loucas[idx % len(symbols_loucas)]
+                    if not sym.IsActive:
+                        sym.Activate()
+                    doc.Create.NewFamilyInstance(pos, sym, level, DB.Structure.StructuralType.NonStructural)
+                    
+                print("3 Louças Hidráulicas de teste instanciadas com sucesso no Banheiro Demo.")
                 tx_f.Commit()
             except Exception as ex_inst:
                 tx_f.RollBack()
                 print("Aviso ao instanciar louças: " + str(ex_inst))
         else:
             return (
-                "⚠️ O arquivo atual está em branco e não contém famílias de Louças Hidráulicas (Bacia, Lavatório, Chuveiro) carregadas.\n\n"
-                "💡 POR FAVOR: Abra o projeto utilizando nosso Template Oficial do Plugin (.rte):\n"
+                "⚠️ O arquivo atual não contém famílias de Louças Hidráulicas (Bacia, Lavatório, Chuveiro) pré-carregadas.\n\n"
+                "💡 POR FAVOR: Abra o arquivo de Template Oficial (.rte):\n"
                 "   1. Abra o arquivo 'template/Revit_Hydro_Designer_Template_NBR.rte'\n"
-                "   2. Ou acesse a aba '🏛️ Template Oficial (.rte)' no Studio BIM e execute novamente!"
+                "   2. Ou clique na aba '🏛️ Template Oficial (.rte)' no Studio BIM!"
             )
             
     print("")

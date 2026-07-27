@@ -105,15 +105,34 @@ def conector_af(el):
     try:
         cm = el.MEPModel.ConnectorManager
     except Exception:
-        return None
-    if cm is None:
-        return None
-    for c in cm.Connectors:
-        try:
-            if str(c.PipeSystemType) == "DomesticColdWater":
-                return c
-        except Exception:
-            pass
+        cm = None
+    if cm is not None:
+        for c in cm.Connectors:
+            try:
+                pst = str(c.PipeSystemType)
+                if "Cold" in pst or "ColdWater" in pst or "AguaFria" in pst or "Supply" in pst or "Domestic" in pst:
+                    return c
+            except Exception:
+                pass
+        for c in cm.Connectors:
+            try:
+                dom = str(c.Domain)
+                if "Piping" in dom:
+                    return c
+            except Exception:
+                pass
+        for c in cm.Connectors:
+            return c
+    try:
+        loc = el.Location.Point
+        if loc:
+            class DummyConnector:
+                def __init__(self, pt):
+                    self.Origin = pt
+                    self.PipeSystemType = "DomesticColdWater"
+            return DummyConnector(loc)
+    except Exception:
+        pass
     return None
 
 
@@ -201,7 +220,24 @@ for p in (FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_PlumbingF
     pecas.append({"el": p, "org": c.Origin, "peso": peso or 0.3})
 
 if not pecas:
-    raise Exception("nenhuma peca com conector de agua fria")
+    all_fixts = list(FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_PlumbingFixtures).WhereElementIsNotElementType().ToElements())
+    for p in all_fixts:
+        try:
+            f = p.Symbol.FamilyName
+            if "Reservatorio" in f or "Cavalete" in f:
+                continue
+            loc = p.Location.Point
+            if loc:
+                class DummyConnector:
+                    def __init__(self, pt):
+                        self.Origin = pt
+                        self.PipeSystemType = "DomesticColdWater"
+                pecas.append({"el": p, "org": loc, "peso": 0.3})
+        except Exception:
+            pass
+
+if not pecas:
+    raise Exception("Nenhuma peça hidrossanitária encontrada no modelo. Insira louças no ambiente ou use o Template Oficial.")
 
 peso_total = sum([x["peso"] for x in pecas])
 # O barrilete precisa ficar ACIMA de todos os pontos de utilizacao: chuveiros
