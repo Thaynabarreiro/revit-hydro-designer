@@ -658,6 +658,17 @@ class HydroStudioInteractiveWindow(Window):
                 p_card.Child = ps
                 stack.Children.Add(p_card)
                 
+            b_demo = Button()
+            b_demo.Content = "🏠 Executar Teste Prático (Criar Banheiro + Vista 3D Transparente + Gerar tudo)"
+            b_demo.Background = hex_b("#7c3aed")
+            b_demo.Foreground = hex_b("#ffffff")
+            b_demo.FontWeight = System.Windows.FontWeights.Bold
+            b_demo.FontSize = 13
+            b_demo.Padding = Thickness(15, 10, 15, 10)
+            b_demo.Margin = Thickness(0, 10, 0, 10)
+            b_demo.Click += lambda s, e: self.exec_tool("gerar_ambiente_banheiro_demo.py", "Geração de Banheiro Demo e Configuração da Vista 3D Transparente")
+            stack.Children.Add(b_demo)
+
             b_start = Button()
             b_start.Content = "🚀 Começar Agora (Ir para ⚙️ Configurações do Projeto)"
             b_start.Background = hex_b("#0284c7")
