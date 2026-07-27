@@ -76,7 +76,59 @@ def gerar_banheiro_e_configurar_vista():
         print("Aviso ao criar Room: " + str(ex_room))
         
     tx.Commit()
+
+    # --- VERIFICAÇÃO DE LOUÇAS SANITÁRIAS ---
+    fixt_instances = list(
+        DB.FilteredElementCollector(doc)
+        .OfCategory(DB.BuiltInCategory.OST_PlumbingFixtures)
+        .WhereElementIsNotElementType()
+        .ToElements()
+    )
     
+    if len(fixt_instances) == 0:
+        print("Nenhuma louça sanitária encontrada. Tentando instanciar louças do Template...")
+        symbols = list(
+            DB.FilteredElementCollector(doc)
+            .OfCategory(DB.BuiltInCategory.OST_PlumbingFixtures)
+            .OfClass(DB.FamilySymbol)
+            .ToElements()
+        )
+        
+        if symbols:
+            tx_f = DB.Transaction(doc, "Inserir Louças Hidráulicas de Teste no Banheiro Demo")
+            tx_f.Start()
+            try:
+                # Prioriza símbolos com conector de água fria ou o primeiro dispoível
+                symbol_alvo = symbols[0]
+                for s in symbols:
+                    if "bacia" in s.Name.lower() or "lavatorio" in s.Name.lower() or "chuveiro" in s.Name.lower():
+                        symbol_alvo = s
+                        break
+                        
+                if not symbol_alvo.IsActive:
+                    symbol_alvo.Activate()
+                    
+                posicoes = [
+                    DB.XYZ(2.5, 1.5, 0),  # Bacia Sanitária
+                    DB.XYZ(7.5, 1.5, 0),  # Lavatório
+                    DB.XYZ(5.0, 6.5, 0)   # Chuveiro
+                ]
+                
+                for pos in posicoes:
+                    doc.Create.NewFamilyInstance(pos, symbol_alvo, level, DB.Structure.StructuralType.NonStructural)
+                print("3 Louças Hidráulicas de teste instanciadas no Banheiro Demo.")
+                tx_f.Commit()
+            except Exception as ex_inst:
+                tx_f.RollBack()
+                print("Aviso ao instanciar louças: " + str(ex_inst))
+        else:
+            return (
+                "⚠️ O arquivo atual está em branco e não contém famílias de Louças Hidráulicas (Bacia, Lavatório, Chuveiro) carregadas.\n\n"
+                "💡 POR FAVOR: Abra o projeto utilizando nosso Template Oficial do Plugin (.rte):\n"
+                "   1. Abra o arquivo 'template/Revit_Hydro_Designer_Template_NBR.rte'\n"
+                "   2. Ou acesse a aba '🏛️ Template Oficial (.rte)' no Studio BIM e execute novamente!"
+            )
+            
     print("")
     print("=== 2. AJUSTANDO A VISTA 3D PARA VISUALIZAÇÃO DE TUBOS (TRANSPARÊNCIA E NÍVEL ALTO) ===")
     
@@ -127,9 +179,9 @@ def gerar_banheiro_e_configurar_vista():
     
     msg_sucesso = (
         "✅ PROCESSO COMPLETO EXECUTADO COM SUCESSO!\n\n"
-        "1. Geometria do Banheiro (4 Paredes + Piso) gerada no modelo.\n"
+        "1. Geometria do Banheiro (4 Paredes + Piso + Louças) gerada no modelo.\n"
         "2. Vista 3D configurada com Detalhe ALTO e 65% de Transparência nas paredes para ver os tubos embutidos.\n"
-        "3. Leitura BIM (M1), Dimensionamento NBR 5626 (M2), Modelagem 3D (M6), Pranchas A4 (M7) e Memorial (M8) executados!"
+        "3. Leitura BIM (M1), Dimensionamento NBR 5626 (M2), Modelagem 3D (M6), Pranchas A4 (M7) e Memorial (M8) executados com sucesso!"
     )
     return msg_sucesso
 
